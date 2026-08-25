@@ -5,6 +5,21 @@ import { getLangFromUrl, useTranslations, useTranslatedPath } from '../i18n/util
 const lang = getLangFromUrl(Astro.url);
 const t = useTranslations(lang);
 const translatePath = useTranslatedPath(lang);
+
+const currentPath = Astro.url.pathname;
+const isActive = (path: string) => {
+  const translated = translatePath(path);
+  const cleanCurrent = currentPath.replace(/\/$/, '') || '/';
+  const cleanTarget = translated.replace(/\/$/, '') || '/';
+  return cleanCurrent === cleanTarget;
+};
+
+const navLinks = [
+  { path: '/', label: t('nav.home') },
+  { path: '/about', label: t('nav.about') },
+  { path: '/books', label: t('nav.books') },
+  { path: '/events', label: t('nav.events') },
+];
 ---
 <header class="sticky top-0 z-40 w-full backdrop-blur-md flex-none transition-colors duration-500 lg:z-50 lg:border-b lg:border-slate-900/10 dark:border-slate-50/[0.06] bg-white/90 dark:bg-slate-900/80 shadow-sm">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -27,28 +42,38 @@ const translatePath = useTranslatedPath(lang);
       </div>
 
       <!-- Navigation Desktop -->
-      <nav class="hidden lg:flex items-center gap-8 text-sm font-medium leading-6 text-slate-700 dark:text-slate-200">
-        <a href={translatePath('/')} class="hover:text-[var(--color-tc-mustard)] transition-colors">{t('nav.home')}</a>
-        <a href={translatePath('/about')} class="hover:text-[var(--color-tc-mustard)] transition-colors">{t('nav.about')}</a>
-        <a href={translatePath('/books')} class="hover:text-[var(--color-tc-mustard)] transition-colors">{t('nav.books')}</a>
-        <a href={translatePath('/events')} class="hover:text-[var(--color-tc-mustard)] transition-colors">{t('nav.events')}</a>
-        <a href={translatePath('/donate')} class="bg-[var(--color-tc-olive)] text-white px-5 py-2 rounded-full hover:bg-opacity-90 hover:shadow-lg transition-all transform hover:-translate-y-0.5">{t('nav.donate')}</a>
+      <nav class="hidden lg:flex items-center gap-4 text-sm font-medium leading-6 text-slate-700 dark:text-slate-200">
+        {navLinks.map(link => (
+          <a 
+            href={translatePath(link.path)} 
+            class={`px-3 py-2 rounded-lg transition-colors ${isActive(link.path) ? 'bg-slate-100 dark:bg-slate-800 text-[var(--color-tc-blue)] dark:text-[var(--color-tc-mustard)] font-bold border border-slate-200 dark:border-slate-700 shadow-sm' : 'hover:text-[var(--color-tc-mustard)] hover:bg-slate-50 dark:hover:bg-slate-800/50'}`}
+          >
+            {link.label}
+          </a>
+        ))}
         
-        <div class="border-l border-slate-200 dark:border-slate-700 h-6 ml-2"></div>
-        <LanguagePicker />
+        <div class="ml-4 flex items-center gap-4">
+          <a href={translatePath('/donate')} class="bg-[var(--color-tc-olive)] text-white px-5 py-2 rounded-full hover:bg-opacity-90 hover:shadow-lg transition-all transform hover:-translate-y-0.5">{t('nav.donate')}</a>
+          <div class="border-l border-slate-200 dark:border-slate-700 h-6"></div>
+          <LanguagePicker />
+        </div>
       </nav>
     </div>
   </div>
 
   <!-- Menu Mobile -->
   <div id="mobile-menu" class="hidden lg:hidden absolute top-full left-0 w-full bg-white dark:bg-slate-900 shadow-2xl border-b border-slate-100 dark:border-slate-800">
-    <div class="flex flex-col items-center py-8 space-y-6">
-      <a href={translatePath('/')} class="text-lg font-medium text-slate-600 dark:text-slate-300 hover:text-[var(--color-tc-blue)] dark:hover:text-white transition-colors">{t('nav.home')}</a>
-      <a href={translatePath('/about')} class="text-lg font-medium text-slate-600 dark:text-slate-300 hover:text-[var(--color-tc-blue)] dark:hover:text-white transition-colors">{t('nav.about')}</a>
-      <a href={translatePath('/books')} class="text-lg font-medium text-slate-600 dark:text-slate-300 hover:text-[var(--color-tc-blue)] dark:hover:text-white transition-colors">{t('nav.books')}</a>
-      <a href={translatePath('/events')} class="text-lg font-medium text-slate-600 dark:text-slate-300 hover:text-[var(--color-tc-blue)] dark:hover:text-white transition-colors">{t('nav.events')}</a>
+    <div class="flex flex-col items-center py-8 space-y-4">
+      {navLinks.map(link => (
+        <a 
+          href={translatePath(link.path)} 
+          class={`px-6 py-2 rounded-lg text-lg transition-colors ${isActive(link.path) ? 'bg-slate-100 dark:bg-slate-800 text-[var(--color-tc-blue)] dark:text-[var(--color-tc-mustard)] font-bold border border-slate-200 dark:border-slate-700 shadow-sm' : 'font-medium text-slate-600 dark:text-slate-300 hover:text-[var(--color-tc-blue)] dark:hover:text-white'}`}
+        >
+          {link.label}
+        </a>
+      ))}
       
-      <div class="w-12 h-px bg-slate-200 dark:bg-slate-700 my-2"></div>
+      <div class="w-12 h-px bg-slate-200 dark:bg-slate-700 my-4"></div>
       
       <a href={translatePath('/donate')} class="bg-[var(--color-tc-olive)] text-white px-8 py-3 rounded-full font-semibold hover:bg-opacity-90 transition-all shadow-md transform hover:scale-105">{t('nav.donate')}</a>
     </div>
