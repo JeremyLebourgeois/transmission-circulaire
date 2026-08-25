@@ -1,0 +1,52 @@
+---
+import { getLangFromUrl, useTranslations, useTranslatedPath } from '../i18n/utils';
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+const translatePath = useTranslatedPath(lang);
+---
+<div class="relative overflow-hidden bg-white dark:bg-slate-950 isolate">
+  <!-- Decorative background -->
+  <div class="absolute inset-x-0 top-0 -z-10 transform-gpu overflow-hidden blur-3xl" aria-hidden="true">
+    <div class="relative left-[calc(50%-11rem)] aspect-[1155/678] w-[36.125rem] -translate-x-1/2 rotate-[30deg] bg-gradient-to-tr from-[var(--color-tc-mustard)] to-[var(--color-tc-red)] opacity-20 dark:opacity-30 sm:left-[calc(50%-30rem)] sm:w-[72.1875rem]" style="clip-path: polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)"></div>
+  </div>
+  
+  <div class="mx-auto max-w-7xl px-6 pb-24 pt-10 sm:pb-32 lg:flex lg:px-8 lg:py-24">
+    <div class="mx-auto max-w-2xl lg:mx-0 lg:max-w-xl lg:flex-shrink-0 lg:pt-8 flex flex-col justify-center">
+      <div class="mt-24 sm:mt-32 lg:mt-16">
+        <span class="inline-flex space-x-6">
+          <span class="rounded-full bg-[var(--color-tc-blue)]/10 dark:bg-slate-800 px-3 py-1 text-sm font-semibold leading-6 text-[var(--color-tc-blue)] dark:text-[var(--color-tc-mustard)] ring-1 ring-inset ring-[var(--color-tc-blue)]/20 dark:ring-slate-700">Nouveau</span>
+          <span class="inline-flex items-center space-x-2 text-sm font-medium leading-6 text-slate-600 dark:text-slate-300">
+            <span>Sortie du livre "Meltem"</span>
+            <svg class="h-5 w-5 text-slate-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+              <path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clip-rule="evenodd" />
+            </svg>
+          </span>
+        </span>
+      </div>
+      <h1 class="mt-10 text-4xl font-display font-bold tracking-tight text-slate-900 dark:text-white sm:text-6xl leading-[1.1]">
+        {t('hero.title')}
+      </h1>
+      <p class="mt-6 text-lg leading-8 text-slate-600 dark:text-slate-300">
+        {t('hero.subtitle')}
+      </p>
+      <div class="mt-10 flex items-center gap-x-6">
+        <a href={translatePath('/about')} class="rounded-full bg-[var(--color-tc-blue)] px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-[var(--color-tc-blue-light)] transition-all transform hover:-translate-y-0.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-tc-blue)]">
+          {t('hero.cta.discover')}
+        </a>
+        <a href={translatePath('/donate')} class="text-sm font-semibold leading-6 text-slate-900 dark:text-white group flex items-center gap-2">
+          {t('hero.cta.support')}
+          <span class="group-hover:translate-x-1 transition-transform" aria-hidden="true">→</span>
+        </a>
+      </div>
+    </div>
+    <div class="mx-auto mt-16 flex max-w-2xl sm:mt-24 lg:ml-10 lg:mr-0 lg:mt-0 lg:max-w-none lg:flex-none xl:ml-32">
+      <div class="max-w-3xl flex-none sm:max-w-5xl lg:max-w-none">
+        <div class="rounded-3xl p-2 lg:p-4 relative">
+          <!-- Main visual could go here, replacing this placeholder -->
+          <img src="/logo.jpeg" alt="Logo HD" class="w-[30rem] lg:w-[40rem] rounded-3xl shadow-2xl object-cover ring-1 ring-slate-900/10 dark:ring-white/10" />
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

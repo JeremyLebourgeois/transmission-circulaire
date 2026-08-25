@@ -1,0 +1,41 @@
+---
+import LanguagePicker from './LanguagePicker.astro';
+import { getLangFromUrl, useTranslations, useTranslatedPath } from '../i18n/utils';
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+const translatePath = useTranslatedPath(lang);
+---
+<header class="sticky top-0 z-40 w-full backdrop-blur-md flex-none transition-colors duration-500 lg:z-50 lg:border-b lg:border-slate-900/10 dark:border-slate-50/[0.06] bg-white/90 dark:bg-slate-900/80 shadow-sm">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="py-4 flex items-center justify-between">
+      <a class="flex items-center gap-3 group" href={translatePath('/')}>
+        <div class="relative overflow-hidden rounded-full h-10 w-10 border-2 border-transparent group-hover:border-[var(--color-tc-mustard)] transition-colors duration-300">
+          <img src="/logo.jpeg" alt="Transmission Circulaire Logo" class="h-full w-full object-cover transform group-hover:scale-110 transition-transform duration-500" />
+        </div>
+        <span class="font-display font-bold text-xl tracking-tight text-[var(--color-tc-blue)] dark:text-white hidden sm:block">Transmission Circulaire</span>
+      </a>
+      
+      <div class="flex items-center lg:hidden gap-4">
+        <LanguagePicker />
+        <button type="button" class="text-slate-500 hover:text-slate-600 dark:text-slate-400 dark:hover:text-slate-300">
+          <span class="sr-only">Ouvrir le menu</span>
+          <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+          </svg>
+        </button>
+      </div>
+
+      <nav class="hidden lg:flex items-center gap-8 text-sm font-medium leading-6 text-slate-700 dark:text-slate-200">
+        <a href={translatePath('/')} class="hover:text-[var(--color-tc-mustard)] transition-colors">{t('nav.home')}</a>
+        <a href={translatePath('/about')} class="hover:text-[var(--color-tc-mustard)] transition-colors">{t('nav.about')}</a>
+        <a href={translatePath('/books')} class="hover:text-[var(--color-tc-mustard)] transition-colors">{t('nav.books')}</a>
+        <a href={translatePath('/events')} class="hover:text-[var(--color-tc-mustard)] transition-colors">{t('nav.events')}</a>
+        <a href={translatePath('/donate')} class="bg-[var(--color-tc-olive)] text-white px-5 py-2 rounded-full hover:bg-opacity-90 hover:shadow-lg transition-all transform hover:-translate-y-0.5">{t('nav.donate')}</a>
+        
+        <div class="border-l border-slate-200 dark:border-slate-700 h-6 ml-2"></div>
+        <LanguagePicker />
+      </nav>
+    </div>
+  </div>
+</header>
