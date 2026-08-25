@@ -8,7 +8,7 @@ const cleanPath = Astro.url.pathname.replace(new RegExp(`^/${currentLang}(/|$)`)
 const currentPath = cleanPath === '/' ? '' : cleanPath;
 ---
 <div class="relative lang-picker-container">
-  <button type="button" class="lang-picker-btn flex items-center space-x-1 text-sm font-medium uppercase hover:text-[var(--color-tc-mustard)] transition-colors focus:outline-none p-1">
+  <button type="button" class="lang-picker-btn flex items-center space-x-1 text-sm font-bold uppercase transition-colors focus:outline-none px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 hover:border-slate-300 dark:hover:border-slate-600 shadow-sm">
     <span>{currentLang}</span>
     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
