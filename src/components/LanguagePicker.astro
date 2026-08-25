@@ -7,21 +7,44 @@ const currentLang = getLangFromUrl(Astro.url);
 const cleanPath = Astro.url.pathname.replace(new RegExp(`^/${currentLang}(/|$)`), '/');
 const currentPath = cleanPath === '/' ? '' : cleanPath;
 ---
-<div class="relative group">
-  <button class="flex items-center space-x-1 text-sm font-medium uppercase hover:text-[var(--color-tc-mustard)] transition-colors focus:outline-none">
+<div class="relative lang-picker-container">
+  <button type="button" class="lang-picker-btn flex items-center space-x-1 text-sm font-medium uppercase hover:text-[var(--color-tc-mustard)] transition-colors focus:outline-none p-1">
     <span>{currentLang}</span>
     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
     </svg>
   </button>
-  <div class="absolute right-0 mt-2 w-36 bg-white dark:bg-slate-800 rounded-xl shadow-xl py-2 z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform origin-top-right scale-95 group-hover:scale-100 border border-slate-200 dark:border-slate-700">
+  <div class="lang-picker-dropdown absolute right-0 mt-2 w-36 bg-white dark:bg-slate-800 rounded-xl shadow-xl py-2 z-50 hidden border border-slate-200 dark:border-slate-700 origin-top-right transition-all">
     {Object.entries(languages).map(([lang, label]) => (
       <a 
         href={lang === 'fr' ? (currentPath || '/') : `/${lang}${currentPath}`} 
-        class={`block px-4 py-2 text-sm transition-colors ${lang === currentLang ? 'font-bold text-[var(--color-tc-blue)] dark:text-white bg-slate-50 dark:bg-slate-700/50' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 hover:text-[var(--color-tc-mustard)] dark:hover:text-[var(--color-tc-mustard)]'}`}
+        class={`block px-4 py-3 text-sm transition-colors ${lang === currentLang ? 'font-bold text-[var(--color-tc-blue)] dark:text-white bg-slate-50 dark:bg-slate-700/50' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 hover:text-[var(--color-tc-mustard)] dark:hover:text-[var(--color-tc-mustard)]'}`}
       >
         {label}
       </a>
     ))}
   </div>
 </div>
+
+<script>
+  // Script pour gérer l'ouverture du menu des langues (surtout sur mobile)
+  const containers = document.querySelectorAll('.lang-picker-container');
+  
+  containers.forEach(container => {
+    const btn = container.querySelector('.lang-picker-btn');
+    const dropdown = container.querySelector('.lang-picker-dropdown');
+    
+    if (btn && dropdown) {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        dropdown.classList.toggle('hidden');
+      });
+
+      document.addEventListener('click', (e) => {
+        if (!dropdown.classList.contains('hidden') && !container.contains(e.target)) {
+          dropdown.classList.add('hidden');
+        }
+      });
+    }
+  });
+</script>

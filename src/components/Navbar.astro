@@ -18,7 +18,7 @@ const translatePath = useTranslatedPath(lang);
       
       <div class="flex items-center lg:hidden gap-4">
         <LanguagePicker />
-        <button type="button" class="text-slate-500 hover:text-slate-600 dark:text-slate-400 dark:hover:text-slate-300">
+        <button type="button" id="mobile-menu-btn" class="text-slate-500 hover:text-slate-600 dark:text-slate-400 dark:hover:text-slate-300 focus:outline-none p-2 -mr-2">
           <span class="sr-only">Ouvrir le menu</span>
           <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
@@ -26,6 +26,7 @@ const translatePath = useTranslatedPath(lang);
         </button>
       </div>
 
+      <!-- Navigation Desktop -->
       <nav class="hidden lg:flex items-center gap-8 text-sm font-medium leading-6 text-slate-700 dark:text-slate-200">
         <a href={translatePath('/')} class="hover:text-[var(--color-tc-mustard)] transition-colors">{t('nav.home')}</a>
         <a href={translatePath('/about')} class="hover:text-[var(--color-tc-mustard)] transition-colors">{t('nav.about')}</a>
@@ -38,4 +39,38 @@ const translatePath = useTranslatedPath(lang);
       </nav>
     </div>
   </div>
+
+  <!-- Menu Mobile -->
+  <div id="mobile-menu" class="hidden lg:hidden absolute top-full left-0 w-full bg-white dark:bg-slate-900 shadow-2xl border-b border-slate-100 dark:border-slate-800">
+    <div class="flex flex-col items-center py-8 space-y-6">
+      <a href={translatePath('/')} class="text-lg font-medium text-slate-600 dark:text-slate-300 hover:text-[var(--color-tc-blue)] dark:hover:text-white transition-colors">{t('nav.home')}</a>
+      <a href={translatePath('/about')} class="text-lg font-medium text-slate-600 dark:text-slate-300 hover:text-[var(--color-tc-blue)] dark:hover:text-white transition-colors">{t('nav.about')}</a>
+      <a href={translatePath('/books')} class="text-lg font-medium text-slate-600 dark:text-slate-300 hover:text-[var(--color-tc-blue)] dark:hover:text-white transition-colors">{t('nav.books')}</a>
+      <a href={translatePath('/events')} class="text-lg font-medium text-slate-600 dark:text-slate-300 hover:text-[var(--color-tc-blue)] dark:hover:text-white transition-colors">{t('nav.events')}</a>
+      
+      <div class="w-12 h-px bg-slate-200 dark:bg-slate-700 my-2"></div>
+      
+      <a href={translatePath('/donate')} class="bg-[var(--color-tc-olive)] text-white px-8 py-3 rounded-full font-semibold hover:bg-opacity-90 transition-all shadow-md transform hover:scale-105">{t('nav.donate')}</a>
+    </div>
+  </div>
 </header>
+
+<script>
+  // Script côté client pour gérer l'ouverture/fermeture du menu mobile
+  const btn = document.getElementById('mobile-menu-btn');
+  const menu = document.getElementById('mobile-menu');
+
+  if (btn && menu) {
+    // Ouvrir/Fermer au clic sur le bouton
+    btn.addEventListener('click', (e) => {
+      menu.classList.toggle('hidden');
+    });
+
+    // Fermer si on clique à côté
+    document.addEventListener('click', (e) => {
+      if (!menu.classList.contains('hidden') && !menu.contains(e.target) && !btn.contains(e.target)) {
+        menu.classList.add('hidden');
+      }
+    });
+  }
+</script>
