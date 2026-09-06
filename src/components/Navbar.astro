@@ -53,6 +53,11 @@ const navLinks = [
         ))}
         
         <div class="ml-4 flex items-center gap-4">
+          <div class="auth-buttons-desktop hidden items-center gap-4">
+            <a href={translatePath('/login')} class="btn-login hidden hover:text-[var(--color-tc-mustard)] transition-colors">{t('nav.login')}</a>
+            <a href={translatePath('/dashboard')} class="btn-dashboard hidden font-bold text-[var(--color-tc-blue)] dark:text-[var(--color-tc-mustard)] hover:opacity-80 transition-opacity">{t('nav.dashboard')}</a>
+          </div>
+          
           <a href={translatePath('/donate')} class="bg-[var(--color-tc-olive)] text-white px-5 py-2 rounded-full hover:bg-opacity-90 hover:shadow-lg transition-all transform hover:-translate-y-0.5">{t('nav.donate')}</a>
           <div class="border-l border-slate-200 dark:border-slate-700 h-6"></div>
           <LanguagePicker />
@@ -75,27 +80,57 @@ const navLinks = [
       
       <div class="w-12 h-px bg-slate-200 dark:bg-slate-700 my-4"></div>
       
+      <div class="auth-buttons-mobile hidden flex-col items-center gap-4 mb-4">
+        <a href={translatePath('/login')} class="btn-login hidden text-lg font-medium text-slate-600 dark:text-slate-300 hover:text-[var(--color-tc-blue)] dark:hover:text-white">{t('nav.login')}</a>
+        <a href={translatePath('/dashboard')} class="btn-dashboard hidden text-lg font-bold text-[var(--color-tc-blue)] dark:text-[var(--color-tc-mustard)]">{t('nav.dashboard')}</a>
+      </div>
+
       <a href={translatePath('/donate')} class="bg-[var(--color-tc-olive)] text-white px-8 py-3 rounded-full font-semibold hover:bg-opacity-90 transition-all shadow-md transform hover:scale-105">{t('nav.donate')}</a>
     </div>
   </div>
 </header>
 
 <script>
-  // Script côté client pour gérer l'ouverture/fermeture du menu mobile
+  // Toggle mobile menu
   const btn = document.getElementById('mobile-menu-btn');
   const menu = document.getElementById('mobile-menu');
 
   if (btn && menu) {
-    // Ouvrir/Fermer au clic sur le bouton
     btn.addEventListener('click', (e) => {
       menu.classList.toggle('hidden');
     });
 
-    // Fermer si on clique à côté
     document.addEventListener('click', (e) => {
-      if (!menu.classList.contains('hidden') && !menu.contains(e.target) && !btn.contains(e.target)) {
+      if (!menu.classList.contains('hidden') && !menu.contains(e.target as Node) && !btn.contains(e.target as Node)) {
         menu.classList.add('hidden');
       }
     });
+  }
+
+  // Toggle Auth buttons client-side (to preserve static rendering of Navbar)
+  const isAuth = document.cookie.includes('-auth-token');
+  
+  // Update desktop
+  const desktopContainer = document.querySelector('.auth-buttons-desktop');
+  if (desktopContainer) {
+    desktopContainer.classList.remove('hidden');
+    desktopContainer.classList.add('flex');
+    if (isAuth) {
+      desktopContainer.querySelector('.btn-dashboard')?.classList.remove('hidden');
+    } else {
+      desktopContainer.querySelector('.btn-login')?.classList.remove('hidden');
+    }
+  }
+
+  // Update mobile
+  const mobileContainer = document.querySelector('.auth-buttons-mobile');
+  if (mobileContainer) {
+    mobileContainer.classList.remove('hidden');
+    mobileContainer.classList.add('flex');
+    if (isAuth) {
+      mobileContainer.querySelector('.btn-dashboard')?.classList.remove('hidden');
+    } else {
+      mobileContainer.querySelector('.btn-login')?.classList.remove('hidden');
+    }
   }
 </script>

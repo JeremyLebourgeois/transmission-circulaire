@@ -1,0 +1,132 @@
+---
+export const prerender = false;
+
+import Layout from '../layouts/Layout.astro';
+import { getLangFromUrl, useTranslatedPath, useTranslations } from '../i18n/utils';
+import { getSupabaseServerClient } from '../lib/supabase-server';
+
+const lang = getLangFromUrl(Astro.url);
+const translatePath = useTranslatedPath(lang);
+const t = useTranslations(lang);
+
+const supabase = getSupabaseServerClient(Astro.cookies);
+const { data: { session } } = await supabase.auth.getSession();
+
+if (!session) {
+  return Astro.redirect(translatePath('/login'));
+}
+
+// Récupération du rôle
+const { data: roleData } = await supabase
+  .from('user_roles')
+  .select('role')
+  .eq('id', session.user.id)
+  .single();
+
+const userRole = roleData?.role || 'Membre';
+
+if (Astro.request.method === 'POST') {
+  // Gestion de la déconnexion
+  const formData = await Astro.request.formData();
+  if (formData.get('action') === 'logout') {
+    await supabase.auth.signOut();
+    return Astro.redirect(translatePath('/'));
+  }
+}
+---
+
+<Layout title={`${t('dashboard.title')} | Transmission Circulaire`}>
+
+  <main class="min-h-screen bg-slate-50 dark:bg-slate-900 py-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
+        
+        <!-- Header du Dashboard -->
+        <div class="p-8 sm:p-10 border-b border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50 flex justify-between items-center">
+          <div>
+            <h1 class="text-3xl font-display font-bold text-slate-900 dark:text-white">
+              {t('dashboard.title')}
+            </h1>
+            <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">
+              {t('dashboard.welcome')} {session.user.email}
+            </p>
+          </div>
+          <div class="text-right">
+            <span class="inline-flex items-center rounded-md bg-[var(--color-tc-blue)]/10 px-3 py-1 text-sm font-medium text-[var(--color-tc-blue)] dark:text-[var(--color-tc-mustard)] ring-1 ring-inset ring-[var(--color-tc-blue)]/20 uppercase tracking-wider">
+              {t('dashboard.role')} {userRole}
+            </span>
+          </div>
+        </div>
+
+        <!-- Contenu du Dashboard -->
+        <div class="p-8 sm:p-10">
+          <h2 class="text-lg font-semibold text-slate-900 dark:text-white mb-6">{t('dashboard.tools')}</h2>
+          
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            
+            <!-- Tuile Profil -->
+            <div class="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col justify-between">
+              <div>
+                <h3 class="text-md font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                  <svg class="w-5 h-5 text-[var(--color-tc-olive)]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                  </svg>
+                  {t('dashboard.profile')}
+                </h3>
+                <p class="mt-2 text-sm text-slate-500">{t('dashboard.profile.desc')}</p>
+              </div>
+              <button class="mt-4 text-sm font-medium text-[var(--color-tc-blue)] hover:underline text-left">{t('dashboard.edit')}</button>
+            </div>
+
+            {/* Outils Admin conditionnels */}
+            {(userRole === 'admin' || userRole === 'super_admin') && (
+              <div class="bg-white dark:bg-slate-900 p-6 rounded-xl border border-[var(--color-tc-mustard)]/50 shadow-sm flex flex-col justify-between">
+                <div>
+                  <h3 class="text-md font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                    <svg class="w-5 h-5 text-[var(--color-tc-mustard)]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
+                    </svg>
+                    {t('dashboard.books')}
+                  </h3>
+                  <p class="mt-2 text-sm text-slate-500">{t('dashboard.books.desc')}</p>
+                </div>
+                <button class="mt-4 text-sm font-medium text-[var(--color-tc-mustard)] hover:underline text-left">{t('dashboard.books.manage')}</button>
+              </div>
+            )}
+
+            {userRole === 'super_admin' && (
+              <div class="bg-white dark:bg-slate-900 p-6 rounded-xl border border-[var(--color-tc-red)]/50 shadow-sm flex flex-col justify-between">
+                <div>
+                  <h3 class="text-md font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                    <svg class="w-5 h-5 text-[var(--color-tc-red)]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+                    </svg>
+                    {t('dashboard.roles')}
+                  </h3>
+                  <p class="mt-2 text-sm text-slate-500">{t('dashboard.roles.desc')}</p>
+                </div>
+                <button class="mt-4 text-sm font-medium text-[var(--color-tc-red)] hover:underline text-left">{t('dashboard.roles.manage')}</button>
+              </div>
+            )}
+            
+          </div>
+          
+          <!-- Actions de compte -->
+          <div class="mt-12 pt-8 border-t border-slate-200 dark:border-slate-700">
+            <form method="POST">
+              <input type="hidden" name="action" value="logout" />
+              <button type="submit" class="text-sm font-medium text-slate-500 hover:text-red-600 dark:hover:text-red-400 transition-colors flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
+                </svg>
+                {t('dashboard.logout')}
+              </button>
+            </form>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </main>
+  
+</Layout>
