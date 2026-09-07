@@ -1,0 +1,158 @@
+---
+import { getSupabaseServerClient } from '../../../lib/supabase-server';
+import { getLangFromUrl, useTranslations, useTranslatedPath } from '../../../i18n/utils';
+import Layout from '../../../layouts/Layout.astro';
+
+const supabase = getSupabaseServerClient(Astro.cookies);
+const { data: { user } } = await supabase.auth.getUser();
+
+const lang = getLangFromUrl(Astro.url);
+const translatePath = useTranslatedPath(lang);
+
+if (!user) {
+  return Astro.redirect(translatePath('/login'));
+}
+
+const t = useTranslations(lang);
+
+let errorMessage = '';
+let successMessage = '';
+
+// Fetch current profile
+let { data: profile } = await supabase
+  .from('profiles')
+  .select('*')
+  .eq('id', user.id)
+  .single();
+
+if (Astro.request.method === 'POST') {
+  try {
+    const formData = await Astro.request.formData();
+    const fullName = formData.get('fullName')?.toString() || '';
+    const description = formData.get('description')?.toString() || '';
+    const avatarFile = formData.get('avatar') as File;
+    
+    let avatarUrl = profile?.avatar_url || '';
+
+    // Upload new avatar if provided
+    if (avatarFile && avatarFile.size > 0) {
+      const fileExt = avatarFile.name.split('.').pop();
+      const fileName = `${user.id}-${Date.now()}.${fileExt}`;
+      
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(fileName, avatarFile, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(fileName);
+        
+      avatarUrl = publicUrl;
+    }
+
+    // Update profile
+    const { error: updateError } = await supabase
+      .from('profiles')
+      .update({
+        full_name: fullName,
+        description: description,
+        avatar_url: avatarUrl,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', user.id);
+
+    if (updateError) throw updateError;
+    
+    successMessage = t('profile.edit.success');
+    
+    // Refresh profile data
+    const { data: updatedProfile } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', user.id)
+      .single();
+    profile = updatedProfile;
+    
+  } catch (error: any) {
+    console.error("Profile Edit Error:", error);
+    errorMessage = t('profile.edit.error') + ' : ' + (error?.message || JSON.stringify(error));
+  }
+}
+---
+
+<Layout title={t('profile.edit.title')}>
+  <main class="min-h-screen py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-2xl mx-auto space-y-8 bg-[var(--color-tc-card)] p-6 sm:p-10 rounded-3xl shadow-2xl border border-[var(--color-tc-blue)]/10">
+      
+      <div class="flex items-center gap-4 border-b border-[var(--color-tc-blue)]/10 pb-6">
+        <a href={translatePath('/dashboard')} class="text-[var(--color-tc-blue)]/70 hover:text-[var(--color-tc-blue)] transition-colors">
+          <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+          </svg>
+        </a>
+        <h1 class="text-3xl font-display font-bold text-[var(--color-tc-blue)]">{t('profile.edit.title')}</h1>
+      </div>
+
+      {errorMessage && (
+        <div class="bg-red-50 text-red-800 p-4 rounded-xl text-sm font-medium">
+          {errorMessage}
+        </div>
+      )}
+
+      {successMessage && (
+        <div class="bg-green-50 text-green-800 p-4 rounded-xl text-sm font-medium">
+          {successMessage}
+        </div>
+      )}
+
+      <form method="POST" enctype="multipart/form-data" class="space-y-6">
+        <!-- Avatar Upload -->
+        <div class="flex flex-col sm:flex-row items-center gap-6">
+          <div class="relative w-24 h-24 rounded-full bg-[var(--color-tc-cream)] border-2 border-[var(--color-tc-mustard)] overflow-hidden flex-shrink-0">
+            {profile?.avatar_url ? (
+              <img src={profile.avatar_url} alt="Avatar" class="w-full h-full object-cover" />
+            ) : (
+              <svg class="w-full h-full text-[var(--color-tc-blue)]/20 p-4" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M24 20.993V24H0v-2.996A14.977 14.977 0 0112.004 15c4.904 0 9.26 2.354 11.996 5.993zM16.002 8.999a4 4 0 11-8 0 4 4 0 018 0z" />
+              </svg>
+            )}
+          </div>
+          <div class="flex-1 w-full">
+            <label for="avatar" class="block text-sm font-medium leading-6 text-[var(--color-tc-blue)]">{t('profile.edit.avatar')}</label>
+            <input type="file" id="avatar" name="avatar" accept="image/*" class="mt-2 block w-full text-sm text-slate-500
+              file:mr-4 file:py-2 file:px-4
+              file:rounded-full file:border-0
+              file:text-sm file:font-semibold
+              file:bg-[var(--color-tc-mustard)]/10 file:text-[var(--color-tc-mustard)]
+              hover:file:bg-[var(--color-tc-mustard)]/20 transition-colors
+            "/>
+          </div>
+        </div>
+
+        <!-- Name -->
+        <div>
+          <label for="fullName" class="block text-sm font-medium leading-6 text-[var(--color-tc-blue)]">{t('profile.edit.name')}</label>
+          <div class="mt-2">
+            <input type="text" id="fullName" name="fullName" value={profile?.full_name || ''} placeholder="Ex: Jean Dupont" class="block w-full rounded-xl border-0 py-3 text-[var(--color-tc-blue)] shadow-sm ring-1 ring-inset ring-[var(--color-tc-blue)]/20 focus:ring-2 focus:ring-inset focus:ring-[var(--color-tc-mustard)] bg-[var(--color-tc-cream)] sm:text-sm sm:leading-6 px-4" />
+          </div>
+        </div>
+
+        <!-- Description -->
+        <div>
+          <label for="description" class="block text-sm font-medium leading-6 text-[var(--color-tc-blue)]">{t('profile.edit.description')}</label>
+          <div class="mt-2">
+            <textarea id="description" name="description" rows="4" placeholder="Quelques mots sur vous..." class="block w-full rounded-xl border-0 py-3 text-[var(--color-tc-blue)] shadow-sm ring-1 ring-inset ring-[var(--color-tc-blue)]/20 focus:ring-2 focus:ring-inset focus:ring-[var(--color-tc-mustard)] bg-[var(--color-tc-cream)] sm:text-sm sm:leading-6 px-4">{profile?.description || ''}</textarea>
+          </div>
+        </div>
+
+        <div class="pt-4">
+          <button type="submit" class="w-full flex justify-center rounded-full bg-[var(--color-tc-olive)] px-4 py-3 text-sm font-bold leading-6 text-white shadow-sm hover:bg-opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-tc-olive)] transition-all transform hover:-translate-y-0.5">
+            {t('profile.edit.save')}
+          </button>
+        </div>
+      </form>
+    </div>
+  </main>
+</Layout>

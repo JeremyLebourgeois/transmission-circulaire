@@ -23,6 +23,13 @@ const { data: roleData, error: roleError } = await supabase
  .eq('id', user.id)
  .single();
 
+// Récupération du profil
+const { data: profile } = await supabase
+  .from('profiles')
+  .select('*')
+  .eq('id', user.id)
+  .single();
+
 const userRole = roleData?.role || 'Membre';
 
 if (Astro.request.method === 'POST') {
@@ -43,14 +50,25 @@ if (Astro.request.method === 'POST') {
  
  <!-- Header du Dashboard -->
  <div class="p-6 sm:p-8 lg:p-10 border-b border-[var(--color-tc-blue)]/10 bg-[var(--color-tc-cream)]/50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
- <div>
- <h1 class="text-3xl font-display font-bold text-[var(--color-tc-blue)] ">
- {t('dashboard.title')}
- </h1>
- <p class="mt-2 text-sm text-[var(--color-tc-blue)]/70 ">
- {t('dashboard.welcome')} {user.email}
- </p>
- </div>
+    <div class="flex items-center gap-4">
+      <div class="relative w-16 h-16 rounded-full bg-[var(--color-tc-cream)] border-2 border-[var(--color-tc-mustard)] overflow-hidden flex-shrink-0 hidden sm:block">
+        {profile?.avatar_url ? (
+          <img src={profile.avatar_url} alt="Avatar" class="w-full h-full object-cover" />
+        ) : (
+          <svg class="w-full h-full text-[var(--color-tc-blue)]/20 p-2" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M24 20.993V24H0v-2.996A14.977 14.977 0 0112.004 15c4.904 0 9.26 2.354 11.996 5.993zM16.002 8.999a4 4 0 11-8 0 4 4 0 018 0z" />
+          </svg>
+        )}
+      </div>
+      <div>
+        <h1 class="text-3xl font-display font-bold text-[var(--color-tc-blue)] ">
+          {t('dashboard.title')}
+        </h1>
+        <p class="mt-2 text-[var(--color-tc-blue)]/80">
+          {t('dashboard.welcome')} <span class="font-semibold text-[var(--color-tc-olive)]">{profile?.full_name || user.email}</span>
+        </p>
+      </div>
+    </div>
  <div class="text-right">
  <span class="inline-flex items-center rounded-md bg-[var(--color-tc-blue)]/10 px-3 py-1 text-sm font-medium text-[var(--color-tc-blue)] ring-1 ring-inset ring-[var(--color-tc-blue)]/20 uppercase tracking-wider">
  {t('dashboard.role')} {userRole}
@@ -75,7 +93,7 @@ if (Astro.request.method === 'POST') {
  </h3>
  <p class="mt-2 text-sm text-[var(--color-tc-blue)]/70">{t('dashboard.profile.desc')}</p>
  </div>
- <button class="mt-4 text-sm font-medium text-[var(--color-tc-blue)] hover:underline text-left">{t('dashboard.edit')}</button>
+ <a href={translatePath('/profile/edit')} class="mt-4 text-sm font-medium text-[var(--color-tc-olive)] hover:underline block text-left">{t('dashboard.edit')}</a>
  </div>
 
  {/* Outils Admin conditionnels */}

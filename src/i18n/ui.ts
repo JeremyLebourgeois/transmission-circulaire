@@ -57,6 +57,14 @@ export const ui = {
     'dashboard.roles.manage': 'Gérer les membres →',
     'dashboard.logout': 'Me déconnecter',
 
+    'profile.edit.title': 'Modifier mon profil',
+    'profile.edit.name': 'Nom complet',
+    'profile.edit.description': 'Description / Bio',
+    'profile.edit.avatar': 'Photo de profil',
+    'profile.edit.save': 'Enregistrer les modifications',
+    'profile.edit.success': 'Profil mis à jour avec succès.',
+    'profile.edit.error': 'Erreur lors de la mise à jour.',
+
     'hero.title': 'Transmission Circulaire',
     'hero.subtitle': 'Bâtir des ponts entre les générations par le partage de la culture, des valeurs et de la paix.',
     'hero.cta.discover': 'Découvrir nos actions',
@@ -112,6 +120,14 @@ export const ui = {
     'dashboard.roles.desc': 'Assign roles (Admin, Treasurer) to users.',
     'dashboard.roles.manage': 'Manage members →',
     'dashboard.logout': 'Log out',
+
+    'profile.edit.title': 'Edit my profile',
+    'profile.edit.name': 'Full name',
+    'profile.edit.description': 'Description / Bio',
+    'profile.edit.avatar': 'Profile picture',
+    'profile.edit.save': 'Save changes',
+    'profile.edit.success': 'Profile updated successfully.',
+    'profile.edit.error': 'Error updating profile.',
 
     'hero.title': 'Circular Transmission',
     'hero.subtitle': 'Building bridges between generations by sharing culture, values, and peace.',
@@ -169,6 +185,14 @@ export const ui = {
     'dashboard.roles.manage': 'Gestionar miembros →',
     'dashboard.logout': 'Cerrar sesión',
 
+    'profile.edit.title': 'Editar mi perfil',
+    'profile.edit.name': 'Nombre completo',
+    'profile.edit.description': 'Descripción / Biografía',
+    'profile.edit.avatar': 'Foto de perfil',
+    'profile.edit.save': 'Guardar cambios',
+    'profile.edit.success': 'Perfil actualizado con éxito.',
+    'profile.edit.error': 'Error al actualizar el perfil.',
+
     'hero.title': 'Transmisión Circular',
     'hero.subtitle': 'Construyendo puentes entre generaciones a través del intercambio de cultura, valores y paz.',
     'hero.cta.discover': 'Descubrir nuestras acciones',
@@ -224,6 +248,14 @@ export const ui = {
     'dashboard.roles.desc': 'Benutzern Rollen (Admin, Schatzmeister) zuweisen.',
     'dashboard.roles.manage': 'Mitglieder verwalten →',
     'dashboard.logout': 'Abmelden',
+
+    'profile.edit.title': 'Mein Profil bearbeiten',
+    'profile.edit.name': 'Vollständiger Name',
+    'profile.edit.description': 'Beschreibung / Bio',
+    'profile.edit.avatar': 'Profilbild',
+    'profile.edit.save': 'Änderungen speichern',
+    'profile.edit.success': 'Profil erfolgreich aktualisiert.',
+    'profile.edit.error': 'Fehler bei der Aktualisierung des Profils.',
 
     'hero.title': 'Zirkuläre Weitergabe',
     'hero.subtitle': 'Brücken zwischen den Generationen bauen, indem wir Kultur, Werte und Frieden teilen.',
