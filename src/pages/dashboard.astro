@@ -42,7 +42,7 @@ if (Astro.request.method === 'POST') {
  <div class="bg-[var(--color-tc-cream)] rounded-2xl shadow-sm border border-[var(--color-tc-blue)]/10 overflow-hidden">
  
  <!-- Header du Dashboard -->
- <div class="p-8 sm:p-10 border-b border-[var(--color-tc-blue)]/10 bg-[var(--color-tc-cream)]/50 flex justify-between items-center">
+ <div class="p-6 sm:p-8 lg:p-10 border-b border-[var(--color-tc-blue)]/10 bg-[var(--color-tc-cream)]/50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
  <div>
  <h1 class="text-3xl font-display font-bold text-[var(--color-tc-blue)] ">
  {t('dashboard.title')}
@@ -59,7 +59,7 @@ if (Astro.request.method === 'POST') {
  </div>
 
  <!-- Contenu du Dashboard -->
- <div class="p-8 sm:p-10">
+ <div class="p-6 sm:p-8 lg:p-10">
  <h2 class="text-lg font-semibold text-[var(--color-tc-blue)] mb-6">{t('dashboard.tools')}</h2>
  
  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
