@@ -4,6 +4,10 @@
 @theme {
   --color-tc-blue: #1E3A8A; /* Bleu profond */
   --color-tc-blue-light: #2563EB; /* Bleu plus clair pour les survols */
+  --color-tc-cream: #FDF8EE; /* Blanc crème du logo */
+  --color-tc-cream-hover: #F2EAD6;
+  --color-tc-cream-dark: #F3EDE0; /* Crème foncé pour footer/sections */
+  --color-tc-card: #FFFFFF; /* Blanc pur pour les cartes */
   --color-tc-olive: #556B2F; /* Vert olive */
   --color-tc-red: #991B1B; /* Rouge terre */
   --color-tc-mustard: #D97706; /* Jaune moutarde */
@@ -13,13 +17,10 @@
 
 @layer base {
   :root {
-    --background: #f8fafc; /* Slate 50 */
-    --foreground: #0f172a; /* Slate 900 */
+    --background: var(--color-tc-cream); /* Slate 50 */
+    --foreground: var(--color-tc-blue); /* Slate 900 */
   }
-  .dark {
-    --background: #020617; /* Slate 950 */
-    --foreground: #f8fafc; /* Slate 50 */
-  }
+  
   
   body {
     @apply bg-[var(--background)] text-[var(--foreground)] font-sans antialiased transition-colors duration-300;

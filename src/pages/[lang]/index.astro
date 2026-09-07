@@ -4,10 +4,10 @@ import Hero from '../../components/Hero.astro';
 import { languages } from '../../i18n/ui';
 
 export function getStaticPaths() {
-  const paths = Object.keys(languages)
-    .filter((lang) => lang !== 'fr') // 'fr' is the default and handled by /src/pages/index.astro
-    .map((lang) => ({ params: { lang } }));
-  return paths;
+ const paths = Object.keys(languages)
+ .filter((lang) => lang !== 'fr') // 'fr' is the default and handled by /src/pages/index.astro
+ .map((lang) => ({ params: { lang } }));
+ return paths;
 }
 ---
 

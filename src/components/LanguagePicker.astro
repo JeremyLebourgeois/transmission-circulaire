@@ -8,43 +8,43 @@ const cleanPath = Astro.url.pathname.replace(new RegExp(`^/${currentLang}(/|$)`)
 const currentPath = cleanPath === '/' ? '' : cleanPath;
 ---
 <div class="relative lang-picker-container">
-  <button type="button" class="lang-picker-btn flex items-center space-x-1 text-sm font-bold uppercase transition-colors focus:outline-none px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 hover:border-slate-300 dark:hover:border-slate-600 shadow-sm">
-    <span>{currentLang}</span>
-    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-    </svg>
-  </button>
-  <div class="lang-picker-dropdown absolute right-0 mt-2 w-36 bg-white dark:bg-slate-800 rounded-xl shadow-xl py-2 z-50 hidden border border-slate-200 dark:border-slate-700 origin-top-right transition-all">
-    {Object.entries(languages).map(([lang, label]) => (
-      <a 
-        href={lang === 'fr' ? (currentPath || '/') : `/${lang}${currentPath}`} 
-        class={`block px-4 py-3 text-sm transition-colors ${lang === currentLang ? 'font-bold text-[var(--color-tc-blue)] dark:text-white bg-slate-50 dark:bg-slate-700/50' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 hover:text-[var(--color-tc-mustard)] dark:hover:text-[var(--color-tc-mustard)]'}`}
-      >
-        {label}
-      </a>
-    ))}
-  </div>
+ <button type="button" class="lang-picker-btn flex items-center space-x-1 text-sm font-bold uppercase transition-colors focus:outline-none px-3 py-1.5 rounded-lg bg-slate-100 border border-[var(--color-tc-blue)]/10 text-slate-700 hover:bg-slate-200 :bg-slate-700 hover:border-[var(--color-tc-blue)]/20 :border-slate-600 shadow-sm">
+ <span>{currentLang}</span>
+ <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+ <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+ </svg>
+ </button>
+ <div class="lang-picker-dropdown absolute right-0 mt-2 w-36 bg-[var(--color-tc-cream)] rounded-xl shadow-xl py-2 z-50 hidden border border-[var(--color-tc-blue)]/10 origin-top-right transition-all">
+ {Object.entries(languages).map(([lang, label]) => (
+ <a 
+ href={lang === 'fr' ? (currentPath || '/') : `/${lang}${currentPath}`} 
+ class={`block px-4 py-3 text-sm transition-colors ${lang === currentLang ? 'font-bold text-[var(--color-tc-blue)] bg-[var(--color-tc-cream)] ' : 'text-[var(--color-tc-blue)]/80 hover:bg-[var(--color-tc-cream)] :bg-slate-700 hover:text-[var(--color-tc-mustard)] :text-[var(--color-tc-mustard)]'}`}
+ >
+ {label}
+ </a>
+ ))}
+ </div>
 </div>
 
 <script>
-  // Script pour gérer l'ouverture du menu des langues (surtout sur mobile)
-  const containers = document.querySelectorAll('.lang-picker-container');
-  
-  containers.forEach(container => {
-    const btn = container.querySelector('.lang-picker-btn');
-    const dropdown = container.querySelector('.lang-picker-dropdown');
-    
-    if (btn && dropdown) {
-      btn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        dropdown.classList.toggle('hidden');
-      });
+ // Script pour gérer l'ouverture du menu des langues (surtout sur mobile)
+ const containers = document.querySelectorAll('.lang-picker-container');
+ 
+ containers.forEach(container => {
+ const btn = container.querySelector('.lang-picker-btn');
+ const dropdown = container.querySelector('.lang-picker-dropdown');
+ 
+ if (btn && dropdown) {
+ btn.addEventListener('click', (e) => {
+ e.stopPropagation();
+ dropdown.classList.toggle('hidden');
+ });
 
-      document.addEventListener('click', (e) => {
-        if (!dropdown.classList.contains('hidden') && !container.contains(e.target)) {
-          dropdown.classList.add('hidden');
-        }
-      });
-    }
-  });
+ document.addEventListener('click', (e) => {
+ if (!dropdown.classList.contains('hidden') && !container.contains(e.target)) {
+ dropdown.classList.add('hidden');
+ }
+ });
+ }
+ });
 </script>

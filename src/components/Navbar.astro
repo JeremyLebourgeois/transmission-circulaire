@@ -8,129 +8,129 @@ const translatePath = useTranslatedPath(lang);
 
 const currentPath = Astro.url.pathname;
 const isActive = (path: string) => {
-  const translated = translatePath(path);
-  const cleanCurrent = currentPath.replace(/\/$/, '') || '/';
-  const cleanTarget = translated.replace(/\/$/, '') || '/';
-  return cleanCurrent === cleanTarget;
+ const translated = translatePath(path);
+ const cleanCurrent = currentPath.replace(/\/$/, '') || '/';
+ const cleanTarget = translated.replace(/\/$/, '') || '/';
+ return cleanCurrent === cleanTarget;
 };
 
 const navLinks = [
-  { path: '/', label: t('nav.home') },
-  { path: '/about', label: t('nav.about') },
-  { path: '/books', label: t('nav.books') },
-  { path: '/events', label: t('nav.events') },
+ { path: '/', label: t('nav.home') },
+ { path: '/about', label: t('nav.about') },
+ { path: '/books', label: t('nav.books') },
+ { path: '/events', label: t('nav.events') },
 ];
 ---
-<header class="sticky top-0 z-40 w-full backdrop-blur-md flex-none transition-colors duration-500 lg:z-50 lg:border-b lg:border-slate-900/10 dark:border-slate-50/[0.06] bg-white/90 dark:bg-slate-900/80 shadow-sm">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <div class="py-4 flex items-center justify-between">
-      <a class="flex items-center gap-3 group" href={translatePath('/')}>
-        <div class="relative overflow-hidden rounded-full h-10 w-10 border-2 border-transparent group-hover:border-[var(--color-tc-mustard)] transition-colors duration-300">
-          <img src="/logo.jpeg" alt="Transmission Circulaire Logo" class="h-full w-full object-cover transform group-hover:scale-110 transition-transform duration-500" />
-        </div>
-        <span class="font-display font-bold text-xl tracking-tight text-[var(--color-tc-blue)] dark:text-white hidden sm:block">Transmission Circulaire</span>
-      </a>
-      
-      <div class="flex items-center lg:hidden gap-4">
-        <LanguagePicker />
-        <button type="button" id="mobile-menu-btn" class="text-slate-500 hover:text-slate-600 dark:text-slate-400 dark:hover:text-slate-300 focus:outline-none p-2 -mr-2">
-          <span class="sr-only">Ouvrir le menu</span>
-          <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
-          </svg>
-        </button>
-      </div>
+<header class="sticky top-0 z-40 w-full backdrop-blur-md flex-none transition-colors duration-500 lg:z-50 lg:border-b border-[var(--color-tc-blue)]/10 bg-[var(--color-tc-cream)]/90 shadow-sm">
+ <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+ <div class="py-4 flex items-center justify-between">
+ <a class="flex items-center gap-3 group" href={translatePath('/')}>
+ <div class="relative overflow-hidden rounded-full h-10 w-10 border-2 border-transparent group-hover:border-[var(--color-tc-mustard)] transition-colors duration-300">
+ <img src="/logo.jpeg" alt="Transmission Circulaire Logo" class="h-full w-full object-cover transform group-hover:scale-110 transition-transform duration-500" />
+ </div>
+ <span class="font-display font-bold text-xl tracking-tight text-[var(--color-tc-blue)] hidden sm:block">Transmission Circulaire</span>
+ </a>
+ 
+ <div class="flex items-center lg:hidden gap-4">
+ <LanguagePicker />
+ <button type="button" id="mobile-menu-btn" class="text-[var(--color-tc-blue)]/70 hover:text-[var(--color-tc-blue)]/80 :text-slate-300 focus:outline-none p-2 -mr-2">
+ <span class="sr-only">Ouvrir le menu</span>
+ <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+ <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+ </svg>
+ </button>
+ </div>
 
-      <!-- Navigation Desktop -->
-      <nav class="hidden lg:flex items-center gap-4 text-sm font-medium leading-6 text-slate-700 dark:text-slate-200">
-        {navLinks.map(link => (
-          <a 
-            href={translatePath(link.path)} 
-            class={`px-3 py-2 rounded-lg transition-colors ${isActive(link.path) ? 'bg-slate-100 dark:bg-slate-800 text-[var(--color-tc-blue)] dark:text-[var(--color-tc-mustard)] font-bold border border-slate-200 dark:border-slate-700 shadow-sm' : 'hover:text-[var(--color-tc-mustard)] hover:bg-slate-50 dark:hover:bg-slate-800/50'}`}
-          >
-            {link.label}
-          </a>
-        ))}
-        
-        <div class="ml-4 flex items-center gap-4">
-          <div class="auth-buttons-desktop hidden items-center gap-4">
-            <a href={translatePath('/login')} class="btn-login hidden hover:text-[var(--color-tc-mustard)] transition-colors">{t('nav.login')}</a>
-            <a href={translatePath('/dashboard')} class="btn-dashboard hidden font-bold text-[var(--color-tc-blue)] dark:text-[var(--color-tc-mustard)] hover:opacity-80 transition-opacity">{t('nav.dashboard')}</a>
-          </div>
-          
-          <a href={translatePath('/donate')} class="bg-[var(--color-tc-olive)] text-white px-5 py-2 rounded-full hover:bg-opacity-90 hover:shadow-lg transition-all transform hover:-translate-y-0.5">{t('nav.donate')}</a>
-          <div class="border-l border-slate-200 dark:border-slate-700 h-6"></div>
-          <LanguagePicker />
-        </div>
-      </nav>
-    </div>
-  </div>
+ <!-- Navigation Desktop -->
+ <nav class="hidden lg:flex items-center gap-4 text-sm font-medium leading-6 text-slate-700 ">
+ {navLinks.map(link => (
+ <a 
+ href={translatePath(link.path)} 
+ class={`px-3 py-2 rounded-lg transition-colors ${isActive(link.path) ? 'bg-slate-100 text-[var(--color-tc-blue)] font-bold border border-[var(--color-tc-blue)]/10 shadow-sm' : 'hover:text-[var(--color-tc-mustard)] hover:bg-[var(--color-tc-cream)] :bg-[var(--color-tc-cream)]/50'}`}
+ >
+ {link.label}
+ </a>
+ ))}
+ 
+ <div class="ml-4 flex items-center gap-4">
+ <div class="auth-buttons-desktop hidden items-center gap-4">
+ <a href={translatePath('/login')} class="btn-login hidden hover:text-[var(--color-tc-mustard)] transition-colors">{t('nav.login')}</a>
+ <a href={translatePath('/dashboard')} class="btn-dashboard hidden font-bold text-[var(--color-tc-blue)] hover:opacity-80 transition-opacity">{t('nav.dashboard')}</a>
+ </div>
+ 
+ <a href={translatePath('/donate')} class="bg-[var(--color-tc-mustard)] text-white px-5 py-2 rounded-full font-bold hover:bg-opacity-90 hover:shadow-lg transition-all transform hover:-translate-y-0.5">{t('nav.donate')}</a>
+ <div class="border-l border-[var(--color-tc-blue)]/10 h-6"></div>
+ <LanguagePicker />
+ </div>
+ </nav>
+ </div>
+ </div>
 
-  <!-- Menu Mobile -->
-  <div id="mobile-menu" class="hidden lg:hidden absolute top-full left-0 w-full bg-white dark:bg-slate-900 shadow-2xl border-b border-slate-100 dark:border-slate-800">
-    <div class="flex flex-col items-center py-8 space-y-4">
-      {navLinks.map(link => (
-        <a 
-          href={translatePath(link.path)} 
-          class={`px-6 py-2 rounded-lg text-lg transition-colors ${isActive(link.path) ? 'bg-slate-100 dark:bg-slate-800 text-[var(--color-tc-blue)] dark:text-[var(--color-tc-mustard)] font-bold border border-slate-200 dark:border-slate-700 shadow-sm' : 'font-medium text-slate-600 dark:text-slate-300 hover:text-[var(--color-tc-blue)] dark:hover:text-white'}`}
-        >
-          {link.label}
-        </a>
-      ))}
-      
-      <div class="w-12 h-px bg-slate-200 dark:bg-slate-700 my-4"></div>
-      
-      <div class="auth-buttons-mobile hidden flex-col items-center gap-4 mb-4">
-        <a href={translatePath('/login')} class="btn-login hidden text-lg font-medium text-slate-600 dark:text-slate-300 hover:text-[var(--color-tc-blue)] dark:hover:text-white">{t('nav.login')}</a>
-        <a href={translatePath('/dashboard')} class="btn-dashboard hidden text-lg font-bold text-[var(--color-tc-blue)] dark:text-[var(--color-tc-mustard)]">{t('nav.dashboard')}</a>
-      </div>
+ <!-- Menu Mobile -->
+ <div id="mobile-menu" class="hidden lg:hidden absolute top-full left-0 w-full bg-[var(--color-tc-cream)] shadow-2xl border-b border-[var(--color-tc-blue)]/5 ">
+ <div class="flex flex-col items-center py-8 space-y-4">
+ {navLinks.map(link => (
+ <a 
+ href={translatePath(link.path)} 
+ class={`px-6 py-2 rounded-lg text-lg transition-colors ${isActive(link.path) ? 'bg-slate-100 text-[var(--color-tc-blue)] font-bold border border-[var(--color-tc-blue)]/10 shadow-sm' : 'font-medium text-[var(--color-tc-blue)]/80 hover:text-[var(--color-tc-blue)] :text-[var(--color-tc-cream)]'}`}
+ >
+ {link.label}
+ </a>
+ ))}
+ 
+ <div class="w-12 h-px bg-slate-200 my-4"></div>
+ 
+ <div class="auth-buttons-mobile hidden flex-col items-center gap-4 mb-4">
+ <a href={translatePath('/login')} class="btn-login hidden text-lg font-medium text-[var(--color-tc-blue)]/80 hover:text-[var(--color-tc-blue)] :text-[var(--color-tc-cream)]">{t('nav.login')}</a>
+ <a href={translatePath('/dashboard')} class="btn-dashboard hidden text-lg font-bold text-[var(--color-tc-blue)] ">{t('nav.dashboard')}</a>
+ </div>
 
-      <a href={translatePath('/donate')} class="bg-[var(--color-tc-olive)] text-white px-8 py-3 rounded-full font-semibold hover:bg-opacity-90 transition-all shadow-md transform hover:scale-105">{t('nav.donate')}</a>
-    </div>
-  </div>
+ <a href={translatePath('/donate')} class="bg-[var(--color-tc-mustard)] text-white px-8 py-3 rounded-full font-bold hover:bg-opacity-90 transition-all shadow-md transform hover:scale-105">{t('nav.donate')}</a>
+ </div>
+ </div>
 </header>
 
 <script>
-  // Toggle mobile menu
-  const btn = document.getElementById('mobile-menu-btn');
-  const menu = document.getElementById('mobile-menu');
+ // Toggle mobile menu
+ const btn = document.getElementById('mobile-menu-btn');
+ const menu = document.getElementById('mobile-menu');
 
-  if (btn && menu) {
-    btn.addEventListener('click', (e) => {
-      menu.classList.toggle('hidden');
-    });
+ if (btn && menu) {
+ btn.addEventListener('click', (e) => {
+ menu.classList.toggle('hidden');
+ });
 
-    document.addEventListener('click', (e) => {
-      if (!menu.classList.contains('hidden') && !menu.contains(e.target as Node) && !btn.contains(e.target as Node)) {
-        menu.classList.add('hidden');
-      }
-    });
-  }
+ document.addEventListener('click', (e) => {
+ if (!menu.classList.contains('hidden') && !menu.contains(e.target as Node) && !btn.contains(e.target as Node)) {
+ menu.classList.add('hidden');
+ }
+ });
+ }
 
-  // Toggle Auth buttons client-side (to preserve static rendering of Navbar)
-  const isAuth = document.cookie.includes('-auth-token');
-  
-  // Update desktop
-  const desktopContainer = document.querySelector('.auth-buttons-desktop');
-  if (desktopContainer) {
-    desktopContainer.classList.remove('hidden');
-    desktopContainer.classList.add('flex');
-    if (isAuth) {
-      desktopContainer.querySelector('.btn-dashboard')?.classList.remove('hidden');
-    } else {
-      desktopContainer.querySelector('.btn-login')?.classList.remove('hidden');
-    }
-  }
+ // Toggle Auth buttons client-side (to preserve static rendering of Navbar)
+ const isAuth = document.cookie.includes('-auth-token');
+ 
+ // Update desktop
+ const desktopContainer = document.querySelector('.auth-buttons-desktop');
+ if (desktopContainer) {
+ desktopContainer.classList.remove('hidden');
+ desktopContainer.classList.add('flex');
+ if (isAuth) {
+ desktopContainer.querySelector('.btn-dashboard')?.classList.remove('hidden');
+ } else {
+ desktopContainer.querySelector('.btn-login')?.classList.remove('hidden');
+ }
+ }
 
-  // Update mobile
-  const mobileContainer = document.querySelector('.auth-buttons-mobile');
-  if (mobileContainer) {
-    mobileContainer.classList.remove('hidden');
-    mobileContainer.classList.add('flex');
-    if (isAuth) {
-      mobileContainer.querySelector('.btn-dashboard')?.classList.remove('hidden');
-    } else {
-      mobileContainer.querySelector('.btn-login')?.classList.remove('hidden');
-    }
-  }
+ // Update mobile
+ const mobileContainer = document.querySelector('.auth-buttons-mobile');
+ if (mobileContainer) {
+ mobileContainer.classList.remove('hidden');
+ mobileContainer.classList.add('flex');
+ if (isAuth) {
+ mobileContainer.querySelector('.btn-dashboard')?.classList.remove('hidden');
+ } else {
+ mobileContainer.querySelector('.btn-login')?.classList.remove('hidden');
+ }
+ }
 </script>

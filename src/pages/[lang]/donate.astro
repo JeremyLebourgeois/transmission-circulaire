@@ -4,7 +4,7 @@ import { getLangFromUrl, useTranslations } from '../../i18n/utils';
 import { languages } from '../../i18n/ui';
 
 export function getStaticPaths() {
-  return Object.keys(languages).filter((lang) => lang !== 'fr').map((lang) => ({ params: { lang } }));
+ return Object.keys(languages).filter((lang) => lang !== 'fr').map((lang) => ({ params: { lang } }));
 }
 
 const lang = getLangFromUrl(Astro.url);
@@ -12,59 +12,59 @@ const t = useTranslations(lang);
 ---
 
 <Layout title={t('nav.donate')}>
-  <div class="bg-slate-50 dark:bg-slate-950 py-24 sm:py-32">
-    <div class="mx-auto max-w-7xl px-6 lg:px-8">
-      <div class="mx-auto max-w-2xl text-center">
-        <h2 class="text-3xl font-display font-bold tracking-tight text-slate-900 dark:text-white sm:text-4xl">Soutenir l'Association</h2>
-        <p class="mt-4 text-lg leading-8 text-slate-600 dark:text-slate-300">
-          Votre soutien est essentiel pour nous permettre de continuer nos actions de transmission intergénérationnelle.
-        </p>
-      </div>
-      
-      <div class="mx-auto mt-16 max-w-4xl bg-white dark:bg-slate-900 rounded-3xl shadow-xl overflow-hidden border border-slate-200 dark:border-slate-800">
-        <div class="p-8 sm:p-12 text-center">
-          <div class="inline-flex items-center justify-center h-16 w-16 rounded-full bg-[var(--color-tc-mustard)]/20 mb-6">
-            <svg class="h-8 w-8 text-[var(--color-tc-mustard)]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M21 11.25v8.25a1.5 1.5 0 01-1.5 1.5H5.25a1.5 1.5 0 01-1.5-1.5v-8.25M12 4.875A2.625 2.625 0 109.375 7.5H12m0-2.625V7.5m0-2.625A2.625 2.625 0 1114.625 7.5H12m0 0V21m-8.625-9.75h18c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125h-18c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
-            </svg>
-          </div>
-          <h3 class="text-2xl font-bold text-slate-900 dark:text-white mb-4">Espace Adhésions & Dons</h3>
-          <p class="text-slate-600 dark:text-slate-400 mb-8 max-w-2xl mx-auto">
-            Notre formulaire de don HelloAsso sera bientôt disponible ici. En attendant, n'hésitez pas à nous contacter par email pour toute proposition d'aide ou de bénévolat.
-          </p>
-          <a href="mailto:transmission.circulaire@gmail.com" class="inline-flex justify-center items-center px-6 py-3 bg-[var(--color-tc-olive)] text-white rounded-full font-medium hover:bg-opacity-90 transition-colors shadow-md">
-            Nous contacter par email
-          </a>
-        </div>
-      </div>
-      
-      <!-- Mockup Supabase Guestbook / Soutien -->
-      <div class="mx-auto mt-24 max-w-4xl text-center">
-        <h3 class="text-2xl font-display font-bold tracking-tight text-slate-900 dark:text-white sm:text-3xl mb-4">Livre d'Or & Soutien</h3>
-        <p class="text-slate-600 dark:text-slate-400 mb-12 max-w-2xl mx-auto">
-          Laissez-nous un message de soutien ! (Ce module sera bientôt connecté à notre base de données).
-        </p>
-        
-        <div class="bg-white dark:bg-slate-900 rounded-3xl shadow-lg border border-slate-200 dark:border-slate-800 p-8 text-left">
-          <form class="space-y-6 opacity-50 pointer-events-none">
-            <div>
-              <label for="name" class="block text-sm font-medium leading-6 text-slate-900 dark:text-white">Votre nom</label>
-              <div class="mt-2">
-                <input type="text" name="name" id="name" class="block w-full rounded-md border-0 py-1.5 text-slate-900 shadow-sm ring-1 ring-inset ring-slate-300 placeholder:text-slate-400 focus:ring-2 focus:ring-inset focus:ring-[var(--color-tc-blue)] sm:text-sm sm:leading-6 dark:bg-slate-800 dark:text-white dark:ring-slate-700" placeholder="Jean Dupont">
-              </div>
-            </div>
-            <div>
-              <label for="message" class="block text-sm font-medium leading-6 text-slate-900 dark:text-white">Votre message</label>
-              <div class="mt-2">
-                <textarea id="message" name="message" rows="4" class="block w-full rounded-md border-0 py-1.5 text-slate-900 shadow-sm ring-1 ring-inset ring-slate-300 placeholder:text-slate-400 focus:ring-2 focus:ring-inset focus:ring-[var(--color-tc-blue)] sm:text-sm sm:leading-6 dark:bg-slate-800 dark:text-white dark:ring-slate-700" placeholder="Un grand merci pour vos actions..."></textarea>
-              </div>
-            </div>
-            <button type="button" class="w-full flex justify-center rounded-md bg-[var(--color-tc-blue)] px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[var(--color-tc-blue-light)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-tc-blue)]">
-              Envoyer mon message (Bientôt disponible)
-            </button>
-          </form>
-        </div>
-      </div>
-    </div>
-  </div>
+ <div class="bg-[var(--color-tc-cream)] py-24 sm:py-32">
+ <div class="mx-auto max-w-7xl px-6 lg:px-8">
+ <div class="mx-auto max-w-2xl text-center">
+ <h2 class="text-3xl font-display font-bold tracking-tight text-[var(--color-tc-blue)] sm:text-4xl">Soutenir l'Association</h2>
+ <p class="mt-4 text-lg leading-8 text-[var(--color-tc-blue)]/80 ">
+ Votre soutien est essentiel pour nous permettre de continuer nos actions de transmission intergénérationnelle.
+ </p>
+ </div>
+ 
+ <div class="mx-auto mt-16 max-w-4xl bg-[var(--color-tc-cream)] rounded-3xl shadow-xl overflow-hidden border border-[var(--color-tc-blue)]/10 ">
+ <div class="p-8 sm:p-12 text-center">
+ <div class="inline-flex items-center justify-center h-16 w-16 rounded-full bg-[var(--color-tc-mustard)]/20 mb-6">
+ <svg class="h-8 w-8 text-[var(--color-tc-mustard)]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+ <path stroke-linecap="round" stroke-linejoin="round" d="M21 11.25v8.25a1.5 1.5 0 01-1.5 1.5H5.25a1.5 1.5 0 01-1.5-1.5v-8.25M12 4.875A2.625 2.625 0 109.375 7.5H12m0-2.625V7.5m0-2.625A2.625 2.625 0 1114.625 7.5H12m0 0V21m-8.625-9.75h18c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125h-18c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
+ </svg>
+ </div>
+ <h3 class="text-2xl font-bold text-[var(--color-tc-blue)] mb-4">Espace Adhésions & Dons</h3>
+ <p class="text-[var(--color-tc-blue)]/80 mb-8 max-w-2xl mx-auto">
+ Notre formulaire de don HelloAsso sera bientôt disponible ici. En attendant, n'hésitez pas à nous contacter par email pour toute proposition d'aide ou de bénévolat.
+ </p>
+ <a href="mailto:transmission.circulaire@gmail.com" class="inline-flex justify-center items-center px-6 py-3 bg-[var(--color-tc-olive)] text-[var(--color-tc-cream)] rounded-full font-medium hover:bg-opacity-90 transition-colors shadow-md">
+ Nous contacter par email
+ </a>
+ </div>
+ </div>
+ 
+ <!-- Mockup Supabase Guestbook / Soutien -->
+ <div class="mx-auto mt-24 max-w-4xl text-center">
+ <h3 class="text-2xl font-display font-bold tracking-tight text-[var(--color-tc-blue)] sm:text-3xl mb-4">Livre d'Or & Soutien</h3>
+ <p class="text-[var(--color-tc-blue)]/80 mb-12 max-w-2xl mx-auto">
+ Laissez-nous un message de soutien ! (Ce module sera bientôt connecté à notre base de données).
+ </p>
+ 
+ <div class="bg-[var(--color-tc-cream)] rounded-3xl shadow-lg border border-[var(--color-tc-blue)]/10 p-8 text-left">
+ <form class="space-y-6 opacity-50 pointer-events-none">
+ <div>
+ <label for="name" class="block text-sm font-medium leading-6 text-[var(--color-tc-blue)] ">Votre nom</label>
+ <div class="mt-2">
+ <input type="text" name="name" id="name" class="block w-full rounded-md border-0 py-1.5 text-[var(--color-tc-blue)] shadow-sm ring-1 ring-inset ring-[var(--color-tc-blue)]/20 placeholder:text-[var(--color-tc-blue)]/60 focus:ring-2 focus:ring-inset focus:ring-[var(--color-tc-blue)] sm:text-sm sm:leading-6 " placeholder="Jean Dupont">
+ </div>
+ </div>
+ <div>
+ <label for="message" class="block text-sm font-medium leading-6 text-[var(--color-tc-blue)] ">Votre message</label>
+ <div class="mt-2">
+ <textarea id="message" name="message" rows="4" class="block w-full rounded-md border-0 py-1.5 text-[var(--color-tc-blue)] shadow-sm ring-1 ring-inset ring-[var(--color-tc-blue)]/20 placeholder:text-[var(--color-tc-blue)]/60 focus:ring-2 focus:ring-inset focus:ring-[var(--color-tc-blue)] sm:text-sm sm:leading-6 " placeholder="Un grand merci pour vos actions..."></textarea>
+ </div>
+ </div>
+ <button type="button" class="w-full flex justify-center rounded-md bg-[var(--color-tc-mustard)] px-3 py-3 text-sm font-semibold text-white shadow-md hover:bg-opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-tc-blue)]">
+ Envoyer mon message (Bientôt disponible)
+ </button>
+ </form>
+ </div>
+ </div>
+ </div>
+ </div>
 </Layout>

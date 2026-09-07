@@ -17,86 +17,86 @@ const supabase = getSupabaseServerClient(Astro.cookies);
 const { data: { session } } = await supabase.auth.getSession();
 
 if (session) {
-  return Astro.redirect(translatePath('/dashboard'));
+ return Astro.redirect(translatePath('/dashboard'));
 }
 
 if (Astro.request.method === 'POST') {
-  const formData = await Astro.request.formData();
-  const email = formData.get('email')?.toString();
-  const password = formData.get('password')?.toString();
+ const formData = await Astro.request.formData();
+ const email = formData.get('email')?.toString();
+ const password = formData.get('password')?.toString();
 
-  if (!email || !password) {
-    error = 'Veuillez remplir tous les champs.';
-  } else {
-    const { error: signInError } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+ if (!email || !password) {
+ error = 'Veuillez remplir tous les champs.';
+ } else {
+ const { error: signInError } = await supabase.auth.signInWithPassword({
+ email,
+ password,
+ });
 
-    if (signInError) {
-      error = "Email ou mot de passe incorrect.";
-    } else {
-      return Astro.redirect(translatePath('/dashboard'));
-    }
-  }
+ if (signInError) {
+ error = "Email ou mot de passe incorrect.";
+ } else {
+ return Astro.redirect(translatePath('/dashboard'));
+ }
+ }
 }
 ---
 
 <Layout title="Connexion | Transmission Circulaire">
 
-  
-  <main class="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-900 py-12 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-md w-full space-y-8 bg-white dark:bg-slate-800 p-10 rounded-2xl shadow-xl border border-slate-100 dark:border-slate-700">
-      <div>
-        <h2 class="mt-6 text-center text-3xl font-display font-bold tracking-tight text-[var(--color-tc-blue)] dark:text-white">
-          Bon retour
-        </h2>
-        <p class="mt-2 text-center text-sm text-slate-600 dark:text-slate-400">
-          Connectez-vous pour accéder à votre espace
-        </p>
-      </div>
-      
-      <form class="mt-8 space-y-6" method="POST">
-        {error && (
-          <div class="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 px-4 py-3 rounded-lg text-sm text-center">
-            {error}
-          </div>
-        )}
-        
-        <div class="space-y-4 rounded-md shadow-sm">
-          <div>
-            <label for="email" class="sr-only">Adresse email</label>
-            <input id="email" name="email" type="email" autocomplete="email" required class="relative block w-full rounded-t-lg border-0 py-3 px-4 text-slate-900 dark:text-white ring-1 ring-inset ring-slate-300 dark:ring-slate-700 placeholder:text-slate-400 focus:z-10 focus:ring-2 focus:ring-inset focus:ring-[var(--color-tc-blue)] sm:text-sm sm:leading-6 dark:bg-slate-900" placeholder="Adresse email">
-          </div>
-          <div>
-            <label for="password" class="sr-only">Mot de passe</label>
-            <input id="password" name="password" type="password" autocomplete="current-password" required class="relative block w-full rounded-b-lg border-0 py-3 px-4 text-slate-900 dark:text-white ring-1 ring-inset ring-slate-300 dark:ring-slate-700 placeholder:text-slate-400 focus:z-10 focus:ring-2 focus:ring-inset focus:ring-[var(--color-tc-blue)] sm:text-sm sm:leading-6 dark:bg-slate-900" placeholder="Mot de passe">
-          </div>
-        </div>
+ 
+ <main class="min-h-screen flex items-center justify-center bg-[var(--color-tc-cream)] py-12 px-4 sm:px-6 lg:px-8">
+ <div class="max-w-md w-full space-y-8 bg-[var(--color-tc-card)] p-10 rounded-3xl shadow-2xl border border-[var(--color-tc-blue)]/10 ">
+ <div>
+ <h2 class="mt-6 text-center text-3xl font-display font-bold tracking-tight text-[var(--color-tc-blue)] ">
+ Bon retour
+ </h2>
+ <p class="mt-2 text-center text-sm text-[var(--color-tc-blue)]/80 ">
+ Connectez-vous pour accéder à votre espace
+ </p>
+ </div>
+ 
+ <form class="mt-8 space-y-6" method="POST">
+ {error && (
+ <div class="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg text-sm text-center">
+ {error}
+ </div>
+ )}
+ 
+ <div class="space-y-4 rounded-md shadow-sm">
+ <div>
+ <label for="email" class="sr-only">Adresse email</label>
+ <input id="email" name="email" type="email" autocomplete="email" required class="relative block w-full rounded-t-lg border-0 py-3 px-4 text-[var(--color-tc-blue)] ring-1 ring-inset ring-[var(--color-tc-blue)]/20 placeholder:text-[var(--color-tc-blue)]/60 focus:z-10 focus:ring-2 focus:ring-inset focus:ring-[var(--color-tc-blue)] sm:text-sm sm:leading-6 " placeholder="Adresse email">
+ </div>
+ <div>
+ <label for="password" class="sr-only">Mot de passe</label>
+ <input id="password" name="password" type="password" autocomplete="current-password" required class="relative block w-full rounded-b-lg border-0 py-3 px-4 text-[var(--color-tc-blue)] ring-1 ring-inset ring-[var(--color-tc-blue)]/20 placeholder:text-[var(--color-tc-blue)]/60 focus:z-10 focus:ring-2 focus:ring-inset focus:ring-[var(--color-tc-blue)] sm:text-sm sm:leading-6 " placeholder="Mot de passe">
+ </div>
+ </div>
 
-        <div class="flex items-center justify-between">
-          <div class="text-sm leading-6">
-            <a href={translatePath('/forgot-password')} class="font-semibold text-[var(--color-tc-blue)] hover:text-[var(--color-tc-mustard)] dark:text-[var(--color-tc-mustard)]">
-              Mot de passe oublié ?
-            </a>
-          </div>
-        </div>
+ <div class="flex items-center justify-between">
+ <div class="text-sm leading-6">
+ <a href={translatePath('/forgot-password')} class="font-semibold text-[var(--color-tc-blue)] hover:text-[var(--color-tc-mustard)] ">
+ Mot de passe oublié ?
+ </a>
+ </div>
+ </div>
 
-        <div>
-          <button type="submit" class="flex w-full justify-center rounded-lg bg-[var(--color-tc-blue)] px-3 py-3 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 transition-transform transform hover:-translate-y-0.5">
-            Se connecter
-          </button>
-        </div>
-      </form>
-      
-      <p class="mt-10 text-center text-sm text-slate-500">
-        Pas encore membre ?
-        <a href={translatePath('/register')} class="font-semibold leading-6 text-[var(--color-tc-olive)] hover:text-opacity-80 ml-1">
-          Créer un compte
-        </a>
-      </p>
-    </div>
-  </main>
-  
+ <div>
+ <button type="submit" class="flex w-full justify-center rounded-lg bg-[var(--color-tc-olive)] px-3 py-3 text-sm font-semibold leading-6 text-white shadow-md hover:bg-opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 transition-transform transform hover:-translate-y-0.5">
+ Se connecter
+ </button>
+ </div>
+ </form>
+ 
+ <p class="mt-10 text-center text-sm text-[var(--color-tc-blue)]/70">
+ Pas encore membre ?
+ <a href={translatePath('/register')} class="font-semibold leading-6 text-[var(--color-tc-olive)] hover:text-opacity-80 ml-1">
+ Créer un compte
+ </a>
+ </p>
+ </div>
+ </main>
+ 
 
 </Layout>

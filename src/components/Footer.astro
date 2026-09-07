@@ -5,40 +5,40 @@ const lang = getLangFromUrl(Astro.url);
 const t = useTranslations(lang);
 const translatePath = useTranslatedPath(lang);
 ---
-<footer class="bg-slate-50 dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 pt-16 pb-8">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
-      <div class="col-span-1 md:col-span-2">
-        <div class="flex items-center gap-3 mb-4">
-          <img src="/logo.jpeg" alt="Logo" class="h-8 w-8 rounded-full object-cover" />
-          <span class="font-display font-bold text-lg text-[var(--color-tc-blue)] dark:text-white">Transmission Circulaire</span>
-        </div>
-        <p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed max-w-md">
-          {t('footer.description')}
-        </p>
-      </div>
-      <div>
-        <h3 class="font-bold text-slate-900 dark:text-white mb-4 uppercase tracking-wider text-xs">Navigation</h3>
-        <ul class="space-y-3 text-sm text-slate-600 dark:text-slate-400">
-          <li><a href={translatePath('/')} class="hover:text-[var(--color-tc-mustard)] transition-colors">{t('nav.home')}</a></li>
-          <li><a href={translatePath('/about')} class="hover:text-[var(--color-tc-mustard)] transition-colors">{t('nav.about')}</a></li>
-          <li><a href={translatePath('/books')} class="hover:text-[var(--color-tc-mustard)] transition-colors">{t('nav.books')}</a></li>
-          <li><a href={translatePath('/events')} class="hover:text-[var(--color-tc-mustard)] transition-colors">{t('nav.events')}</a></li>
-        </ul>
-      </div>
-      <div>
-        <h3 class="font-bold text-slate-900 dark:text-white mb-4 uppercase tracking-wider text-xs">Contact</h3>
-        <ul class="space-y-3 text-sm text-slate-600 dark:text-slate-400">
-          <li><a href="mailto:transmission.circulaire@gmail.com" class="hover:text-[var(--color-tc-mustard)] transition-colors">transmission.circulaire@gmail.com</a></li>
-          <li>Association loi 1901</li>
-          <li>Fondée le 10 juin 2026</li>
-        </ul>
-      </div>
-    </div>
-    <div class="border-t border-slate-200 dark:border-slate-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-      <p class="text-xs text-slate-500 dark:text-slate-400">
-        &copy; {new Date().getFullYear()} Transmission Circulaire. {t('footer.rights')}
-      </p>
-    </div>
-  </div>
+<footer class="bg-[var(--color-tc-cream-dark)] border-t border-[var(--color-tc-blue)]/10 pt-16 pb-8">
+ <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+ <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
+ <div class="col-span-1 md:col-span-2">
+ <div class="flex items-center gap-3 mb-4">
+ <img src="/logo.jpeg" alt="Logo" class="h-8 w-8 rounded-full object-cover" />
+ <span class="font-display font-bold text-lg text-[var(--color-tc-blue)] ">Transmission Circulaire</span>
+ </div>
+ <p class="text-sm text-[var(--color-tc-blue)]/70 leading-relaxed max-w-md">
+ {t('footer.description')}
+ </p>
+ </div>
+ <div>
+ <h3 class="font-bold text-[var(--color-tc-blue)] mb-4 uppercase tracking-wider text-xs">Navigation</h3>
+ <ul class="space-y-3 text-sm text-[var(--color-tc-blue)]/80 ">
+ <li><a href={translatePath('/')} class="hover:text-[var(--color-tc-mustard)] transition-colors">{t('nav.home')}</a></li>
+ <li><a href={translatePath('/about')} class="hover:text-[var(--color-tc-mustard)] transition-colors">{t('nav.about')}</a></li>
+ <li><a href={translatePath('/books')} class="hover:text-[var(--color-tc-mustard)] transition-colors">{t('nav.books')}</a></li>
+ <li><a href={translatePath('/events')} class="hover:text-[var(--color-tc-mustard)] transition-colors">{t('nav.events')}</a></li>
+ </ul>
+ </div>
+ <div>
+ <h3 class="font-bold text-[var(--color-tc-blue)] mb-4 uppercase tracking-wider text-xs">Contact</h3>
+ <ul class="space-y-3 text-sm text-[var(--color-tc-blue)]/80 ">
+ <li><a href="mailto:transmission.circulaire@gmail.com" class="hover:text-[var(--color-tc-mustard)] transition-colors">transmission.circulaire@gmail.com</a></li>
+ <li>Association loi 1901</li>
+ <li>Fondée le 10 juin 2026</li>
+ </ul>
+ </div>
+ </div>
+ <div class="border-t border-[var(--color-tc-blue)]/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+ <p class="text-xs text-[var(--color-tc-blue)]/70 ">
+ &copy; {new Date().getFullYear()} Transmission Circulaire. {t('footer.rights')}
+ </p>
+ </div>
+ </div>
 </footer>
