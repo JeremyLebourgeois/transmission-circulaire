@@ -108,7 +108,7 @@ if (Astro.request.method === 'POST') {
  </h3>
  <p class="mt-2 text-sm text-[var(--color-tc-blue)]/70">{t('dashboard.books.desc')}</p>
  </div>
- <button class="mt-4 text-sm font-medium text-[var(--color-tc-mustard)] hover:underline text-left">{t('dashboard.books.manage')}</button>
+ <a href={translatePath('/dashboard/books')} class="mt-4 text-sm font-medium text-[var(--color-tc-mustard)] hover:underline block text-left">{t('dashboard.books.manage')}</a>
  </div>
  )}
 

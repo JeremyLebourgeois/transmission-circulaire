@@ -1,0 +1,143 @@
+---
+export const prerender = false;
+
+import Layout from '../../layouts/Layout.astro';
+import { getLangFromUrl, useTranslatedPath, useTranslations } from '../../i18n/utils';
+import { getSupabaseServerClient } from '../../lib/supabase-server';
+
+const lang = getLangFromUrl(Astro.url);
+const translatePath = useTranslatedPath(lang);
+const t = useTranslations(lang);
+
+const { id } = Astro.params;
+
+const supabase = getSupabaseServerClient(Astro.cookies);
+
+const { data: book } = await supabase
+  .from('books')
+  .select('*, book_collaborators(*)')
+  .eq('id', id)
+  .single();
+
+if (!book) {
+  return Astro.redirect(translatePath('/books'));
+}
+
+const mainCollabs = book.book_collaborators?.filter((c: any) => c.is_main) || [];
+const otherCollabs = book.book_collaborators?.filter((c: any) => !c.is_main) || [];
+
+// Fetch user profiles for collaborators with user_id
+const userIds = book.book_collaborators?.filter((c: any) => c.user_id).map((c: any) => c.user_id) || [];
+let profileMap: Record<string, any> = {};
+if (userIds.length > 0) {
+  const { data: profiles } = await supabase
+    .from('profiles')
+    .select('id, full_name, avatar_url')
+    .in('id', userIds);
+  profiles?.forEach((p: any) => { profileMap[p.id] = p; });
+}
+---
+
+<Layout title={`${book.title} | Livres`}>
+  <main class="min-h-screen bg-[var(--color-tc-cream)]">
+
+    <!-- Hero Section -->
+    <div class="bg-[var(--color-tc-blue)] text-white py-20 px-4">
+      <div class="max-w-5xl mx-auto flex flex-col lg:flex-row gap-10 items-center">
+        {book.main_image_url && (
+          <div class="flex-shrink-0 w-48 sm:w-64">
+            <img src={book.main_image_url} alt={book.title} class="w-full rounded-2xl shadow-2xl object-cover aspect-[3/4]" />
+          </div>
+        )}
+        <div class="flex-1 text-center lg:text-left">
+          <a href={translatePath('/books')} class="text-white/60 hover:text-white text-sm inline-flex items-center gap-1 mb-6 transition-colors">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+            </svg>
+            Retour aux livres
+          </a>
+          <h1 class="text-4xl sm:text-5xl font-display font-bold leading-tight">{book.title}</h1>
+          {mainCollabs.length > 0 && (
+            <p class="mt-4 text-white/70 text-lg">
+              Par {mainCollabs.map((c: any) => {
+                const profile = c.user_id ? profileMap[c.user_id] : null;
+                return profile?.full_name || c.name || 'Inconnu';
+              }).join(', ')}
+            </p>
+          )}
+          <p class="mt-6 text-white/90 text-lg leading-relaxed">{book.short_description}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Content -->
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16 space-y-16">
+
+      <!-- Long description -->
+      {book.long_description && (
+        <section>
+          <h2 class="text-2xl font-display font-bold text-[var(--color-tc-blue)] mb-6">À propos de ce livre</h2>
+          <div class="prose prose-lg max-w-none text-[var(--color-tc-blue)]/80 leading-relaxed whitespace-pre-wrap">{book.long_description}</div>
+        </section>
+      )}
+
+      <!-- Main Collaborators -->
+      {mainCollabs.length > 0 && (
+        <section>
+          <h2 class="text-2xl font-display font-bold text-[var(--color-tc-blue)] mb-8">Collaborateurs principaux</h2>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            {mainCollabs.map((c: any) => {
+              const profile = c.user_id ? profileMap[c.user_id] : null;
+              const name = profile?.full_name || c.name || 'Inconnu';
+              const avatar = profile?.avatar_url;
+              return (
+                <div class="bg-[var(--color-tc-card)] rounded-2xl p-6 border border-[var(--color-tc-blue)]/10 shadow-md flex gap-4 items-start">
+                  <div class="w-14 h-14 rounded-full bg-[var(--color-tc-cream)] border-2 border-[var(--color-tc-mustard)]/50 overflow-hidden flex-shrink-0">
+                    {avatar ? (
+                      <img src={avatar} alt={name} class="w-full h-full object-cover" />
+                    ) : (
+                      <svg class="w-full h-full text-[var(--color-tc-blue)]/20 p-2" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M24 20.993V24H0v-2.996A14.977 14.977 0 0112.004 15c4.904 0 9.26 2.354 11.996 5.993zM16.002 8.999a4 4 0 11-8 0 4 4 0 018 0z" />
+                      </svg>
+                    )}
+                  </div>
+                  <div>
+                    <p class="font-bold text-[var(--color-tc-blue)]">{name}</p>
+                    {c.contribution_detail && <p class="text-sm text-[var(--color-tc-blue)]/70 mt-1">{c.contribution_detail}</p>}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      )}
+
+      <!-- Other Collaborators -->
+      {otherCollabs.length > 0 && (
+        <section>
+          <h2 class="text-2xl font-display font-bold text-[var(--color-tc-blue)] mb-6">Autres contributeurs</h2>
+          <ul class="flex flex-wrap gap-3">
+            {otherCollabs.map((c: any) => (
+              <li class="bg-[var(--color-tc-cream)] border border-[var(--color-tc-blue)]/10 rounded-full px-4 py-2 text-sm text-[var(--color-tc-blue)]">
+                {c.name}
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      <!-- Extra Images -->
+      {book.extra_images?.length > 0 && (
+        <section>
+          <h2 class="text-2xl font-display font-bold text-[var(--color-tc-blue)] mb-6">Galerie</h2>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {book.extra_images.map((img: string) => (
+              <img src={img} alt="Image du livre" class="w-full rounded-2xl shadow-md object-cover aspect-video" />
+            ))}
+          </div>
+        </section>
+      )}
+
+    </div>
+  </main>
+</Layout>

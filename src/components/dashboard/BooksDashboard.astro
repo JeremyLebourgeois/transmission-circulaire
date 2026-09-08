@@ -1,0 +1,355 @@
+---
+export const prerender = false;
+
+import Layout from '../../layouts/Layout.astro';
+import { getLangFromUrl, useTranslatedPath, useTranslations } from '../../i18n/utils';
+import { getSupabaseServerClient } from '../../lib/supabase-server';
+
+const lang = getLangFromUrl(Astro.url);
+const translatePath = useTranslatedPath(lang);
+const t = useTranslations(lang);
+
+const supabase = getSupabaseServerClient(Astro.cookies);
+const { data: { user }, error: userError } = await supabase.auth.getUser();
+
+if (!user || userError) {
+  return Astro.redirect(translatePath('/login'));
+}
+
+const { data: roleData } = await supabase
+  .from('user_roles')
+  .select('role')
+  .eq('id', user.id)
+  .single();
+
+const userRole = roleData?.role || '';
+if (userRole !== 'admin' && userRole !== 'super_admin') {
+  return Astro.redirect(translatePath('/dashboard'));
+}
+
+let successMessage = '';
+let errorMessage = '';
+
+// Handle form submission (add new book)
+if (Astro.request.method === 'POST') {
+  try {
+    const formData = await Astro.request.formData();
+    const action = formData.get('action')?.toString();
+
+    if (action === 'delete') {
+      const bookId = formData.get('bookId')?.toString();
+      const { error } = await supabase.from('books').delete().eq('id', bookId);
+      if (error) throw error;
+      successMessage = 'Livre supprimé avec succès.';
+    } else {
+      // Add book
+      const title = formData.get('title')?.toString() || '';
+      const shortDesc = formData.get('short_description')?.toString() || '';
+      const longDesc = formData.get('long_description')?.toString() || '';
+      const mainImageFile = formData.get('main_image') as File;
+
+      let mainImageUrl = '';
+      if (mainImageFile && mainImageFile.size > 0) {
+        const fileExt = mainImageFile.name.split('.').pop();
+        const fileName = `${Date.now()}-main.${fileExt}`;
+        const { error: uploadError } = await supabase.storage
+          .from('books_images')
+          .upload(fileName, mainImageFile, { upsert: true });
+        if (uploadError) throw uploadError;
+        const { data: { publicUrl } } = supabase.storage.from('books_images').getPublicUrl(fileName);
+        mainImageUrl = publicUrl;
+      }
+
+      const { data: newBook, error: bookError } = await supabase
+        .from('books')
+        .insert({ title, short_description: shortDesc, long_description: longDesc, main_image_url: mainImageUrl })
+        .select()
+        .single();
+      if (bookError) throw bookError;
+
+      // Handle main collaborators (registered users)
+      const mainCollabUserIds = formData.getAll('main_collab_user_id[]');
+      const mainCollabContribs = formData.getAll('main_collab_contrib[]');
+      for (let i = 0; i < mainCollabUserIds.length; i++) {
+        const uid = mainCollabUserIds[i]?.toString();
+        if (uid) {
+          await supabase.from('book_collaborators').insert({
+            book_id: newBook.id,
+            user_id: uid,
+            contribution_detail: mainCollabContribs[i]?.toString() || '',
+            is_main: true,
+          });
+        }
+      }
+
+      // Handle free-text main collaborators (no account)
+      const mainCollabNames = formData.getAll('main_collab_name[]');
+      const mainCollabNameContribs = formData.getAll('main_collab_name_contrib[]');
+      for (let i = 0; i < mainCollabNames.length; i++) {
+        const name = mainCollabNames[i]?.toString();
+        if (name) {
+          await supabase.from('book_collaborators').insert({
+            book_id: newBook.id,
+            name,
+            contribution_detail: mainCollabNameContribs[i]?.toString() || '',
+            is_main: true,
+          });
+        }
+      }
+
+      // Handle additional collaborators (text names)
+      const otherCollabNames = formData.getAll('other_collab_name[]');
+      for (const name of otherCollabNames) {
+        const n = name?.toString();
+        if (n) {
+          await supabase.from('book_collaborators').insert({
+            book_id: newBook.id, name: n, is_main: false,
+          });
+        }
+      }
+
+      successMessage = 'Livre ajouté avec succès !';
+    }
+  } catch (err: any) {
+    errorMessage = 'Erreur : ' + (err?.message || JSON.stringify(err));
+  }
+}
+
+// Fetch existing books
+const { data: books } = await supabase
+  .from('books')
+  .select('*, book_collaborators(*)')
+  .order('created_at', { ascending: false });
+
+// Fetch all registered users for collaborator selection
+const { data: users } = await supabase
+  .from('profiles')
+  .select('id, full_name')
+  .order('full_name');
+---
+
+<Layout title="Gestion des Livres | Admin">
+  <main class="min-h-screen bg-[var(--color-tc-cream)] py-12">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
+
+      <!-- Header -->
+      <div class="flex items-center gap-4">
+        <a href={translatePath('/dashboard')} class="text-[var(--color-tc-blue)]/60 hover:text-[var(--color-tc-blue)] transition-colors">
+          <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+          </svg>
+        </a>
+        <h1 class="text-3xl font-display font-bold text-[var(--color-tc-blue)]">📚 Gestion des Livres</h1>
+      </div>
+
+      {successMessage && <div class="bg-green-50 text-green-800 p-4 rounded-xl text-sm font-medium">{successMessage}</div>}
+      {errorMessage && <div class="bg-red-50 text-red-800 p-4 rounded-xl text-sm font-medium">{errorMessage}</div>}
+
+      <!-- Add Book Form -->
+      <div class="bg-[var(--color-tc-card)] rounded-3xl shadow-xl border border-[var(--color-tc-blue)]/10 p-6 sm:p-8">
+        <h2 class="text-xl font-bold text-[var(--color-tc-blue)] mb-6">Ajouter un nouveau livre</h2>
+        <form method="POST" enctype="multipart/form-data" class="space-y-6">
+
+          <!-- Titre + Image principale -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <div>
+              <label class="block text-sm font-medium text-[var(--color-tc-blue)] mb-2">Titre *</label>
+              <input type="text" name="title" required placeholder="Ex: Meltem" class="w-full rounded-xl border-0 py-3 px-4 bg-[var(--color-tc-cream)] ring-1 ring-[var(--color-tc-blue)]/20 focus:ring-2 focus:ring-[var(--color-tc-mustard)] text-[var(--color-tc-blue)] text-sm" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-[var(--color-tc-blue)] mb-2">Image principale *</label>
+              <input type="file" name="main_image" accept="image/*" class="w-full text-sm text-slate-500 file:mr-3 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[var(--color-tc-mustard)]/10 file:text-[var(--color-tc-mustard)] hover:file:bg-[var(--color-tc-mustard)]/20" />
+            </div>
+          </div>
+
+          <!-- Description courte -->
+          <div>
+            <label class="block text-sm font-medium text-[var(--color-tc-blue)] mb-2">Description courte *</label>
+            <textarea name="short_description" required rows="3" placeholder="Un résumé en quelques phrases..." class="w-full rounded-xl border-0 py-3 px-4 bg-[var(--color-tc-cream)] ring-1 ring-[var(--color-tc-blue)]/20 focus:ring-2 focus:ring-[var(--color-tc-mustard)] text-[var(--color-tc-blue)] text-sm"></textarea>
+          </div>
+
+          <!-- Description longue -->
+          <div>
+            <label class="block text-sm font-medium text-[var(--color-tc-blue)] mb-2">Description longue (pour la page détail)</label>
+            <textarea name="long_description" rows="5" placeholder="Contenu détaillé du livre..." class="w-full rounded-xl border-0 py-3 px-4 bg-[var(--color-tc-cream)] ring-1 ring-[var(--color-tc-blue)]/20 focus:ring-2 focus:ring-[var(--color-tc-mustard)] text-[var(--color-tc-blue)] text-sm"></textarea>
+          </div>
+
+          <!-- Collaborateurs principaux (inscrits) -->
+          <div class="border-t border-[var(--color-tc-blue)]/10 pt-6">
+            <h3 class="text-md font-bold text-[var(--color-tc-blue)] mb-4">Collaborateurs principaux</h3>
+            <p class="text-xs text-[var(--color-tc-blue)]/60 mb-4">Sélectionnez des membres inscrits et/ou saisissez des noms librement.</p>
+
+            <!-- Membres inscrits -->
+            <div class="space-y-3 mb-4">
+              <label class="block text-sm font-medium text-[var(--color-tc-blue)]">Membres inscrits sur le site</label>
+              
+              <div class="relative">
+                <input type="text" id="userSearchInput" placeholder="Rechercher un membre par nom..." class="w-full rounded-xl border-0 py-2 px-4 bg-[var(--color-tc-cream)] ring-1 ring-[var(--color-tc-blue)]/20 focus:ring-2 focus:ring-[var(--color-tc-mustard)] text-[var(--color-tc-blue)] text-sm" autocomplete="off" />
+                <div id="userSearchResults" class="absolute z-10 w-full mt-1 bg-white border border-[var(--color-tc-blue)]/10 rounded-xl shadow-lg max-h-48 overflow-y-auto hidden"></div>
+              </div>
+
+              <div id="selectedUsersList" class="space-y-3 mt-3">
+                <!-- Selected users will be injected here -->
+              </div>
+              {(!users || users.length === 0) && <p class="text-sm text-[var(--color-tc-blue)]/50 italic">Aucun membre inscrit pour l'instant.</p>}
+            </div>
+
+            <!-- Noms libres -->
+            <div>
+              <label class="block text-sm font-medium text-[var(--color-tc-blue)] mb-3">Personnes sans compte</label>
+              <div id="free-collabs" class="space-y-3">
+                <div class="flex flex-col sm:flex-row gap-3">
+                  <input type="text" name="main_collab_name[]" placeholder="Nom complet..." class="flex-1 rounded-xl border-0 py-2 px-3 bg-[var(--color-tc-cream)] ring-1 ring-[var(--color-tc-blue)]/20 focus:ring-2 focus:ring-[var(--color-tc-mustard)] text-[var(--color-tc-blue)] text-sm" />
+                  <input type="text" name="main_collab_name_contrib[]" placeholder="Rôle / contribution..." class="flex-1 rounded-xl border-0 py-2 px-3 bg-[var(--color-tc-cream)] ring-1 ring-[var(--color-tc-blue)]/20 focus:ring-2 focus:ring-[var(--color-tc-mustard)] text-[var(--color-tc-blue)] text-sm" />
+                </div>
+              </div>
+              <button type="button" onclick="addFreeCollab()" class="mt-3 text-sm text-[var(--color-tc-mustard)] hover:underline">+ Ajouter une personne</button>
+            </div>
+          </div>
+
+          <!-- Autres collaborateurs -->
+          <div class="border-t border-[var(--color-tc-blue)]/10 pt-6">
+            <h3 class="text-md font-bold text-[var(--color-tc-blue)] mb-4">Autres collaborateurs (optionnel)</h3>
+            <div id="other-collabs" class="space-y-3">
+              <input type="text" name="other_collab_name[]" placeholder="Nom complet..." class="w-full sm:w-1/2 rounded-xl border-0 py-2 px-3 bg-[var(--color-tc-cream)] ring-1 ring-[var(--color-tc-blue)]/20 focus:ring-2 focus:ring-[var(--color-tc-mustard)] text-[var(--color-tc-blue)] text-sm" />
+            </div>
+            <button type="button" onclick="addOtherCollab()" class="mt-3 text-sm text-[var(--color-tc-mustard)] hover:underline">+ Ajouter un collaborateur</button>
+          </div>
+
+          <div class="pt-4">
+            <button type="submit" class="w-full sm:w-auto rounded-full bg-[var(--color-tc-olive)] px-8 py-3 text-sm font-bold text-white shadow-sm hover:bg-opacity-90 transition-all transform hover:-translate-y-0.5">
+              Publier le livre
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Existing Books -->
+      <div class="bg-[var(--color-tc-card)] rounded-3xl shadow-xl border border-[var(--color-tc-blue)]/10 p-6 sm:p-8">
+        <h2 class="text-xl font-bold text-[var(--color-tc-blue)] mb-6">Livres publiés ({books?.length || 0})</h2>
+        {books?.length === 0 && <p class="text-[var(--color-tc-blue)]/50 italic text-sm">Aucun livre pour l'instant. Ajoutez-en un ci-dessus !</p>}
+        <div class="space-y-4">
+          {books?.map(book => (
+            <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4 p-4 rounded-2xl bg-[var(--color-tc-cream)] border border-[var(--color-tc-blue)]/5">
+              {book.main_image_url && (
+                <img src={book.main_image_url} alt={book.title} class="w-16 h-20 object-cover rounded-xl flex-shrink-0" />
+              )}
+              <div class="flex-1 min-w-0">
+                <h3 class="font-bold text-[var(--color-tc-blue)] truncate">{book.title}</h3>
+                <p class="text-xs text-[var(--color-tc-blue)]/60 mt-1 line-clamp-2">{book.short_description}</p>
+                <p class="text-xs text-[var(--color-tc-blue)]/40 mt-1">{book.book_collaborators?.length || 0} collaborateur(s)</p>
+              </div>
+              <div class="flex items-baseline gap-3 flex-shrink-0">
+                <a href={translatePath(`/books/${book.id}`)} target="_blank" class="text-xs text-[var(--color-tc-blue)]/60 hover:text-[var(--color-tc-blue)] underline">Voir →</a>
+                <form method="POST" class="m-0 p-0 flex items-baseline">
+                  <input type="hidden" name="action" value="delete" />
+                  <input type="hidden" name="bookId" value={book.id} />
+                  <button type="submit" onclick="return confirm('Supprimer ce livre ?')" class="text-xs text-red-500 hover:text-red-700 underline leading-none">Supprimer</button>
+                </form>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+    </div>
+  </main>
+</Layout>
+
+<script is:inline define:vars={{ users }}>
+window.addFreeCollab = function() {
+  const container = document.getElementById('free-collabs');
+  const div = document.createElement('div');
+  div.className = 'flex flex-col sm:flex-row gap-3 mt-3';
+  div.innerHTML = `
+    <input type="text" name="main_collab_name[]" placeholder="Nom complet..." class="flex-1 rounded-xl border-0 py-2 px-3 bg-[var(--color-tc-cream)] ring-1 ring-[#1a3a5c]/20 text-[#1a3a5c] text-sm" />
+    <input type="text" name="main_collab_name_contrib[]" placeholder="Rôle / contribution..." class="flex-1 rounded-xl border-0 py-2 px-3 bg-[var(--color-tc-cream)] ring-1 ring-[#1a3a5c]/20 text-[#1a3a5c] text-sm" />
+  `;
+  container.appendChild(div);
+};
+
+window.addOtherCollab = function() {
+  const container = document.getElementById('other-collabs');
+  const input = document.createElement('input');
+  input.type = 'text';
+  input.name = 'other_collab_name[]';
+  input.placeholder = 'Nom complet...';
+  input.className = 'w-full sm:w-1/2 rounded-xl border-0 py-2 px-3 ring-1 ring-[#1a3a5c]/20 text-[#1a3a5c] text-sm mt-3';
+  container.appendChild(input);
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+  const searchInput = document.getElementById('userSearchInput');
+  const searchResults = document.getElementById('userSearchResults');
+  const selectedList = document.getElementById('selectedUsersList');
+
+  let selectedUserIds = new Set();
+
+  if (!searchInput) return;
+
+  searchInput.addEventListener('input', (e) => {
+    const query = e.target.value.toLowerCase().trim();
+    searchResults.innerHTML = '';
+    if (!query) {
+      searchResults.classList.add('hidden');
+      return;
+    }
+
+    const matches = (users || []).filter(u => {
+      const name = (u.full_name || u.id).toLowerCase();
+      return name.includes(query) && !selectedUserIds.has(u.id);
+    });
+
+    if (matches.length > 0) {
+      searchResults.classList.remove('hidden');
+      matches.forEach(u => {
+        const div = document.createElement('div');
+        div.className = 'px-4 py-2 hover:bg-[var(--color-tc-cream)] cursor-pointer text-sm text-[var(--color-tc-blue)] border-b border-[var(--color-tc-blue)]/5 last:border-0';
+        div.textContent = u.full_name || u.id;
+        div.onclick = () => selectUser(u);
+        searchResults.appendChild(div);
+      });
+    } else {
+      searchResults.classList.add('hidden');
+      const div = document.createElement('div');
+      div.className = 'px-4 py-2 text-sm text-[var(--color-tc-blue)]/50 italic';
+      div.textContent = 'Aucun membre trouvé.';
+      searchResults.appendChild(div);
+      searchResults.classList.remove('hidden');
+    }
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
+      searchResults.classList.add('hidden');
+    }
+  });
+
+  function selectUser(user) {
+    selectedUserIds.add(user.id);
+    searchInput.value = '';
+    searchResults.classList.add('hidden');
+
+    const item = document.createElement('div');
+    item.className = 'flex flex-col sm:flex-row gap-3 items-start sm:items-center bg-[var(--color-tc-cream)]/50 p-3 rounded-xl border border-[var(--color-tc-blue)]/10';
+    item.id = `selected-user-${user.id}`;
+    
+    item.innerHTML = `
+      <div class="flex items-center justify-between sm:justify-start gap-2 w-full sm:w-auto sm:min-w-[200px]">
+        <input type="hidden" name="main_collab_user_id[]" value="${user.id}" />
+        <span class="text-sm font-bold text-[var(--color-tc-blue)] flex-1 truncate">${user.full_name || user.id}</span>
+        <button type="button" class="text-red-400 hover:text-red-600 px-2 font-bold" onclick="removeUser('${user.id}')">✕</button>
+      </div>
+      <input type="text" name="main_collab_contrib[]" placeholder="Rôle / contribution..." class="flex-1 rounded-xl border-0 py-2 px-3 bg-white ring-1 ring-[var(--color-tc-blue)]/20 focus:ring-2 focus:ring-[var(--color-tc-mustard)] text-[var(--color-tc-blue)] text-sm w-full" />
+    `;
+    
+    selectedList.appendChild(item);
+  }
+
+  window.removeUser = (userId) => {
+    selectedUserIds.delete(userId);
+    const item = document.getElementById(`selected-user-${userId}`);
+    if (item) item.remove();
+  };
+});
+</script>
