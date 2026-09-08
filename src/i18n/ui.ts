@@ -69,7 +69,7 @@ export const ui = {
     'profile.edit.error': 'Erreur lors de la mise à jour.',
 
     'hero.title': 'Transmission Circulaire',
-    'hero.subtitle': 'Bâtir des ponts entre les générations par le partage de la culture, des valeurs et de la paix.',
+    'hero.subtitle': 'Bâtir des connexions entre les générations par le partage de la culture, des valeurs et de la paix.',
     'hero.cta.discover': 'Découvrir nos actions',
     'hero.cta.support': 'Soutenir l\'association',
 

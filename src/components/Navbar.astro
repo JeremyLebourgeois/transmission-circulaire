@@ -20,6 +20,9 @@ const navLinks = [
  { path: '/books', label: t('nav.books') },
  { path: '/events', label: t('nav.events') },
 ];
+
+const cookiesHeader = Astro.request.headers.get('cookie') || '';
+const isAuth = cookiesHeader.includes('-auth-token');
 ---
 <header class="sticky top-0 z-40 w-full backdrop-blur-md flex-none transition-colors duration-500 lg:z-50 lg:border-b border-[var(--color-tc-blue)]/10 bg-[var(--color-tc-cream)]/90 shadow-sm">
  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -53,9 +56,12 @@ const navLinks = [
  ))}
  
  <div class="ml-4 flex items-center gap-4">
- <div class="auth-buttons-desktop hidden items-center gap-4">
- <a href={translatePath('/login')} class="btn-login hidden hover:text-[var(--color-tc-mustard)] transition-colors">{t('nav.login')}</a>
- <a href={translatePath('/dashboard')} class="btn-dashboard hidden font-bold text-[var(--color-tc-blue)] hover:opacity-80 transition-opacity">{t('nav.dashboard')}</a>
+ <div class="auth-buttons-desktop flex items-center gap-4">
+ {isAuth ? (
+ <a href={translatePath('/dashboard')} class="btn-dashboard font-bold text-[var(--color-tc-blue)] hover:opacity-80 transition-opacity">{t('nav.dashboard')}</a>
+ ) : (
+ <a href={translatePath('/login')} class="btn-login hover:text-[var(--color-tc-mustard)] transition-colors">{t('nav.login')}</a>
+ )}
  </div>
  
  <a href={translatePath('/donate')} class="bg-[var(--color-tc-mustard)] text-white px-5 py-2 rounded-full font-bold hover:bg-opacity-90 hover:shadow-lg transition-all transform hover:-translate-y-0.5">{t('nav.donate')}</a>
@@ -80,9 +86,12 @@ const navLinks = [
  
  <div class="w-12 h-px bg-slate-200 my-4"></div>
  
- <div class="auth-buttons-mobile hidden flex-col items-center gap-4 mb-4">
- <a href={translatePath('/login')} class="btn-login hidden text-lg font-medium text-[var(--color-tc-blue)]/80 hover:text-[var(--color-tc-blue)] :text-[var(--color-tc-cream)]">{t('nav.login')}</a>
- <a href={translatePath('/dashboard')} class="btn-dashboard hidden text-lg font-bold text-[var(--color-tc-blue)] ">{t('nav.dashboard')}</a>
+ <div class="auth-buttons-mobile flex flex-col items-center gap-4 mb-4">
+ {isAuth ? (
+ <a href={translatePath('/dashboard')} class="btn-dashboard text-lg font-bold text-[var(--color-tc-blue)]">{t('nav.dashboard')}</a>
+ ) : (
+ <a href={translatePath('/login')} class="btn-login text-lg font-medium text-[var(--color-tc-blue)]/80 hover:text-[var(--color-tc-blue)]">{t('nav.login')}</a>
+ )}
  </div>
 
  <a href={translatePath('/donate')} class="bg-[var(--color-tc-mustard)] text-white px-8 py-3 rounded-full font-bold hover:bg-opacity-90 transition-all shadow-md transform hover:scale-105">{t('nav.donate')}</a>
@@ -105,32 +114,5 @@ const navLinks = [
  menu.classList.add('hidden');
  }
  });
- }
-
- // Toggle Auth buttons client-side (to preserve static rendering of Navbar)
- const isAuth = document.cookie.includes('-auth-token');
- 
- // Update desktop
- const desktopContainer = document.querySelector('.auth-buttons-desktop');
- if (desktopContainer) {
- desktopContainer.classList.remove('hidden');
- desktopContainer.classList.add('flex');
- if (isAuth) {
- desktopContainer.querySelector('.btn-dashboard')?.classList.remove('hidden');
- } else {
- desktopContainer.querySelector('.btn-login')?.classList.remove('hidden');
- }
- }
-
- // Update mobile
- const mobileContainer = document.querySelector('.auth-buttons-mobile');
- if (mobileContainer) {
- mobileContainer.classList.remove('hidden');
- mobileContainer.classList.add('flex');
- if (isAuth) {
- mobileContainer.querySelector('.btn-dashboard')?.classList.remove('hidden');
- } else {
- mobileContainer.querySelector('.btn-login')?.classList.remove('hidden');
- }
  }
 </script>
