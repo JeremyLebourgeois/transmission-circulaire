@@ -28,7 +28,7 @@ const { title, author, coverImage, description, link } = Astro.props;
  {description}
  </p>
  {link && (
- <a href={link} target="_blank" rel="noopener noreferrer" class="inline-flex justify-center items-center px-4 py-2 bg-slate-100 text-[var(--color-tc-blue)] rounded-full text-sm font-medium hover:bg-slate-200 :bg-slate-600 transition-colors w-full">
+ <a href={link} class="inline-flex justify-center items-center px-4 py-2 bg-slate-100 text-[var(--color-tc-blue)] rounded-full text-sm font-medium hover:bg-slate-200 :bg-slate-600 transition-colors w-full">
  {t('books.read_more')}
  </a>
  )}
