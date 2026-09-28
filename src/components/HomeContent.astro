@@ -17,7 +17,7 @@ const { data: books } = await supabase
 
 const { data: events } = await supabase
   .from('events')
-  .select('id, title, date, location')
+  .select('id, title, date, end_date, location')
   .order('date', { ascending: true })
   .limit(3);
 ---
@@ -215,7 +215,11 @@ const { data: events } = await supabase
             <div class="flex-1 min-w-0">
               <p class="font-bold text-[var(--color-tc-blue)] truncate">{event.title}</p>
               <p class="text-xs text-[var(--color-tc-blue)]/50 mt-0.5">
-                {event.date ? new Date(event.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }) : ''}
+                {event.end_date ? (
+                  <>Du {new Date(event.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })} au {new Date(event.end_date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })}</>
+                ) : (
+                  event.date ? new Date(event.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }) : ''
+                )}
                 {event.location ? ` · ${event.location}` : ''}
               </p>
             </div>

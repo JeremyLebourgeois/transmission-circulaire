@@ -1,14 +1,28 @@
 ---
+export const prerender = false;
 import Layout from '../../layouts/Layout.astro';
-import { getLangFromUrl, useTranslations } from '../../i18n/utils';
-import { languages } from '../../i18n/ui';
-
-export function getStaticPaths() {
- return Object.keys(languages).filter((lang) => lang !== 'fr').map((lang) => ({ params: { lang } }));
-}
+import { getLangFromUrl, useTranslations, useTranslatedPath } from '../../i18n/utils';
+import { getSupabaseServerClient } from '../../lib/supabase-server';
 
 const lang = getLangFromUrl(Astro.url);
 const t = useTranslations(lang);
+const translatePath = useTranslatedPath(lang);
+
+const supabase = getSupabaseServerClient(Astro.cookies);
+
+// Check if current user is admin
+const { data: { user } } = await supabase.auth.getUser();
+let userRole = '';
+if (user) {
+  const { data: roleData } = await supabase.from('user_roles').select('role').eq('id', user.id).single();
+  userRole = roleData?.role || '';
+}
+
+// Fetch events
+const { data: events, error } = await supabase
+  .from('events')
+  .select('*')
+  .order('date', { ascending: true });
 ---
 
 <Layout title={t('nav.events')}>
@@ -19,41 +33,67 @@ const t = useTranslations(lang);
  <p class="mt-4 text-lg leading-8 text-[var(--color-tc-blue)]/80 ">
  Rejoignez-nous lors de nos prochains ateliers, rencontres et événements pour échanger et partager.
  </p>
+  {(userRole === 'admin' || userRole === 'super_admin') && (
+    <a href={translatePath('/dashboard/events')} class="mt-6 inline-flex items-center gap-2 rounded-full bg-[var(--color-tc-olive)] px-5 py-2.5 text-sm font-semibold text-white shadow-md hover:bg-opacity-90 transition-all transform hover:-translate-y-0.5">
+      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+      </svg>
+      {t('dashboard.events.manage')}
+    </a>
+  )}
  </div>
  
- <div class="mx-auto mt-16 max-w-2xl border-t border-[var(--color-tc-blue)]/10 pt-10 sm:mt-20 sm:pt-16 lg:mx-0 lg:max-w-none">
- <!-- Event Card Placeholder -->
- <article class="flex max-w-xl flex-col items-start justify-between bg-[var(--color-tc-cream)] p-8 rounded-3xl border border-[var(--color-tc-blue)]/5 shadow-sm hover:shadow-md transition-shadow">
- <div class="flex items-center gap-x-4 text-xs">
- <time datetime="2026-10-15" class="text-[var(--color-tc-blue)]/70 ">15 Octobre 2026</time>
- <a href="#" class="relative z-10 rounded-full bg-[var(--color-tc-cream)] px-3 py-1.5 font-medium text-[var(--color-tc-blue)]/80 hover:bg-slate-100 :bg-slate-700">Rencontre</a>
- </div>
- <div class="group relative">
- <h3 class="mt-3 text-lg font-bold font-display leading-6 text-[var(--color-tc-blue)] group-hover:text-[var(--color-tc-mustard)] transition-colors">
- <a href="#">
- <span class="absolute inset-0"></span>
- Soirée de Lancement : "Meltem"
- </a>
- </h3>
- <p class="mt-5 line-clamp-3 text-sm leading-6 text-[var(--color-tc-blue)]/80 ">
- Venez célébrer avec nous la sortie de notre nouvel ouvrage "Meltem". Au programme : dédicaces, échanges autour de la transmission intergénérationnelle et cocktail dînatoire.
- </p>
- </div>
- <div class="relative mt-8 flex items-center gap-x-4">
- <div class="h-10 w-10 rounded-full bg-[var(--color-tc-cream)] border border-[var(--color-tc-blue)]/20 flex items-center justify-center text-[var(--color-tc-blue)] font-bold">
- TC
- </div>
- <div class="text-sm leading-6">
- <p class="font-semibold text-[var(--color-tc-blue)] ">
- <a href="#">
- <span class="absolute inset-0"></span>
- L'équipe Transmission Circulaire
- </a>
- </p>
- <p class="text-[var(--color-tc-blue)]/80 ">Paris, France</p>
- </div>
- </div>
- </article>
+ <div class="mx-auto mt-16 grid max-w-2xl grid-cols-1 gap-x-8 gap-y-12 sm:mt-20 lg:mx-0 lg:max-w-none lg:grid-cols-2 xl:grid-cols-3">
+ 
+ {error && error.code === '42P01' ? (
+   <p class="text-center w-full text-red-500 italic">La table des événements n'a pas encore été créée dans la base de données.</p>
+ ) : events?.length === 0 ? (
+   <p class="text-center w-full text-[var(--color-tc-blue)]/60 italic">Aucun événement n'est programmé pour le moment.</p>
+ ) : (
+   events?.map(evt => (
+     <article class="flex flex-col items-start justify-between bg-[var(--color-tc-card)] p-8 rounded-3xl border border-[var(--color-tc-blue)]/5 shadow-sm hover:shadow-md transition-shadow">
+       <div class="flex items-center gap-x-4 text-xs mb-4">
+         <time datetime={evt.date} class="font-bold text-[var(--color-tc-olive)] text-sm">
+           {evt.end_date ? (
+             <>Du {new Date(evt.date).toLocaleDateString(lang === 'fr' ? 'fr-FR' : 'en-US', { day: 'numeric', month: 'short', hour: '2-digit', minute:'2-digit' })} au {new Date(evt.end_date).toLocaleDateString(lang === 'fr' ? 'fr-FR' : 'en-US', { day: 'numeric', month: 'short', hour: '2-digit', minute:'2-digit' })}</>
+           ) : (
+             <>{new Date(evt.date).toLocaleDateString(lang === 'fr' ? 'fr-FR' : 'en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute:'2-digit' })}</>
+           )}
+         </time>
+       </div>
+       
+       {evt.image_url && (
+         <img src={evt.image_url} alt={evt.title} class="w-full h-48 object-cover rounded-2xl mb-4" />
+       )}
+       
+       <div class="group relative flex-1 w-full">
+         <h3 class="mt-3 text-xl font-bold font-display leading-7 text-[var(--color-tc-blue)] group-hover:text-[var(--color-tc-mustard)] transition-colors">
+           <a href={translatePath(`/events/${evt.id}`)}>
+             <span class="absolute inset-0"></span>
+             {evt.title}
+           </a>
+         </h3>
+         <p class="mt-3 line-clamp-4 text-sm leading-6 text-[var(--color-tc-blue)]/80 ">
+           {evt.description || "Aucune description fournie."}
+         </p>
+       </div>
+       
+       <div class="relative mt-auto flex flex-col gap-6 w-full border-t border-[var(--color-tc-blue)]/10 pt-6">
+         <div class="flex items-center gap-2 text-sm leading-6 text-[var(--color-tc-blue)]/80">
+           <svg class="w-5 h-5 text-[var(--color-tc-mustard)]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+             <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
+             <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
+           </svg>
+           {evt.location}
+         </div>
+         <a href={translatePath(`/events/${evt.id}`)} class="inline-flex justify-center items-center px-4 py-2 bg-slate-100 text-[var(--color-tc-blue)] rounded-full text-sm font-medium hover:bg-slate-200 transition-colors w-full relative z-10">
+           En savoir plus
+         </a>
+       </div>
+     </article>
+   ))
+ )}
+ 
  </div>
  </div>
  </div>
