@@ -1,0 +1,282 @@
+---
+export const prerender = false;
+
+import Layout from '../../layouts/Layout.astro';
+import { getLangFromUrl, useTranslatedPath, useTranslations } from '../../i18n/utils';
+import { getSupabaseServerClient } from '../../lib/supabase-server';
+
+const lang = getLangFromUrl(Astro.url);
+const translatePath = useTranslatedPath(lang);
+const t = useTranslations(lang);
+
+const supabase = getSupabaseServerClient(Astro.cookies);
+const { data: { user }, error: userError } = await supabase.auth.getUser();
+
+if (!user || userError) {
+  return Astro.redirect(translatePath('/login'));
+}
+
+const { data: currentUserRoleData } = await supabase
+  .from('user_roles')
+  .select('role')
+  .eq('id', user.id)
+  .single();
+
+const currentUserRole = currentUserRoleData?.role || '';
+if (currentUserRole !== 'admin' && currentUserRole !== 'super_admin') {
+  return Astro.redirect(translatePath('/dashboard'));
+}
+
+let successMessage = '';
+let errorMessage = '';
+
+// Handle form submission (update role)
+if (Astro.request.method === 'POST') {
+  try {
+    const formData = await Astro.request.formData();
+    const action = formData.get('action')?.toString();
+
+    if (action === 'update_role' && currentUserRole === 'super_admin') {
+      const targetUserId = formData.get('userId')?.toString();
+      const newRole = formData.get('newRole')?.toString();
+
+      if (!targetUserId || !newRole) throw new Error('Informations manquantes');
+      
+      // Sécurité : Impossible d'attribuer le rôle super_admin via cette interface
+      if (newRole === 'super_admin') throw new Error('Action non autorisée');
+      
+      // Sécurité supplémentaire : On vérifie que l'utilisateur cible n'est pas déjà super_admin
+      // (Optionnel selon les règles, mais plus sûr pour éviter qu'un super_admin se rétrograde)
+      const { data: targetRoleData } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('id', targetUserId)
+        .single();
+        
+      if (targetRoleData?.role === 'super_admin') {
+         throw new Error('Impossible de modifier le rôle d\'un Super Admin');
+      }
+
+      const { error } = await supabase
+        .from('user_roles')
+        .update({ role: newRole })
+        .eq('id', targetUserId);
+        
+      if (error) throw error;
+      successMessage = 'Rôle mis à jour avec succès.';
+    } else if (action === 'delete_user' && currentUserRole === 'super_admin') {
+      const targetUserId = formData.get('userId')?.toString();
+      if (!targetUserId) throw new Error('Utilisateur non spécifié');
+      
+      const { error } = await supabase.rpc('delete_user_account', { target_user_id: targetUserId });
+      if (error) throw error;
+      successMessage = 'Le compte a été supprimé avec succès.';
+    }
+  } catch (err: any) {
+    errorMessage = 'Erreur : ' + (err?.message || JSON.stringify(err));
+  }
+}
+
+// Fetch all profiles
+const { data: profilesData, error: profilesError } = await supabase
+  .from('profiles')
+  .select('*');
+
+// Fetch all roles
+const { data: rolesData, error: rolesError } = await supabase
+  .from('user_roles')
+  .select('*');
+
+const members = (profilesData || []).map(profile => {
+  const roleRecord = (rolesData || []).find(r => r.id === profile.id);
+  return {
+    ...profile,
+    role: roleRecord ? roleRecord.role : 'membre'
+  };
+});
+---
+
+<Layout title="Gestion des Membres | Admin">
+  <main class="min-h-screen bg-[var(--color-tc-cream)] py-12">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+
+      <!-- Header -->
+      <div class="flex items-center gap-4">
+        <a href={translatePath('/dashboard')} class="text-[var(--color-tc-blue)]/60 hover:text-[var(--color-tc-blue)] transition-colors">
+          <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+          </svg>
+        </a>
+        <h1 class="text-3xl font-display font-bold text-[var(--color-tc-blue)]">🛡️ Gestion des Membres</h1>
+      </div>
+
+      {successMessage && <div class="bg-green-50 text-green-800 p-4 rounded-xl text-sm font-medium border border-green-200">{successMessage}</div>}
+      {errorMessage && <div class="bg-red-50 text-red-800 p-4 rounded-xl text-sm font-medium border border-red-200">{errorMessage}</div>}
+
+      <!-- Members List -->
+      <div class="bg-[var(--color-tc-card)] rounded-3xl shadow-xl border border-[var(--color-tc-blue)]/10 p-6 sm:p-8" x-data="{ searchQuery: '', roleFilter: 'all' }">
+        
+        <!-- Controls: Search & Filter -->
+        <div class="flex flex-col sm:flex-row gap-4 mb-6">
+          <div class="flex-1 relative">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </div>
+            <input 
+              type="text" 
+              id="searchInput"
+              placeholder="Rechercher par nom..." 
+              class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-xl leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-[var(--color-tc-red)] focus:border-[var(--color-tc-red)] sm:text-sm"
+            >
+          </div>
+          <div class="sm:w-64">
+            <select 
+              id="roleFilter"
+              class="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-[var(--color-tc-red)] focus:border-[var(--color-tc-red)] sm:text-sm rounded-xl"
+            >
+              <option value="all">Tous les rôles</option>
+              <option value="super_admin">Super Admin</option>
+              <option value="admin">Admin</option>
+              <option value="tresorier">Trésorier</option>
+              <option value="collaborateur">Collaborateur</option>
+              <option value="membre">Membre</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Table / List -->
+        <div class="overflow-x-auto rounded-xl border border-gray-200 bg-white shadow-sm">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+              <tr>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Membre</th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rôle Actuel</th>
+                {currentUserRole === 'super_admin' && (
+                  <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                )}
+              </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200" id="membersTableBody">
+              {members.map(member => (
+                <tr class="member-row transition-colors hover:bg-gray-50" data-name={(member.full_name || 'Anonyme').toLowerCase()} data-role={member.role}>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="flex items-center">
+                      <div class="flex-shrink-0 h-10 w-10">
+                        {member.avatar_url ? (
+                          <img class="h-10 w-10 rounded-full object-cover" src={member.avatar_url} alt="" />
+                        ) : (
+                          <div class="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-500">
+                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                              <path fill-rule="evenodd" d="M7.5 6a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM3.751 20.105a8.25 8.25 0 0116.498 0 .75.75 0 01-.437.695A18.683 18.683 0 0112 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 01-.437-.695z" clip-rule="evenodd" />
+                            </svg>
+                          </div>
+                        )}
+                      </div>
+                      <div class="ml-4">
+                        <div class="text-sm font-medium text-gray-900">{member.full_name || 'Anonyme'}</div>
+                        <div class="text-sm text-gray-500 text-xs truncate max-w-[150px]" title={member.id}>{member.id}</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <span class={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                      ${member.role === 'super_admin' ? 'bg-red-100 text-red-800' : ''}
+                      ${member.role === 'admin' ? 'bg-orange-100 text-orange-800' : ''}
+                      ${member.role === 'tresorier' ? 'bg-blue-100 text-blue-800' : ''}
+                      ${member.role === 'collaborateur' ? 'bg-green-100 text-green-800' : ''}
+                      ${member.role === 'membre' ? 'bg-gray-100 text-gray-800' : ''}
+                    `}>
+                      {member.role === 'super_admin' ? 'Super Admin' : 
+                       member.role === 'admin' ? 'Admin' :
+                       member.role === 'tresorier' ? 'Trésorier' :
+                       member.role === 'collaborateur' ? 'Collaborateur' : 'Membre'}
+                    </span>
+                  </td>
+                  {currentUserRole === 'super_admin' && (
+                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                      {member.role !== 'super_admin' ? (
+                        <div class="flex items-center justify-end gap-4">
+                          <form method="POST" class="inline-flex items-center gap-2 m-0 p-0">
+                            <input type="hidden" name="action" value="update_role" />
+                            <input type="hidden" name="userId" value={member.id} />
+                            <select name="newRole" class="text-sm border-gray-300 rounded-lg focus:ring-[var(--color-tc-red)] focus:border-[var(--color-tc-red)] py-1.5 pl-2 pr-8 shadow-sm">
+                              <option value="membre" selected={member.role === 'membre'}>Membre</option>
+                              <option value="collaborateur" selected={member.role === 'collaborateur'}>Collaborateur</option>
+                              <option value="tresorier" selected={member.role === 'tresorier'}>Trésorier</option>
+                              <option value="admin" selected={member.role === 'admin'}>Admin</option>
+                            </select>
+                            <button type="submit" class="text-[var(--color-tc-red)] hover:text-red-900 font-bold bg-red-50 px-3 py-1.5 rounded-lg border border-red-100 hover:bg-red-100 transition-colors shadow-sm">
+                              Appliquer
+                            </button>
+                          </form>
+
+                          <form method="POST" class="inline-flex m-0 p-0" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer DÉFINITIVEMENT ce compte ? Cette action est irréversible.');">
+                            <input type="hidden" name="action" value="delete_user" />
+                            <input type="hidden" name="userId" value={member.id} />
+                            <button type="submit" class="text-red-600 hover:text-red-900 transition-colors" title="Supprimer le compte">
+                              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                              </svg>
+                            </button>
+                          </form>
+                        </div>
+                      ) : (
+                        <span class="text-gray-400 text-xs italic px-3">Intouchable</span>
+                      )}
+                    </td>
+                  )}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <div id="noResultsMessage" class="hidden p-8 text-center text-gray-500 italic">
+            Aucun membre ne correspond à votre recherche.
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </main>
+</Layout>
+
+<script>
+  // Simple client-side filtering logic
+  document.addEventListener('DOMContentLoaded', () => {
+    const searchInput = document.getElementById('searchInput') as HTMLInputElement;
+    const roleFilter = document.getElementById('roleFilter') as HTMLSelectElement;
+    const membersRows = document.querySelectorAll('.member-row');
+    const noResultsMessage = document.getElementById('noResultsMessage');
+
+    function filterMembers() {
+      const query = searchInput.value.toLowerCase();
+      const role = roleFilter.value;
+      let visibleCount = 0;
+
+      membersRows.forEach(row => {
+        const r = row as HTMLElement;
+        const name = r.getAttribute('data-name') || '';
+        const rRole = r.getAttribute('data-role') || '';
+        
+        const matchesQuery = name.includes(query);
+        const matchesRole = role === 'all' || role === rRole;
+
+        if (matchesQuery && matchesRole) {
+          r.style.display = '';
+          visibleCount++;
+        } else {
+          r.style.display = 'none';
+        }
+      });
+
+      if (noResultsMessage) {
+        noResultsMessage.style.display = visibleCount === 0 ? 'block' : 'none';
+      }
+    }
+
+    if (searchInput) searchInput.addEventListener('input', filterMembers);
+    if (roleFilter) roleFilter.addEventListener('change', filterMembers);
+  });
+</script>
