@@ -57,10 +57,10 @@ if (Astro.request.method === 'POST') {
          throw new Error('Impossible de modifier le rôle d\'un Super Admin');
       }
 
-      const { error } = await supabase
-        .from('user_roles')
-        .update({ role: newRole })
-        .eq('id', targetUserId);
+      const { error } = await supabase.rpc('update_user_role', { 
+        target_user_id: targetUserId, 
+        new_role: newRole 
+      });
         
       if (error) throw error;
       successMessage = 'Rôle mis à jour avec succès.';
