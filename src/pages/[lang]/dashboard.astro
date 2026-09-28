@@ -32,6 +32,27 @@ const { data: profile } = await supabase
 
 const userRole = roleData?.role || 'Membre';
 
+// Récupération des événements auxquels l'utilisateur est inscrit
+const { data: userRegistrations } = await supabase
+  .from('event_registrations')
+  .select('event_id')
+  .eq('user_id', user.id);
+
+let registeredEvents: any[] = [];
+if (userRegistrations && userRegistrations.length > 0) {
+  const eventIds = userRegistrations.map((r: any) => r.event_id);
+  const { data: eventsData } = await supabase
+    .from('events')
+    .select('*')
+    .in('id', eventIds)
+    .gte('date', new Date().toISOString())
+    .order('date', { ascending: true });
+    
+  if (eventsData) {
+    registeredEvents = eventsData;
+  }
+}
+
 if (Astro.request.method === 'POST') {
  // Gestion de la déconnexion
  const formData = await Astro.request.formData();
@@ -143,6 +164,41 @@ if (Astro.request.method === 'POST') {
  )}
  
  </div>
+ 
+  <!-- Événements à venir -->
+  <div class="mt-12 pt-8 border-t border-[var(--color-tc-blue)]/10">
+    <h2 class="text-lg font-semibold text-[var(--color-tc-blue)] mb-6 flex items-center gap-2">
+      <svg class="w-5 h-5 text-[var(--color-tc-mustard)]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+      </svg>
+      Mes événements à venir
+    </h2>
+    
+    {registeredEvents.length > 0 ? (
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {registeredEvents.map(evt => (
+          <a href={translatePath(`/events/${evt.id}`)} class="bg-white rounded-2xl p-6 border border-[var(--color-tc-blue)]/5 shadow-sm hover:shadow-md transition-shadow group flex flex-col justify-between">
+            <div>
+              <h3 class="font-bold text-[var(--color-tc-blue)] group-hover:text-[var(--color-tc-olive)] transition-colors line-clamp-2">{evt.title}</h3>
+              <p class="text-sm text-[var(--color-tc-blue)]/70 mt-3 flex items-center gap-2">
+                <svg class="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                {new Date(evt.date).toLocaleDateString(lang === 'fr' ? 'fr-FR' : 'en-US', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute:'2-digit' })}
+              </p>
+              <p class="text-sm text-[var(--color-tc-blue)]/70 mt-2 flex items-center gap-2">
+                <svg class="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" /></svg>
+                <span class="truncate">{evt.location}</span>
+              </p>
+            </div>
+          </a>
+        ))}
+      </div>
+    ) : (
+      <div class="bg-white/50 border border-[var(--color-tc-blue)]/5 rounded-2xl p-6 text-center">
+        <p class="text-[var(--color-tc-blue)]/60 text-sm">Vous n'êtes inscrit à aucun événement à venir.</p>
+        <a href={translatePath('/events')} class="inline-block mt-3 text-[var(--color-tc-olive)] font-medium text-sm hover:underline">Voir les événements disponibles →</a>
+      </div>
+    )}
+  </div>
  
  <!-- Actions de compte -->
  <div class="mt-12 pt-8 border-t border-[var(--color-tc-blue)]/10 ">
