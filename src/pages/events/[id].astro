@@ -11,6 +11,43 @@ const t = useTranslations(lang);
 const { id } = Astro.params;
 
 const supabase = getSupabaseServerClient(Astro.cookies);
+const { data: { user } } = await supabase.auth.getUser();
+
+// Fetch role
+let userRole = 'membre';
+if (user) {
+  const { data: roleData } = await supabase.from('user_roles').select('role').eq('id', user.id).single();
+  if (roleData) userRole = roleData.role;
+}
+
+const isCollaborator = ['collaborateur', 'tresorier', 'admin', 'super_admin'].includes(userRole);
+
+let message = '';
+let isError = false;
+
+if (Astro.request.method === 'POST' && user) {
+  const formData = await Astro.request.formData();
+  const action = formData.get('action');
+
+  if (action === 'register') {
+    const { error } = await supabase.from('event_registrations').insert({ event_id: id, user_id: user.id });
+    if (error) {
+      isError = true;
+      message = "Erreur lors de l'inscription : " + error.message;
+      console.error(error);
+    } else {
+      message = "Inscription confirmée !";
+    }
+  } else if (action === 'unregister') {
+    const { error } = await supabase.from('event_registrations').delete().match({ event_id: id, user_id: user.id });
+    if (error) {
+      isError = true;
+      message = "Erreur lors de la désinscription.";
+    } else {
+      message = "Inscription annulée.";
+    }
+  }
+}
 
 const { data: evt } = await supabase
   .from('events')
@@ -21,6 +58,21 @@ const { data: evt } = await supabase
 if (!evt) {
   return Astro.redirect(translatePath('/events'));
 }
+
+const { count: registrationsCount } = await supabase
+  .from('event_registrations')
+  .select('*', { count: 'exact', head: true })
+  .eq('event_id', id);
+
+const { count: userRegCount } = user ? await supabase
+  .from('event_registrations')
+  .select('*', { count: 'exact', head: true })
+  .match({ event_id: id, user_id: user.id }) : { count: 0 };
+
+const isRegistered = (userRegCount || 0) > 0;
+const spotsRemaining = evt.max_spots ? evt.max_spots - (registrationsCount || 0) : null;
+const isFull = evt.max_spots !== null && spotsRemaining !== null && spotsRemaining <= 0;
+const canRegister = user && (evt.audience !== 'collaborator_only' || isCollaborator);
 ---
 
 <Layout title={`${evt.title} | Événements`}>
@@ -56,6 +108,56 @@ if (!evt) {
             </svg>
             <span class="font-medium text-lg">{evt.location}</span>
           </div>
+        </div>
+
+        <div class="flex flex-col sm:flex-row items-center justify-center sm:justify-start gap-4 mt-6">
+          {evt.max_spots && (
+            <div class="bg-white/10 rounded-full px-4 py-2 border border-white/20 text-sm font-medium">
+              🎟️ {spotsRemaining} places restantes sur {evt.max_spots}
+            </div>
+          )}
+          {evt.audience === 'collaborator_only' && (
+            <div class="bg-purple-500/20 text-purple-200 rounded-full px-4 py-2 border border-purple-500/30 text-sm font-medium flex items-center gap-2">
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+              Réservé aux collaborateurs
+            </div>
+          )}
+        </div>
+
+        {message && (
+          <div class={`mt-6 p-4 rounded-xl text-sm font-medium border w-fit mx-auto sm:mx-0 ${isError ? 'bg-red-500/20 border-red-500/50 text-red-100' : 'bg-green-500/20 border-green-500/50 text-green-100'}`}>
+            {message}
+          </div>
+        )}
+
+        <div class="mt-8 flex justify-center sm:justify-start">
+          {!user ? (
+            <a href={translatePath('/login')} class="inline-flex items-center gap-2 bg-white text-[var(--color-tc-blue)] px-6 py-3 rounded-full font-bold hover:bg-gray-100 transition-colors">
+              Se connecter pour s'inscrire
+            </a>
+          ) : isRegistered ? (
+            <form method="POST" class="inline-block">
+              <input type="hidden" name="action" value="unregister" />
+              <button type="submit" class="inline-flex items-center gap-2 bg-red-500/20 border border-red-500/50 text-red-100 px-6 py-3 rounded-full font-bold hover:bg-red-500/30 transition-colors">
+                Annuler mon inscription
+              </button>
+            </form>
+          ) : isFull ? (
+            <div class="inline-flex items-center gap-2 bg-white/10 text-white/50 px-6 py-3 rounded-full font-bold cursor-not-allowed border border-white/10">
+              Complet
+            </div>
+          ) : !canRegister ? (
+            <div class="inline-flex items-center gap-2 bg-white/10 text-white/50 px-6 py-3 rounded-full font-bold cursor-not-allowed border border-white/10" title="Réservé aux collaborateurs">
+              Réservé aux collaborateurs
+            </div>
+          ) : (
+            <form method="POST" class="inline-block">
+              <input type="hidden" name="action" value="register" />
+              <button type="submit" class="inline-flex items-center gap-2 bg-[var(--color-tc-mustard)] text-[var(--color-tc-blue)] px-8 py-3 rounded-full font-bold shadow-lg hover:shadow-xl hover:scale-105 transition-all">
+                S'inscrire à l'événement
+              </button>
+            </form>
+          )}
         </div>
       </div>
     </div>

@@ -68,9 +68,13 @@ if (Astro.request.method === 'POST') {
         imageUrl = publicUrl;
       }
 
+      const maxSpotsRaw = formData.get('max_spots')?.toString();
+      const maxSpots = maxSpotsRaw ? parseInt(maxSpotsRaw, 10) : null;
+      const audience = formData.get('audience')?.toString() || 'all';
+
       const { data: newEvent, error: eventError } = await supabase
         .from('events')
-        .insert({ title, date, end_date: endDate, location, description, image_url: imageUrl })
+        .insert({ title, date, end_date: endDate, location, description, image_url: imageUrl, max_spots: maxSpots, audience })
         .select()
         .single();
         
@@ -160,6 +164,21 @@ if (fetchError && fetchError.code === '42P01') { // table does not exist
             <div>
               <label class="block text-sm font-medium text-[var(--color-tc-blue)] mb-2">Description / Informations additionnelles</label>
               <textarea name="description" rows="4" placeholder="Détails de l'événement, lien de réservation..." class="w-full rounded-xl border-0 py-3 px-4 bg-[var(--color-tc-cream)] ring-1 ring-[var(--color-tc-blue)]/20 focus:ring-2 focus:ring-[var(--color-tc-mustard)] text-[var(--color-tc-blue)] text-sm"></textarea>
+            </div>
+
+            <!-- Infos Additionnelles: Places et Audience -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div>
+                <label class="block text-sm font-medium text-[var(--color-tc-blue)] mb-2">Nombre de places max (optionnel)</label>
+                <input type="number" min="1" name="max_spots" placeholder="Laisser vide si illimité" class="w-full rounded-xl border-0 py-3 px-4 bg-[var(--color-tc-cream)] ring-1 ring-[var(--color-tc-blue)]/20 focus:ring-2 focus:ring-[var(--color-tc-mustard)] text-[var(--color-tc-blue)] text-sm" />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-[var(--color-tc-blue)] mb-2">Public autorisé *</label>
+                <select name="audience" class="w-full rounded-xl border-0 py-3 px-4 bg-[var(--color-tc-cream)] ring-1 ring-[var(--color-tc-blue)]/20 focus:ring-2 focus:ring-[var(--color-tc-mustard)] text-[var(--color-tc-blue)] text-sm">
+                  <option value="all" selected>Ouvert à tous</option>
+                  <option value="collaborator_only">Réservé aux collaborateurs</option>
+                </select>
+              </div>
             </div>
 
             <div class="pt-4">
