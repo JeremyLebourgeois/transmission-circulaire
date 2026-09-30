@@ -57,12 +57,18 @@ const { data: events, error } = await supabase
      
      return (
      <article class={`flex flex-col items-start justify-between bg-[var(--color-tc-card)] p-8 rounded-3xl border border-[var(--color-tc-blue)]/5 shadow-sm transition-shadow ${isPast ? 'opacity-60 grayscale' : 'hover:shadow-md'}`}>
-       <div class="flex items-center gap-x-4 text-xs mb-4">
-         <time datetime={evt.date} class="font-bold text-[var(--color-tc-olive)] text-sm">
+       <div class="flex items-start gap-x-2 text-xs mb-4 text-[var(--color-tc-olive)]">
+          <svg class="w-5 h-5 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+          </svg>
+          <time datetime={evt.date} class="font-bold text-[var(--color-tc-olive)] text-sm flex flex-col gap-0.5">
            {evt.end_date ? (
-             <>Du {new Date(evt.date).toLocaleDateString(lang === 'fr' ? 'fr-FR' : 'en-US', { day: 'numeric', month: 'short', hour: '2-digit', minute:'2-digit' })} au {new Date(evt.end_date).toLocaleDateString(lang === 'fr' ? 'fr-FR' : 'en-US', { day: 'numeric', month: 'short', hour: '2-digit', minute:'2-digit' })}</>
+             <>
+                <span>Du {new Date(evt.date).toLocaleDateString(lang === 'fr' ? 'fr-FR' : 'en-US', { day: 'numeric', month: 'long', hour: '2-digit', minute:'2-digit' })}</span>
+                <span>Au {new Date(evt.end_date).toLocaleDateString(lang === 'fr' ? 'fr-FR' : 'en-US', { day: 'numeric', month: 'long', hour: '2-digit', minute:'2-digit' })}</span>
+              </>
            ) : (
-             <>{new Date(evt.date).toLocaleDateString(lang === 'fr' ? 'fr-FR' : 'en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute:'2-digit' })}</>
+             <span>{new Date(evt.date).toLocaleDateString(lang === 'fr' ? 'fr-FR' : 'en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute:'2-digit' })}</span>
            )}
          </time>
        </div>
