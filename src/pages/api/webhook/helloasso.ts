@@ -15,13 +15,26 @@ export const POST: APIRoute = async ({ request, url, cookies }) => {
     const payload = await request.json();
     
     // HelloAsso place généralement l'email dans data.payer.email
-    const email = payload?.data?.payer?.email;
+    const dataInfo = payload?.data;
+    const email = dataInfo?.payer?.email;
     
     if (!email) {
       return new Response('No email found in payload, ignored', { status: 200 });
     }
 
-    // 3. Initialiser Supabase et appeler la fonction sécurisée
+    // 3. Sécurité vitale : Vérifier qu'il s'agit bien de la campagne d'adhésion (et pas d'un don libre)
+    // On vérifie le slug de la campagne ou le type de formulaire (HelloAsso V5)
+    const isMembership = 
+      dataInfo?.formSlug === 'devenir-adherent' || 
+      dataInfo?.formType === 'Membership' || 
+      JSON.stringify(payload).includes('devenir-adherent');
+
+    if (!isMembership) {
+      console.log(`Webhook ignoré : Paiement reçu de ${email} mais ce n'est pas une adhésion.`);
+      return new Response('Not a membership campaign, ignored', { status: 200 });
+    }
+
+    // 4. Initialiser Supabase et appeler la fonction sécurisée
     const supabase = getSupabaseServerClient(cookies);
     
     const { data, error } = await supabase.rpc('grant_adhesion_by_email', {
