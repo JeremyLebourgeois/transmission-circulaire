@@ -225,7 +225,6 @@ const canRegister = user && (evt.audience !== 'collaborator_only' || isCollabora
                 <thead>
                   <tr class="border-b border-gray-200">
                     <th class="py-3 px-4 text-sm font-semibold text-gray-600">Nom</th>
-                    <th class="py-3 px-4 text-sm font-semibold text-gray-600">Email</th>
                     <th class="py-3 px-4 text-sm font-semibold text-gray-600 text-right">Actions</th>
                   </tr>
                 </thead>
@@ -234,9 +233,6 @@ const canRegister = user && (evt.audience !== 'collaborator_only' || isCollabora
                     <tr class="border-b border-gray-100 hover:bg-gray-50">
                       <td class="py-3 px-4 text-sm text-gray-800 font-medium">
                         {reg.first_name} {reg.last_name}
-                      </td>
-                      <td class="py-3 px-4 text-sm text-gray-600">
-                        {reg.email}
                       </td>
                       <td class="py-3 px-4 text-sm text-right">
                         <form method="POST" class="inline" onsubmit="return confirm('Êtes-vous sûr de vouloir désinscrire cette personne ?');">
