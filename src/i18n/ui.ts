@@ -47,7 +47,7 @@ export const ui = {
 
     'dashboard.title': 'Tableau de bord',
     'dashboard.welcome': 'Bienvenue, ',
-    'dashboard.role': 'Rôle : ',
+    'dashboard.role': 'Statut : ',
     'dashboard.tools': 'Outils disponibles',
     'dashboard.profile': 'Mon profil',
     'dashboard.profile.desc': 'Gérez vos informations personnelles et vos préférences.',
@@ -117,7 +117,7 @@ export const ui = {
 
     'dashboard.title': 'Dashboard',
     'dashboard.welcome': 'Welcome, ',
-    'dashboard.role': 'Role: ',
+    'dashboard.role': 'Status: ',
     'dashboard.tools': 'Available Tools',
     'dashboard.profile': 'My Profile',
     'dashboard.profile.desc': 'Manage your personal information and preferences.',
@@ -187,7 +187,7 @@ export const ui = {
 
     'dashboard.title': 'Panel de control',
     'dashboard.welcome': 'Bienvenido/a, ',
-    'dashboard.role': 'Rol: ',
+    'dashboard.role': 'Estado: ',
     'dashboard.tools': 'Herramientas disponibles',
     'dashboard.profile': 'Mi Perfil',
     'dashboard.profile.desc': 'Gestione su información personal y preferencias.',
@@ -254,7 +254,7 @@ export const ui = {
 
     'dashboard.title': 'Dashboard',
     'dashboard.welcome': 'Willkommen, ',
-    'dashboard.role': 'Rolle: ',
+    'dashboard.role': 'Status: ',
     'dashboard.tools': 'Verfügbare Werkzeuge',
     'dashboard.profile': 'Mein Profil',
     'dashboard.profile.desc': 'Verwalten Sie Ihre persönlichen Informationen und Einstellungen.',
