@@ -46,7 +46,7 @@ if (userRegistrations && userRegistrations.length > 0) {
     .select('*')
     .in('id', eventIds)
     .gte('date', new Date().toISOString())
-    .order('date', { ascending: true });
+    .order('date', { ascending: false });
     
   if (eventsData) {
     registeredEvents = eventsData;

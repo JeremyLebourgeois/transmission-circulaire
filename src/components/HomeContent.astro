@@ -18,7 +18,7 @@ const { data: books } = await supabase
 const { data: events } = await supabase
   .from('events')
   .select('id, title, date, end_date, location')
-  .order('date', { ascending: true })
+  .order('date', { ascending: false })
   .limit(3);
 ---
 

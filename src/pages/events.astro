@@ -22,7 +22,7 @@ if (user) {
 const { data: events, error } = await supabase
   .from('events')
   .select('*')
-  .order('date', { ascending: true });
+  .order('date', { ascending: false });
 ---
 
 <Layout title={t('nav.events')}>
