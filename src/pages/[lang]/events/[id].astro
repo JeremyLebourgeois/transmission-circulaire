@@ -21,6 +21,7 @@ if (user) {
 }
 
 const isCollaborator = ['adherent', 'tresorier', 'admin', 'super_admin'].includes(userRole);
+const isAdmin = userRole === 'admin' || userRole === 'super_admin';
 
 let message = '';
 let isError = false;
@@ -46,6 +47,42 @@ if (Astro.request.method === 'POST' && user) {
     } else {
       message = "Inscription annulée.";
     }
+  } else if (action === 'force_unregister' && isAdmin) {
+    const registrationId = formData.get('registration_id');
+    const { error } = await supabase.from('event_registrations').delete().eq('id', registrationId);
+    if (error) {
+      isError = true;
+      message = "Erreur lors de la désinscription : " + error.message;
+    } else {
+      message = "Membre désinscrit avec succès.";
+    }
+  }
+}
+
+let registeredUsers = [];
+if (isAdmin) {
+  const { data: regs } = await supabase
+    .from('event_registrations')
+    .select('id, user_id')
+    .eq('event_id', id);
+    
+  if (regs && regs.length > 0) {
+    const userIds = regs.map(r => r.user_id);
+    const { data: profiles } = await supabase
+      .from('profiles')
+      .select('*')
+      .in('id', userIds);
+      
+    registeredUsers = regs.map(reg => {
+      const p = (profiles || []).find(p => p.id === reg.user_id);
+      return {
+        id: reg.id,
+        user_id: reg.user_id,
+        first_name: p ? (p.first_name || p.full_name || 'Inconnu') : 'Inconnu',
+        last_name: p ? (p.last_name || '') : '',
+        email: p ? (p.email || 'N/A') : 'N/A'
+      };
+    });
   }
 }
 
@@ -173,6 +210,54 @@ const canRegister = user && (evt.audience !== 'collaborator_only' || isCollabora
 
     <!-- Content -->
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 space-y-16">
+      {isAdmin && (
+        <section class="bg-white rounded-3xl p-8 sm:p-12 shadow-sm border border-red-500/20">
+          <h2 class="text-2xl font-display font-bold text-red-600 mb-6 flex items-center gap-3">
+            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
+            </svg>
+            Administration : Liste des inscrits ({registeredUsers.length})
+          </h2>
+          
+          {registeredUsers.length > 0 ? (
+            <div class="overflow-x-auto">
+              <table class="w-full text-left border-collapse">
+                <thead>
+                  <tr class="border-b border-gray-200">
+                    <th class="py-3 px-4 text-sm font-semibold text-gray-600">Nom</th>
+                    <th class="py-3 px-4 text-sm font-semibold text-gray-600">Email</th>
+                    <th class="py-3 px-4 text-sm font-semibold text-gray-600 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {registeredUsers.map((reg) => (
+                    <tr class="border-b border-gray-100 hover:bg-gray-50">
+                      <td class="py-3 px-4 text-sm text-gray-800 font-medium">
+                        {reg.first_name} {reg.last_name}
+                      </td>
+                      <td class="py-3 px-4 text-sm text-gray-600">
+                        {reg.email}
+                      </td>
+                      <td class="py-3 px-4 text-sm text-right">
+                        <form method="POST" class="inline" onsubmit="return confirm('Êtes-vous sûr de vouloir désinscrire cette personne ?');">
+                          <input type="hidden" name="action" value="force_unregister" />
+                          <input type="hidden" name="registration_id" value={reg.id} />
+                          <button type="submit" class="text-red-500 hover:text-red-700 text-xs font-bold uppercase tracking-wider bg-red-50 hover:bg-red-100 px-3 py-1 rounded-full transition-colors">
+                            Désinscrire
+                          </button>
+                        </form>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <p class="text-gray-500 italic">Aucun inscrit pour le moment.</p>
+          )}
+        </section>
+      )}
+
       {evt.image_url && (
         <div class="rounded-3xl overflow-hidden shadow-2xl border border-[var(--color-tc-blue)]/10 bg-[var(--color-tc-cream)]">
           <img src={evt.image_url} alt={evt.title} class="w-full object-cover max-h-[600px]" />
