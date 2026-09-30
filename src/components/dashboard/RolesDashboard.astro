@@ -140,7 +140,7 @@ const members = (profilesData || []).map(profile => {
               <option value="super_admin">Super Admin</option>
               <option value="admin">Admin</option>
               <option value="tresorier">Trésorier</option>
-              <option value="collaborateur">Collaborateur</option>
+              <option value="adherent">Adhérent</option>
               <option value="membre">Membre</option>
             </select>
           </div>
@@ -185,13 +185,13 @@ const members = (profilesData || []).map(profile => {
                       ${member.role === 'super_admin' ? 'bg-red-100 text-red-800' : ''}
                       ${member.role === 'admin' ? 'bg-orange-100 text-orange-800' : ''}
                       ${member.role === 'tresorier' ? 'bg-blue-100 text-blue-800' : ''}
-                      ${member.role === 'collaborateur' ? 'bg-green-100 text-green-800' : ''}
+                      ${member.role === 'adherent' ? 'bg-green-100 text-green-800' : ''}
                       ${member.role === 'membre' ? 'bg-gray-100 text-gray-800' : ''}
                     `}>
                       {member.role === 'super_admin' ? 'Super Admin' : 
                        member.role === 'admin' ? 'Admin' :
                        member.role === 'tresorier' ? 'Trésorier' :
-                       member.role === 'collaborateur' ? 'Collaborateur' : 'Membre'}
+                       member.role === 'adherent' ? 'Adhérent' : 'Membre'}
                     </span>
                   </td>
                   {currentUserRole === 'super_admin' && (
@@ -203,7 +203,7 @@ const members = (profilesData || []).map(profile => {
                             <input type="hidden" name="userId" value={member.id} />
                             <select name="newRole" class="text-sm border-gray-300 rounded-lg focus:ring-[var(--color-tc-red)] focus:border-[var(--color-tc-red)] py-1.5 pl-2 pr-8 shadow-sm">
                               <option value="membre" selected={member.role === 'membre'}>Membre</option>
-                              <option value="collaborateur" selected={member.role === 'collaborateur'}>Collaborateur</option>
+                              <option value="adherent" selected={member.role === 'adherent'}>Adhérent</option>
                               <option value="tresorier" selected={member.role === 'tresorier'}>Trésorier</option>
                               <option value="admin" selected={member.role === 'admin'}>Admin</option>
                             </select>
