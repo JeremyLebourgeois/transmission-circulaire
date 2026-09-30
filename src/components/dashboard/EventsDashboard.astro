@@ -27,7 +27,10 @@ if (userRole !== 'admin' && userRole !== 'super_admin') {
   return Astro.redirect(translatePath('/dashboard'));
 }
 
+const successParam = Astro.url.searchParams.get('success');
 let successMessage = '';
+if (successParam === 'added') successMessage = 'Événement ajouté avec succès !';
+if (successParam === 'deleted') successMessage = 'Événement supprimé avec succès.';
 let errorMessage = '';
 
 // Handle form submission (add new event or delete)
@@ -59,8 +62,6 @@ if (Astro.request.method === 'POST') {
           .upload(fileName, mainImageFile, { upsert: true });
         
         if (uploadError) {
-          // If the bucket doesn't exist, we will just skip the image or throw.
-          // Supabase might throw an error if 'events_images' bucket is missing.
           throw uploadError;
         }
         
