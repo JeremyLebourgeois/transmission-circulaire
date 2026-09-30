@@ -25,7 +25,8 @@ if (Astro.request.method === 'POST') {
       });
       if (error) {
         isError = true;
-        message = "Une erreur est survenue lors de l'envoi du message.";
+        message = "Une erreur est survenue: " + error.message;
+        console.error("GUESTBOOK ERROR:", error);
       } else {
         message = "Merci pour votre message !";
       }
@@ -164,62 +165,66 @@ const messages = guestbookData || [];
       </div>
  
  <!-- Guestbook / Soutien -->
- <div class="mx-auto mt-24 max-w-4xl text-center pb-12">
- <h3 class="text-2xl font-display font-bold tracking-tight text-[var(--color-tc-blue)] sm:text-3xl mb-4">Livre d'Or & Soutien</h3>
- <p class="text-[var(--color-tc-blue)]/80 mb-12 max-w-2xl mx-auto">
- Laissez-nous un message de soutien ! Retrouvez les mots de notre communauté ci-dessous.
- </p>
-
- {message && (
-   <div class={`mb-8 p-4 rounded-xl font-medium ${isError ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>
-     {message}
+ <div class="mx-auto mt-16 max-w-5xl bg-white rounded-3xl shadow-md overflow-hidden border border-[var(--color-tc-blue)]/5 p-6 sm:p-10">
+   <div class="text-center sm:text-left mb-8 flex items-center justify-center sm:justify-start gap-4">
+      <div class="inline-flex items-center justify-center h-12 w-12 rounded-full bg-[var(--color-tc-olive)]/10">
+        <svg class="h-6 w-6 text-[var(--color-tc-olive)]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.501 48.172 48.172 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" />
+        </svg>
+      </div>
+      <div>
+        <h3 class="text-2xl font-display font-bold text-[var(--color-tc-blue)]">Livre d'Or</h3>
+        <p class="text-[var(--color-tc-blue)]/70 text-sm sm:text-base mt-1">Laissez-nous un message de soutien ! Retrouvez les mots de notre communauté ci-dessous.</p>
+      </div>
    </div>
- )}
- 
- <div class="bg-[var(--color-tc-cream)] rounded-3xl shadow-lg border border-[var(--color-tc-blue)]/10 p-6 sm:p-8 text-left mb-16">
-   {user ? (
-     <form method="POST" class="space-y-6">
-       <div>
-         <label for="message" class="block text-sm font-medium leading-6 text-[var(--color-tc-blue)] ">Votre message (public)</label>
-         <div class="mt-2">
-           <textarea id="message" name="message" rows="4" required class="block w-full rounded-md border-0 py-1.5 text-[var(--color-tc-blue)] shadow-sm ring-1 ring-inset ring-[var(--color-tc-blue)]/20 focus:ring-2 focus:ring-inset focus:ring-[var(--color-tc-blue)] sm:text-sm sm:leading-6 " placeholder="Un grand merci pour vos actions..."></textarea>
-         </div>
-       </div>
-       <button type="submit" class="w-full flex justify-center rounded-md bg-[var(--color-tc-mustard)] px-3 py-3 text-sm font-bold text-white shadow-md hover:bg-opacity-90 transition-all">
-         Envoyer mon message
-       </button>
-     </form>
-   ) : (
-     <div class="text-center py-8">
-       <p class="text-[var(--color-tc-blue)]/80 mb-6 font-medium">Vous devez être connecté pour laisser un message dans le livre d'or.</p>
-       <a href={translatePath('/login')} class="inline-flex justify-center rounded-md bg-[var(--color-tc-blue)] px-6 py-3 text-sm font-bold text-white shadow-md hover:bg-opacity-90 transition-all">
-         Se connecter ou s'inscrire
-       </a>
+
+   {message && (
+     <div class={`mb-8 p-4 rounded-xl font-medium ${isError ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>
+       {message}
      </div>
    )}
- </div>
-
- <!-- Messages List -->
- {messages.length > 0 ? (
-   <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
-     {messages.map(msg => (
-       <div class="bg-white rounded-2xl p-6 shadow-sm border border-[var(--color-tc-blue)]/5 relative overflow-hidden group">
-         <div class="absolute top-0 left-0 w-1 h-full bg-[var(--color-tc-mustard)]/50 group-hover:bg-[var(--color-tc-mustard)] transition-colors"></div>
-         <p class="text-[var(--color-tc-blue)] mb-4 italic leading-relaxed">"{msg.message}"</p>
-         <div class="text-sm">
-           <span class="font-bold text-[var(--color-tc-blue)]">{msg.profiles?.first_name || 'Anonyme'} {msg.profiles?.last_name || ''}</span>
-           <span class="text-[var(--color-tc-blue)]/40 mx-2">•</span>
-           <span class="text-[var(--color-tc-blue)]/60">{new Date(msg.created_at).toLocaleDateString(lang === 'fr' ? 'fr-FR' : 'en-US', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
+ 
+   <div class="bg-[var(--color-tc-cream)] rounded-2xl border border-[var(--color-tc-blue)]/10 p-6 text-left mb-10">
+     {user ? (
+       <form method="POST" class="space-y-4">
+         <div>
+           <label for="message" class="block text-sm font-medium leading-6 text-[var(--color-tc-blue)] ">Votre message public :</label>
+           <div class="mt-2">
+             <textarea id="message" name="message" rows="3" required class="block w-full rounded-xl border-0 py-2.5 px-4 text-[var(--color-tc-blue)] shadow-sm ring-1 ring-inset ring-[var(--color-tc-blue)]/10 focus:ring-2 focus:ring-inset focus:ring-[var(--color-tc-olive)] sm:text-sm sm:leading-6 " placeholder="Ex: Un grand merci pour toutes vos actions..."></textarea>
+           </div>
          </div>
+         <button type="submit" class="w-full flex justify-center rounded-xl bg-[var(--color-tc-olive)] px-3 py-3 text-sm font-bold text-white shadow-md hover:bg-opacity-90 hover:scale-[1.01] transition-all">
+           Publier mon message
+         </button>
+       </form>
+     ) : (
+       <div class="text-center py-6">
+         <p class="text-[var(--color-tc-blue)]/80 mb-4 font-medium">Vous devez être connecté pour écrire un mot.</p>
+         <a href={translatePath('/login')} class="inline-flex justify-center rounded-xl border border-[var(--color-tc-blue)]/20 bg-white px-6 py-2.5 text-sm font-bold text-[var(--color-tc-blue)] shadow-sm hover:bg-[var(--color-tc-cream)] transition-all">
+           Se connecter
+         </a>
        </div>
-     ))}
+     )}
    </div>
- ) : (
-   <p class="text-[var(--color-tc-blue)]/50 italic text-sm">Soyez le premier à laisser un message !</p>
- )}
- </div>
- </div>
- </div>
+
+   <!-- Messages List -->
+   {messages.length > 0 ? (
+     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
+       {messages.map(msg => (
+         <div class="bg-[var(--color-tc-cream)] rounded-2xl p-6 border border-[var(--color-tc-blue)]/5 relative overflow-hidden group">
+           <p class="text-[var(--color-tc-blue)] mb-4 italic leading-relaxed text-sm">"{msg.message}"</p>
+           <div class="text-xs">
+             <span class="font-bold text-[var(--color-tc-blue)]">{msg.profiles?.first_name || 'Anonyme'} {msg.profiles?.last_name || ''}</span>
+             <span class="text-[var(--color-tc-blue)]/40 mx-2">•</span>
+             <span class="text-[var(--color-tc-blue)]/60">{new Date(msg.created_at).toLocaleDateString(lang === 'fr' ? 'fr-FR' : 'en-US', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
+           </div>
+         </div>
+       ))}
+     </div>
+   ) : (
+     <p class="text-[var(--color-tc-blue)]/50 italic text-sm text-center py-4">Soyez le premier à laisser un message !</p>
+   )}
+ </div></div>
 </Layout>
 
 <script>
