@@ -1,14 +1,48 @@
 ---
+export const prerender = false;
 import Layout from '../../layouts/Layout.astro';
-import { getLangFromUrl, useTranslations } from '../../i18n/utils';
-import { languages } from '../../i18n/ui';
-
-export function getStaticPaths() {
- return Object.keys(languages).filter((lang) => lang !== 'fr').map((lang) => ({ params: { lang } }));
-}
+import { getLangFromUrl, useTranslations, useTranslatedPath } from '../../i18n/utils';
+import { getSupabaseServerClient } from '../../lib/supabase-server';
 
 const lang = getLangFromUrl(Astro.url);
 const t = useTranslations(lang);
+const translatePath = useTranslatedPath(lang);
+
+const supabase = getSupabaseServerClient(Astro.cookies);
+const { data: { user } } = await supabase.auth.getUser();
+
+let message = '';
+let isError = false;
+
+if (Astro.request.method === 'POST') {
+  const formData = await Astro.request.formData();
+  if (user) {
+    const text = formData.get('message')?.toString();
+    if (text && text.trim().length > 0) {
+      const { error } = await supabase.from('guestbook').insert({
+        user_id: user.id,
+        message: text.trim()
+      });
+      if (error) {
+        isError = true;
+        message = "Une erreur est survenue lors de l'envoi du message.";
+      } else {
+        message = "Merci pour votre message !";
+      }
+    } else {
+      isError = true;
+      message = "Le message ne peut pas être vide.";
+    }
+  }
+}
+
+// Fetch guestbook messages
+const { data: guestbookData } = await supabase
+  .from('guestbook')
+  .select('*, profiles(first_name, last_name)')
+  .order('created_at', { ascending: false });
+  
+const messages = guestbookData || [];
 ---
 
 <Layout title={t('nav.donate')}>
