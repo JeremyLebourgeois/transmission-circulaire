@@ -50,8 +50,13 @@ const { data: events, error } = await supabase
  ) : events?.length === 0 ? (
    <p class="text-center w-full text-[var(--color-tc-blue)]/60 italic">Aucun événement n'est programmé pour le moment.</p>
  ) : (
-   events?.map(evt => (
-     <article class="flex flex-col items-start justify-between bg-[var(--color-tc-card)] p-8 rounded-3xl border border-[var(--color-tc-blue)]/5 shadow-sm hover:shadow-md transition-shadow">
+   events?.map(evt => {
+     const targetDate = (evt.end_date && evt.end_date.trim() !== '') ? evt.end_date : evt.date;
+     const isPast = new Date(targetDate).getTime() < Date.now();
+     console.log('EVENT DEBUG:', evt.title, 'targetDate:', targetDate, 'parsedDate:', new Date(targetDate), 'isPast:', isPast);
+     
+     return (
+     <article class={`flex flex-col items-start justify-between bg-[var(--color-tc-card)] p-8 rounded-3xl border border-[var(--color-tc-blue)]/5 shadow-sm transition-shadow ${isPast ? 'opacity-60 grayscale' : 'hover:shadow-md'}`}>
        <div class="flex items-center gap-x-4 text-xs mb-4">
          <time datetime={evt.date} class="font-bold text-[var(--color-tc-olive)] text-sm">
            {evt.end_date ? (
@@ -86,12 +91,13 @@ const { data: events, error } = await supabase
            </svg>
            {evt.location}
          </div>
-         <a href={translatePath(`/events/${evt.id}`)} class="inline-flex justify-center items-center px-4 py-2 bg-slate-100 text-[var(--color-tc-blue)] rounded-full text-sm font-medium hover:bg-slate-200 transition-colors w-full relative z-10">
-           En savoir plus
+         <a href={translatePath(`/events/${evt.id}`)} class={`inline-flex justify-center items-center px-4 py-2 rounded-full text-sm font-medium transition-colors w-full relative z-10 ${isPast ? 'bg-slate-200 text-[var(--color-tc-blue)]/60' : 'bg-slate-100 text-[var(--color-tc-blue)] hover:bg-slate-200'}`}>
+           {isPast ? 'Événement passé' : 'En savoir plus'}
          </a>
        </div>
      </article>
-   ))
+     )
+   })
  )}
  
  </div>
