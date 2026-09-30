@@ -33,6 +33,18 @@ if (successParam === 'added') successMessage = 'Événement ajouté avec succès
 if (successParam === 'deleted') successMessage = 'Événement supprimé avec succès.';
 let errorMessage = '';
 
+const editId = Astro.url.searchParams.get('edit');
+let eventToEdit = null;
+if (editId) {
+  const { data } = await supabase.from('events').select('*').eq('id', editId).single();
+  if (data) eventToEdit = data;
+}
+
+const formatForInput = (isoString) => {
+  if (!isoString) return '';
+  return new Date(isoString).toISOString().slice(0, 16);
+};
+
 // Handle form submission (add new event or delete)
 if (Astro.request.method === 'POST') {
   try {
@@ -44,6 +56,55 @@ if (Astro.request.method === 'POST') {
       const { error } = await supabase.from('events').delete().eq('id', eventId);
       if (error) throw error;
       successMessage = 'Événement supprimé avec succès.';
+    } else if (action === 'update') {
+      // Update event
+      const eventId = formData.get('eventId')?.toString();
+      const title = formData.get('title')?.toString() || '';
+      const date = formData.get('date')?.toString() || '';
+      const endDate = formData.get('end_date')?.toString() || null;
+      const location = formData.get('location')?.toString() || '';
+      const description = formData.get('description')?.toString() || '';
+      const mainImageFile = formData.get('image') as File;
+
+      const updateData: any = { title, date, end_date: endDate, location, description };
+
+      if (mainImageFile && mainImageFile.size > 0) {
+        const fileExt = mainImageFile.name.split('.').pop();
+        const fileName = `${Date.now()}-event.${fileExt}`;
+        const { error: uploadError } = await supabase.storage
+          .from('events_images')
+          .upload(fileName, mainImageFile, { upsert: true });
+        
+        if (uploadError) throw uploadError;
+        
+        const { data: { publicUrl } } = supabase.storage.from('events_images').getPublicUrl(fileName);
+        updateData.image_url = publicUrl;
+      }
+
+      const maxSpotsRaw = formData.get('max_spots')?.toString();
+      let maxSpots = maxSpotsRaw ? parseInt(maxSpotsRaw, 10) : null;
+      const audience = formData.get('audience')?.toString() || 'all';
+
+      // Vérification du nombre d'inscrits actuels
+      const { count: currentRegistrations, error: countError } = await supabase
+        .from('event_registrations')
+        .select('*', { count: 'exact', head: true })
+        .eq('event_id', eventId);
+      
+      if (countError) throw countError;
+      
+      if (maxSpots !== null && currentRegistrations !== null && maxSpots < currentRegistrations) {
+        throw new Error(`Impossible de définir la limite à ${maxSpots}. Il y a déjà ${currentRegistrations} inscrit(s).`);
+      }
+
+      updateData.max_spots = maxSpots;
+      updateData.audience = audience;
+
+      const { error: eventError } = await supabase.from('events').update(updateData).eq('id', eventId);
+      if (eventError) throw eventError;
+
+      successMessage = 'Événement mis à jour avec succès !';
+      eventToEdit = null;
     } else {
       // Add event
       const title = formData.get('title')?.toString() || '';
@@ -127,25 +188,27 @@ if (fetchError && fetchError.code === '42P01') { // table does not exist
 
       <!-- Add Event Form -->
       {!dbMissing && (
-        <div class="bg-[var(--color-tc-card)] rounded-3xl shadow-xl border border-[var(--color-tc-blue)]/10 p-6 sm:p-8">
-          <h2 class="text-xl font-bold text-[var(--color-tc-blue)] mb-6">Ajouter un nouvel événement</h2>
+        <div class="bg-[var(--color-tc-card)] rounded-3xl shadow-xl border border-[var(--color-tc-blue)]/10 p-6 sm:p-8" id="event-form">
+          <h2 class="text-xl font-bold text-[var(--color-tc-blue)] mb-6">{eventToEdit ? "Modifier l'événement" : "Ajouter un nouvel événement"}</h2>
           <form method="POST" enctype="multipart/form-data" class="space-y-6">
-
+            <input type="hidden" name="action" value={eventToEdit ? "update" : "add"} />
+            {eventToEdit && <input type="hidden" name="eventId" value={eventToEdit.id} />}
+            
             <!-- Titre -->
             <div>
               <label class="block text-sm font-medium text-[var(--color-tc-blue)] mb-2">Nom de l'événement *</label>
-              <input type="text" name="title" required placeholder="Ex: Vernissage exposition" class="w-full rounded-xl border-0 py-3 px-4 bg-[var(--color-tc-cream)] ring-1 ring-[var(--color-tc-blue)]/20 focus:ring-2 focus:ring-[var(--color-tc-mustard)] text-[var(--color-tc-blue)] text-sm" />
+              <input type="text" name="title" required value={eventToEdit?.title || ''} placeholder="Ex: Vernissage exposition" class="w-full rounded-xl border-0 py-3 px-4 bg-[var(--color-tc-cream)] ring-1 ring-[var(--color-tc-blue)]/20 focus:ring-2 focus:ring-[var(--color-tc-mustard)] text-[var(--color-tc-blue)] text-sm" />
             </div>
 
             <!-- Dates -->
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div>
                 <label class="block text-sm font-medium text-[var(--color-tc-blue)] mb-2">Date et Heure de début *</label>
-                <input type="datetime-local" name="date" required class="w-full rounded-xl border-0 py-3 px-4 bg-[var(--color-tc-cream)] ring-1 ring-[var(--color-tc-blue)]/20 focus:ring-2 focus:ring-[var(--color-tc-mustard)] text-[var(--color-tc-blue)] text-sm" />
+                <input type="datetime-local" name="date" required value={formatForInput(eventToEdit?.date)} class="w-full rounded-xl border-0 py-3 px-4 bg-[var(--color-tc-cream)] ring-1 ring-[var(--color-tc-blue)]/20 focus:ring-2 focus:ring-[var(--color-tc-mustard)] text-[var(--color-tc-blue)] text-sm" />
               </div>
               <div>
                 <label class="block text-sm font-medium text-[var(--color-tc-blue)] mb-2">Date et Heure de fin (Optionnel)</label>
-                <input type="datetime-local" name="end_date" class="w-full rounded-xl border-0 py-3 px-4 bg-[var(--color-tc-cream)] ring-1 ring-[var(--color-tc-blue)]/20 focus:ring-2 focus:ring-[var(--color-tc-mustard)] text-[var(--color-tc-blue)] text-sm" />
+                <input type="datetime-local" name="end_date" value={formatForInput(eventToEdit?.end_date)} class="w-full rounded-xl border-0 py-3 px-4 bg-[var(--color-tc-cream)] ring-1 ring-[var(--color-tc-blue)]/20 focus:ring-2 focus:ring-[var(--color-tc-mustard)] text-[var(--color-tc-blue)] text-sm" />
               </div>
             </div>
 
@@ -153,39 +216,45 @@ if (fetchError && fetchError.code === '42P01') { // table does not exist
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div>
                 <label class="block text-sm font-medium text-[var(--color-tc-blue)] mb-2">Lieu *</label>
-                <input type="text" name="location" required placeholder="Ex: Paris, France" class="w-full rounded-xl border-0 py-3 px-4 bg-[var(--color-tc-cream)] ring-1 ring-[var(--color-tc-blue)]/20 focus:ring-2 focus:ring-[var(--color-tc-mustard)] text-[var(--color-tc-blue)] text-sm" />
+                <input type="text" name="location" required value={eventToEdit?.location || ''} placeholder="Ex: Paris, France" class="w-full rounded-xl border-0 py-3 px-4 bg-[var(--color-tc-cream)] ring-1 ring-[var(--color-tc-blue)]/20 focus:ring-2 focus:ring-[var(--color-tc-mustard)] text-[var(--color-tc-blue)] text-sm" />
               </div>
               <div>
                 <label class="block text-sm font-medium text-[var(--color-tc-blue)] mb-2">Image d'illustration (optionnel)</label>
                 <input type="file" name="image" accept="image/*" class="w-full text-sm text-slate-500 file:mr-3 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[var(--color-tc-mustard)]/10 file:text-[var(--color-tc-mustard)] hover:file:bg-[var(--color-tc-mustard)]/20" />
+                {eventToEdit?.image_url && <p class="text-xs text-[var(--color-tc-blue)]/50 mt-1">L'image actuelle sera conservée si vous n'en sélectionnez pas de nouvelle.</p>}
               </div>
             </div>
 
             <!-- Description -->
             <div>
               <label class="block text-sm font-medium text-[var(--color-tc-blue)] mb-2">Description / Informations additionnelles</label>
-              <textarea name="description" rows="4" placeholder="Détails de l'événement, lien de réservation..." class="w-full rounded-xl border-0 py-3 px-4 bg-[var(--color-tc-cream)] ring-1 ring-[var(--color-tc-blue)]/20 focus:ring-2 focus:ring-[var(--color-tc-mustard)] text-[var(--color-tc-blue)] text-sm"></textarea>
+              <textarea name="description" rows="4" placeholder="Détails de l'événement, lien de réservation..." class="w-full rounded-xl border-0 py-3 px-4 bg-[var(--color-tc-cream)] ring-1 ring-[var(--color-tc-blue)]/20 focus:ring-2 focus:ring-[var(--color-tc-mustard)] text-[var(--color-tc-blue)] text-sm">{eventToEdit?.description || ''}</textarea>
             </div>
 
             <!-- Infos Additionnelles: Places et Audience -->
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div>
                 <label class="block text-sm font-medium text-[var(--color-tc-blue)] mb-2">Nombre de places max (optionnel)</label>
-                <input type="number" min="1" name="max_spots" placeholder="Laisser vide si illimité" class="w-full rounded-xl border-0 py-3 px-4 bg-[var(--color-tc-cream)] ring-1 ring-[var(--color-tc-blue)]/20 focus:ring-2 focus:ring-[var(--color-tc-mustard)] text-[var(--color-tc-blue)] text-sm" />
+                <input type="number" min="1" name="max_spots" value={eventToEdit?.max_spots || ''} placeholder="Laisser vide si illimité" class="w-full rounded-xl border-0 py-3 px-4 bg-[var(--color-tc-cream)] ring-1 ring-[var(--color-tc-blue)]/20 focus:ring-2 focus:ring-[var(--color-tc-mustard)] text-[var(--color-tc-blue)] text-sm" />
               </div>
               <div>
                 <label class="block text-sm font-medium text-[var(--color-tc-blue)] mb-2">Public autorisé *</label>
                 <select name="audience" class="w-full rounded-xl border-0 py-3 px-4 bg-[var(--color-tc-cream)] ring-1 ring-[var(--color-tc-blue)]/20 focus:ring-2 focus:ring-[var(--color-tc-mustard)] text-[var(--color-tc-blue)] text-sm">
-                  <option value="all" selected>Ouvert à tous</option>
-                  <option value="collaborator_only">Réservé aux adhérents</option>
+                  <option value="all" selected={eventToEdit?.audience !== 'collaborator_only'}>Ouvert à tous</option>
+                  <option value="collaborator_only" selected={eventToEdit?.audience === 'collaborator_only'}>Réservé aux adhérents</option>
                 </select>
               </div>
             </div>
 
-            <div class="pt-4">
+            <div class="pt-4 flex items-center gap-4">
               <button type="submit" class="w-full sm:w-auto rounded-full bg-[var(--color-tc-olive)] px-8 py-3 text-sm font-bold text-white shadow-sm hover:bg-opacity-90 transition-all transform hover:-translate-y-0.5">
-                Ajouter l'événement
+                {eventToEdit ? "Enregistrer les modifications" : "Ajouter l'événement"}
               </button>
+              {eventToEdit && (
+                <a href={translatePath('/dashboard/events')} class="text-sm font-bold text-[var(--color-tc-blue)] hover:underline">
+                  Annuler
+                </a>
+              )}
             </div>
           </form>
         </div>
@@ -229,6 +298,7 @@ if (fetchError && fetchError.code === '42P01') { // table does not exist
                 </div>
                 
                 <div class="flex items-baseline gap-3 flex-shrink-0 mt-4 sm:mt-0">
+                  <a href={translatePath(`/dashboard/events?edit=${evt.id}#event-form`)} class="text-xs text-[var(--color-tc-mustard)] hover:text-[var(--color-tc-mustard)]/80 font-bold underline">Modifier</a>
                   <a href={translatePath(`/events/${evt.id}`)} target="_blank" class="text-xs text-[var(--color-tc-blue)]/60 hover:text-[var(--color-tc-blue)] underline">Voir →</a>
                   <form method="POST" class="m-0 p-0 flex items-baseline">
                     <input type="hidden" name="action" value="delete" />

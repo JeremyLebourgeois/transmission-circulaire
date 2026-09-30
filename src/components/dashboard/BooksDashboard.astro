@@ -27,8 +27,18 @@ if (userRole !== 'admin' && userRole !== 'super_admin') {
   return Astro.redirect(translatePath('/dashboard'));
 }
 
+const successParam = Astro.url.searchParams.get('success');
 let successMessage = '';
+if (successParam === 'added') successMessage = 'Livre ajouté avec succès !';
+if (successParam === 'deleted') successMessage = 'Livre supprimé avec succès.';
 let errorMessage = '';
+
+const editId = Astro.url.searchParams.get('edit');
+let bookToEdit = null;
+if (editId) {
+  const { data } = await supabase.from('books').select('*, book_collaborators(*)').eq('id', editId).single();
+  if (data) bookToEdit = data;
+}
 
 // Handle form submission (add new book)
 if (Astro.request.method === 'POST') {
@@ -42,7 +52,7 @@ if (Astro.request.method === 'POST') {
       if (error) throw error;
       successMessage = 'Livre supprimé avec succès.';
     } else {
-      // Add book
+      // Add or Update book
       const title = formData.get('title')?.toString() || '';
       const shortDesc = formData.get('short_description')?.toString() || '';
       const longDesc = formData.get('long_description')?.toString() || '';
@@ -60,12 +70,28 @@ if (Astro.request.method === 'POST') {
         mainImageUrl = publicUrl;
       }
 
-      const { data: newBook, error: bookError } = await supabase
-        .from('books')
-        .insert({ title, short_description: shortDesc, long_description: longDesc, main_image_url: mainImageUrl })
-        .select()
-        .single();
-      if (bookError) throw bookError;
+      let targetBookId = '';
+
+      if (action === 'update') {
+        const bookId = formData.get('bookId')?.toString();
+        const updateData: any = { title, short_description: shortDesc, long_description: longDesc };
+        if (mainImageUrl) updateData.main_image_url = mainImageUrl;
+        
+        const { error: bookError } = await supabase.from('books').update(updateData).eq('id', bookId);
+        if (bookError) throw bookError;
+        targetBookId = bookId;
+
+        // Reset collabs
+        await supabase.from('book_collaborators').delete().eq('book_id', bookId);
+      } else {
+        const { data: newBook, error: bookError } = await supabase
+          .from('books')
+          .insert({ title, short_description: shortDesc, long_description: longDesc, main_image_url: mainImageUrl })
+          .select()
+          .single();
+        if (bookError) throw bookError;
+        targetBookId = newBook.id;
+      }
 
       // Handle main collaborators (registered users)
       const mainCollabUserIds = formData.getAll('main_collab_user_id[]');
@@ -74,7 +100,7 @@ if (Astro.request.method === 'POST') {
         const uid = mainCollabUserIds[i]?.toString();
         if (uid) {
           await supabase.from('book_collaborators').insert({
-            book_id: newBook.id,
+            book_id: targetBookId,
             user_id: uid,
             contribution_detail: mainCollabContribs[i]?.toString() || '',
             is_main: true,
@@ -89,7 +115,7 @@ if (Astro.request.method === 'POST') {
         const name = mainCollabNames[i]?.toString();
         if (name) {
           await supabase.from('book_collaborators').insert({
-            book_id: newBook.id,
+            book_id: targetBookId,
             name,
             contribution_detail: mainCollabNameContribs[i]?.toString() || '',
             is_main: true,
@@ -103,12 +129,17 @@ if (Astro.request.method === 'POST') {
         const n = name?.toString();
         if (n) {
           await supabase.from('book_collaborators').insert({
-            book_id: newBook.id, name: n, is_main: false,
+            book_id: targetBookId, name: n, is_main: false,
           });
         }
       }
 
-      successMessage = 'Livre ajouté avec succès !';
+      if (action === 'update') {
+        successMessage = 'Livre mis à jour avec succès !';
+        bookToEdit = null;
+      } else {
+        successMessage = 'Livre ajouté avec succès !';
+      }
     }
   } catch (err: any) {
     errorMessage = 'Erreur : ' + (err?.message || JSON.stringify(err));
@@ -146,32 +177,35 @@ const { data: users } = await supabase
       {errorMessage && <div class="bg-red-50 text-red-800 p-4 rounded-xl text-sm font-medium">{errorMessage}</div>}
 
       <!-- Add Book Form -->
-      <div class="bg-[var(--color-tc-card)] rounded-3xl shadow-xl border border-[var(--color-tc-blue)]/10 p-6 sm:p-8">
-        <h2 class="text-xl font-bold text-[var(--color-tc-blue)] mb-6">Ajouter un nouveau livre</h2>
+      <div class="bg-[var(--color-tc-card)] rounded-3xl shadow-xl border border-[var(--color-tc-blue)]/10 p-6 sm:p-8" id="book-form">
+        <h2 class="text-xl font-bold text-[var(--color-tc-blue)] mb-6">{bookToEdit ? "Modifier le livre" : "Ajouter un nouveau livre"}</h2>
         <form method="POST" enctype="multipart/form-data" class="space-y-6">
+          <input type="hidden" name="action" value={bookToEdit ? "update" : "add"} />
+          {bookToEdit && <input type="hidden" name="bookId" value={bookToEdit.id} />}
 
           <!-- Titre + Image principale -->
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <div>
               <label class="block text-sm font-medium text-[var(--color-tc-blue)] mb-2">Titre *</label>
-              <input type="text" name="title" required placeholder="Ex: Meltem" class="w-full rounded-xl border-0 py-3 px-4 bg-[var(--color-tc-cream)] ring-1 ring-[var(--color-tc-blue)]/20 focus:ring-2 focus:ring-[var(--color-tc-mustard)] text-[var(--color-tc-blue)] text-sm" />
+              <input type="text" name="title" required value={bookToEdit?.title || ''} placeholder="Ex: Meltem" class="w-full rounded-xl border-0 py-3 px-4 bg-[var(--color-tc-cream)] ring-1 ring-[var(--color-tc-blue)]/20 focus:ring-2 focus:ring-[var(--color-tc-mustard)] text-[var(--color-tc-blue)] text-sm" />
             </div>
             <div>
               <label class="block text-sm font-medium text-[var(--color-tc-blue)] mb-2">Image principale *</label>
               <input type="file" name="main_image" accept="image/*" class="w-full text-sm text-slate-500 file:mr-3 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[var(--color-tc-mustard)]/10 file:text-[var(--color-tc-mustard)] hover:file:bg-[var(--color-tc-mustard)]/20" />
+              {bookToEdit?.main_image_url && <p class="text-xs text-[var(--color-tc-blue)]/50 mt-1">L'image actuelle sera conservée si vous n'en sélectionnez pas de nouvelle.</p>}
             </div>
           </div>
 
           <!-- Description courte -->
           <div>
             <label class="block text-sm font-medium text-[var(--color-tc-blue)] mb-2">Description courte *</label>
-            <textarea name="short_description" required rows="3" placeholder="Un résumé en quelques phrases..." class="w-full rounded-xl border-0 py-3 px-4 bg-[var(--color-tc-cream)] ring-1 ring-[var(--color-tc-blue)]/20 focus:ring-2 focus:ring-[var(--color-tc-mustard)] text-[var(--color-tc-blue)] text-sm"></textarea>
+            <textarea name="short_description" required rows="3" placeholder="Un résumé en quelques phrases..." class="w-full rounded-xl border-0 py-3 px-4 bg-[var(--color-tc-cream)] ring-1 ring-[var(--color-tc-blue)]/20 focus:ring-2 focus:ring-[var(--color-tc-mustard)] text-[var(--color-tc-blue)] text-sm">{bookToEdit?.short_description || ''}</textarea>
           </div>
 
           <!-- Description longue -->
           <div>
             <label class="block text-sm font-medium text-[var(--color-tc-blue)] mb-2">Description longue (pour la page détail)</label>
-            <textarea name="long_description" rows="5" placeholder="Contenu détaillé du livre..." class="w-full rounded-xl border-0 py-3 px-4 bg-[var(--color-tc-cream)] ring-1 ring-[var(--color-tc-blue)]/20 focus:ring-2 focus:ring-[var(--color-tc-mustard)] text-[var(--color-tc-blue)] text-sm"></textarea>
+            <textarea name="long_description" rows="5" placeholder="Contenu détaillé du livre..." class="w-full rounded-xl border-0 py-3 px-4 bg-[var(--color-tc-cream)] ring-1 ring-[var(--color-tc-blue)]/20 focus:ring-2 focus:ring-[var(--color-tc-mustard)] text-[var(--color-tc-blue)] text-sm">{bookToEdit?.long_description || ''}</textarea>
           </div>
 
           <!-- Collaborateurs principaux (inscrits) -->
@@ -189,7 +223,20 @@ const { data: users } = await supabase
               </div>
 
               <div id="selectedUsersList" class="space-y-3 mt-3">
-                <!-- Selected users will be injected here -->
+                {bookToEdit?.book_collaborators?.filter(c => c.is_main && c.user_id).map(c => {
+                  const userProfile = users?.find(u => u.id === c.user_id);
+                  const name = userProfile ? (userProfile.full_name || userProfile.id) : c.user_id;
+                  return (
+                    <div class="flex flex-col sm:flex-row gap-3 items-start sm:items-center bg-[var(--color-tc-cream)]/50 p-3 rounded-xl border border-[var(--color-tc-blue)]/10" id={`selected-user-${c.user_id}`}>
+                      <div class="flex items-center justify-between sm:justify-start gap-2 w-full sm:w-auto sm:min-w-[200px]">
+                        <input type="hidden" name="main_collab_user_id[]" value={c.user_id} />
+                        <span class="text-sm font-bold text-[var(--color-tc-blue)] flex-1 truncate">{name}</span>
+                        <button type="button" class="text-red-400 hover:text-red-600 px-2 font-bold" onclick={`removeUser('${c.user_id}')`}>✕</button>
+                      </div>
+                      <input type="text" name="main_collab_contrib[]" value={c.contribution_detail || ''} placeholder="Rôle / contribution..." class="flex-1 rounded-xl border-0 py-2 px-3 bg-white ring-1 ring-[var(--color-tc-blue)]/20 focus:ring-2 focus:ring-[var(--color-tc-mustard)] text-[var(--color-tc-blue)] text-sm w-full" />
+                    </div>
+                  );
+                })}
               </div>
               {(!users || users.length === 0) && <p class="text-sm text-[var(--color-tc-blue)]/50 italic">Aucun membre inscrit pour l'instant.</p>}
             </div>
@@ -198,10 +245,19 @@ const { data: users } = await supabase
             <div>
               <label class="block text-sm font-medium text-[var(--color-tc-blue)] mb-3">Personnes sans compte</label>
               <div id="free-collabs" class="space-y-3">
-                <div class="flex flex-col sm:flex-row gap-3">
-                  <input type="text" name="main_collab_name[]" placeholder="Nom complet..." class="flex-1 rounded-xl border-0 py-2 px-3 bg-[var(--color-tc-cream)] ring-1 ring-[var(--color-tc-blue)]/20 focus:ring-2 focus:ring-[var(--color-tc-mustard)] text-[var(--color-tc-blue)] text-sm" />
-                  <input type="text" name="main_collab_name_contrib[]" placeholder="Rôle / contribution..." class="flex-1 rounded-xl border-0 py-2 px-3 bg-[var(--color-tc-cream)] ring-1 ring-[var(--color-tc-blue)]/20 focus:ring-2 focus:ring-[var(--color-tc-mustard)] text-[var(--color-tc-blue)] text-sm" />
-                </div>
+                {bookToEdit && bookToEdit.book_collaborators?.filter(c => c.is_main && !c.user_id).length > 0 ? (
+                  bookToEdit.book_collaborators.filter(c => c.is_main && !c.user_id).map(c => (
+                    <div class="flex flex-col sm:flex-row gap-3">
+                      <input type="text" name="main_collab_name[]" value={c.name} placeholder="Nom complet..." class="flex-1 rounded-xl border-0 py-2 px-3 bg-[var(--color-tc-cream)] ring-1 ring-[var(--color-tc-blue)]/20 focus:ring-2 focus:ring-[var(--color-tc-mustard)] text-[var(--color-tc-blue)] text-sm" />
+                      <input type="text" name="main_collab_name_contrib[]" value={c.contribution_detail || ''} placeholder="Rôle / contribution..." class="flex-1 rounded-xl border-0 py-2 px-3 bg-[var(--color-tc-cream)] ring-1 ring-[var(--color-tc-blue)]/20 focus:ring-2 focus:ring-[var(--color-tc-mustard)] text-[var(--color-tc-blue)] text-sm" />
+                    </div>
+                  ))
+                ) : (
+                  <div class="flex flex-col sm:flex-row gap-3">
+                    <input type="text" name="main_collab_name[]" placeholder="Nom complet..." class="flex-1 rounded-xl border-0 py-2 px-3 bg-[var(--color-tc-cream)] ring-1 ring-[var(--color-tc-blue)]/20 focus:ring-2 focus:ring-[var(--color-tc-mustard)] text-[var(--color-tc-blue)] text-sm" />
+                    <input type="text" name="main_collab_name_contrib[]" placeholder="Rôle / contribution..." class="flex-1 rounded-xl border-0 py-2 px-3 bg-[var(--color-tc-cream)] ring-1 ring-[var(--color-tc-blue)]/20 focus:ring-2 focus:ring-[var(--color-tc-mustard)] text-[var(--color-tc-blue)] text-sm" />
+                  </div>
+                )}
               </div>
               <button type="button" onclick="addFreeCollab()" class="mt-3 text-sm text-[var(--color-tc-mustard)] hover:underline">+ Ajouter une personne</button>
             </div>
@@ -211,15 +267,26 @@ const { data: users } = await supabase
           <div class="border-t border-[var(--color-tc-blue)]/10 pt-6">
             <h3 class="text-md font-bold text-[var(--color-tc-blue)] mb-4">Autres collaborateurs (optionnel)</h3>
             <div id="other-collabs" class="space-y-3">
-              <input type="text" name="other_collab_name[]" placeholder="Nom complet..." class="w-full sm:w-1/2 rounded-xl border-0 py-2 px-3 bg-[var(--color-tc-cream)] ring-1 ring-[var(--color-tc-blue)]/20 focus:ring-2 focus:ring-[var(--color-tc-mustard)] text-[var(--color-tc-blue)] text-sm" />
+              {bookToEdit && bookToEdit.book_collaborators?.filter(c => !c.is_main).length > 0 ? (
+                bookToEdit.book_collaborators.filter(c => !c.is_main).map(c => (
+                  <input type="text" name="other_collab_name[]" value={c.name} placeholder="Nom complet..." class="w-full sm:w-1/2 rounded-xl border-0 py-2 px-3 bg-[var(--color-tc-cream)] ring-1 ring-[var(--color-tc-blue)]/20 focus:ring-2 focus:ring-[var(--color-tc-mustard)] text-[var(--color-tc-blue)] text-sm block" />
+                ))
+              ) : (
+                <input type="text" name="other_collab_name[]" placeholder="Nom complet..." class="w-full sm:w-1/2 rounded-xl border-0 py-2 px-3 bg-[var(--color-tc-cream)] ring-1 ring-[var(--color-tc-blue)]/20 focus:ring-2 focus:ring-[var(--color-tc-mustard)] text-[var(--color-tc-blue)] text-sm block" />
+              )}
             </div>
             <button type="button" onclick="addOtherCollab()" class="mt-3 text-sm text-[var(--color-tc-mustard)] hover:underline">+ Ajouter un collaborateur</button>
           </div>
 
-          <div class="pt-4">
+          <div class="pt-4 flex items-center gap-4">
             <button type="submit" class="w-full sm:w-auto rounded-full bg-[var(--color-tc-olive)] px-8 py-3 text-sm font-bold text-white shadow-sm hover:bg-opacity-90 transition-all transform hover:-translate-y-0.5">
-              Publier le livre
+              {bookToEdit ? "Enregistrer les modifications" : "Publier le livre"}
             </button>
+            {bookToEdit && (
+              <a href={translatePath('/dashboard/books')} class="text-sm font-bold text-[var(--color-tc-blue)] hover:underline">
+                Annuler
+              </a>
+            )}
           </div>
         </form>
       </div>
@@ -240,6 +307,7 @@ const { data: users } = await supabase
                 <p class="text-xs text-[var(--color-tc-blue)]/40 mt-1">{book.book_collaborators?.length || 0} collaborateur(s)</p>
               </div>
               <div class="flex items-baseline gap-3 flex-shrink-0">
+                <a href={translatePath(`/dashboard/books?edit=${book.id}#book-form`)} class="text-xs text-[var(--color-tc-mustard)] hover:text-[var(--color-tc-mustard)]/80 font-bold underline">Modifier</a>
                 <a href={translatePath(`/books/${book.id}`)} target="_blank" class="text-xs text-[var(--color-tc-blue)]/60 hover:text-[var(--color-tc-blue)] underline">Voir →</a>
                 <form method="POST" class="m-0 p-0 flex items-baseline">
                   <input type="hidden" name="action" value="delete" />
@@ -284,6 +352,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const selectedList = document.getElementById('selectedUsersList');
 
   let selectedUserIds = new Set();
+  
+  // Populate existing users from pre-rendered HTML
+  const existingInputs = document.querySelectorAll('input[name="main_collab_user_id[]"]');
+  existingInputs.forEach(input => selectedUserIds.add(input.value));
 
   if (!searchInput) return;
 
