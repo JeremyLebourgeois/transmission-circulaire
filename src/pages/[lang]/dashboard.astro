@@ -2,8 +2,8 @@
 export const prerender = false;
 
 import Layout from '../../layouts/Layout.astro';
-import { getLangFromUrl, useTranslatedPath, useTranslations } from '../i18n/utils';
-import { getSupabaseServerClient } from '../lib/supabase-server';
+import { getLangFromUrl, useTranslatedPath, useTranslations } from '../../i18n/utils';
+import { getSupabaseServerClient } from '../../lib/supabase-server';
 
 const lang = getLangFromUrl(Astro.url);
 const translatePath = useTranslatedPath(lang);
