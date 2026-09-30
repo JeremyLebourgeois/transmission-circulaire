@@ -190,7 +190,7 @@ const messages = guestbookData || [];
          <div>
            <label for="message" class="block text-sm font-medium leading-6 text-[var(--color-tc-blue)] ">Votre message public :</label>
            <div class="mt-2">
-             <textarea id="message" name="message" rows="3" required class="block w-full rounded-xl border-0 py-2.5 px-4 text-[var(--color-tc-blue)] shadow-sm ring-1 ring-inset ring-[var(--color-tc-blue)]/10 focus:ring-2 focus:ring-inset focus:ring-[var(--color-tc-olive)] sm:text-sm sm:leading-6 " placeholder="Ex: Un grand merci pour toutes vos actions..."></textarea>
+             <textarea id="message" name="message" rows="3" required class="block w-full rounded-xl border-0 py-2.5 px-4 text-[var(--color-tc-blue)] shadow-sm ring-1 ring-inset ring-[var(--color-tc-blue)]/10 focus:ring-2 focus:ring-inset focus:ring-[var(--color-tc-olive)] sm:text-sm sm:leading-6 " placeholder="Écrivez ici..."></textarea>
            </div>
          </div>
          <button type="submit" class="w-full flex justify-center rounded-xl bg-[var(--color-tc-olive)] px-3 py-3 text-sm font-bold text-white shadow-md hover:bg-opacity-90 hover:scale-[1.01] transition-all">
@@ -208,7 +208,7 @@ const messages = guestbookData || [];
    </div>
 
    <!-- Messages List -->
-   {messages.length > 0 ? (
+   {messages.length > 0 && (
      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
        {messages.map(msg => (
          <div class="bg-[var(--color-tc-cream)] rounded-2xl p-6 border border-[var(--color-tc-blue)]/5 relative overflow-hidden group">
@@ -221,8 +221,6 @@ const messages = guestbookData || [];
          </div>
        ))}
      </div>
-   ) : (
-     <p class="text-[var(--color-tc-blue)]/50 italic text-sm text-center py-4">Soyez le premier à laisser un message !</p>
    )}
  </div>
  </div>
