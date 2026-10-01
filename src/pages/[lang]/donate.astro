@@ -61,7 +61,7 @@ if (Astro.request.method === 'POST') {
 // Fetch guestbook messages
 const { data: guestbookData } = await supabase
   .from('guestbook')
-  .select('*, profiles(first_name, last_name)')
+  .select('*, profiles(full_name)')
   .order('created_at', { ascending: false });
   
 const messages = guestbookData || [];
@@ -238,7 +238,7 @@ const messages = guestbookData || [];
              <p class="text-[var(--color-tc-blue)] mb-4 italic leading-relaxed text-sm">"{msg.message}"</p>
              <div class="flex justify-between items-end">
                <div class="text-xs">
-                 <span class="font-bold text-[var(--color-tc-blue)]">{msg.profiles?.first_name || 'Anonyme'} {msg.profiles?.last_name || ''}</span>
+                 <span class="font-bold text-[var(--color-tc-blue)]">{msg.profiles?.full_name || 'Anonyme'}</span>
                  <span class="text-[var(--color-tc-blue)]/40 mx-2">•</span>
                  <span class="text-[var(--color-tc-blue)]/60">{new Date(msg.created_at).toLocaleDateString(lang === 'fr' ? 'fr-FR' : 'en-US', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
                </div>
