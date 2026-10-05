@@ -222,24 +222,32 @@ const otherMessages = allMessages.filter(m => !m.is_featured);
      </div>
    )}
  
-   <div class="bg-[var(--color-tc-cream)] rounded-2xl border border-[var(--color-tc-blue)]/10 p-6 text-left mb-10">
+   <div class="bg-gradient-to-b from-white to-[var(--color-tc-cream)]/30 rounded-3xl p-8 sm:p-10 text-left mb-12 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] border border-[var(--color-tc-blue)]/5 relative overflow-hidden">
+     <!-- Decorative accent -->
+     <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[var(--color-tc-olive)] via-[var(--color-tc-mustard)] to-[var(--color-tc-blue)]/20"></div>
+     
      {user ? (
-       <form method="POST" class="space-y-4">
+       <form method="POST" class="space-y-6 relative z-10">
          <div>
-           <label for="message" class="block text-sm font-medium leading-6 text-[var(--color-tc-blue)] ">Votre message public :</label>
+           <label for="message" class="block text-xl font-serif italic text-[var(--color-tc-blue)] mb-4 text-center">Laissez une trace dans notre livre d'or...</label>
            <div class="mt-2">
-             <textarea id="message" name="message" rows="3" required class="block w-full rounded-xl border-0 py-2.5 px-4 text-[var(--color-tc-blue)] shadow-sm ring-1 ring-inset ring-[var(--color-tc-blue)]/10 focus:ring-2 focus:ring-inset focus:ring-[var(--color-tc-olive)] sm:text-sm sm:leading-6 " placeholder="Écrivez ici..."></textarea>
+             <textarea id="message" name="message" rows="4" required class="block w-full rounded-2xl border-0 bg-[var(--color-tc-cream)]/50 py-4 px-6 text-[var(--color-tc-blue)] shadow-inner focus:bg-white focus:ring-2 focus:ring-inset focus:ring-[var(--color-tc-olive)]/40 font-serif text-lg leading-relaxed transition-all resize-y placeholder:font-sans placeholder:text-sm placeholder:not-italic" placeholder="Écrivez votre message de soutien ici..."></textarea>
            </div>
          </div>
-         <button type="submit" class="w-full flex justify-center rounded-xl bg-[var(--color-tc-olive)] px-3 py-3 text-sm font-bold text-white shadow-md hover:bg-opacity-90 hover:scale-[1.01] transition-all">
-           Publier mon message
-         </button>
+         <div class="flex justify-center">
+           <button type="submit" class="inline-flex justify-center items-center rounded-full bg-[var(--color-tc-olive)] px-8 py-3.5 text-base font-bold text-white shadow-md hover:bg-[#6b7c4a] hover:-translate-y-0.5 transition-all gap-2 group">
+             <svg class="w-5 h-5 group-hover:rotate-12 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+             </svg>
+             Signer le livre d'or
+           </button>
+         </div>
        </form>
      ) : (
-       <div class="text-center py-6">
-         <p class="text-[var(--color-tc-blue)]/80 mb-4 font-medium">Vous devez être connecté pour écrire un mot.</p>
-         <a href={translatePath('/login')} class="inline-flex justify-center rounded-xl border border-[var(--color-tc-blue)]/20 bg-white px-6 py-2.5 text-sm font-bold text-[var(--color-tc-blue)] shadow-sm hover:bg-[var(--color-tc-cream)] transition-all">
-           Se connecter
+       <div class="text-center py-6 relative z-10">
+         <p class="text-[var(--color-tc-blue)]/80 mb-6 font-medium text-lg">Vous devez être connecté pour écrire un mot.</p>
+         <a href={translatePath('/login')} class="inline-flex justify-center items-center rounded-full border-2 border-[var(--color-tc-olive)] bg-white px-8 py-3 text-base font-bold text-[var(--color-tc-olive)] shadow-sm hover:bg-[var(--color-tc-olive)] hover:text-white transition-all">
+           Se connecter pour signer
          </a>
        </div>
      )}
