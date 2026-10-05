@@ -377,15 +377,15 @@ const otherMessages = allMessages.filter(m => !m.is_featured);
           <svg class="w-5 h-5 group-hover:-translate-y-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
           </svg>
-          Voir les autres messages <span class="opacity-60 ml-1">(\${messagesContainer.querySelectorAll('.group').length})</span>
-        \`;
+          Voir les autres messages <span class="opacity-60 ml-1">(${messagesContainer.querySelectorAll('.group').length})</span>
+        `;
       } else {
-        toggleBtn.innerHTML = \`
+        toggleBtn.innerHTML = `
           <svg class="w-5 h-5 group-hover:-translate-y-0.5 transition-transform rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
           </svg>
           Fermer
-        \`;
+        `;
       }
     });
   }
