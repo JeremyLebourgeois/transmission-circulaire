@@ -250,7 +250,7 @@ const messages = guestbookData || [];
          {messages.map(msg => (
            <div class="bg-white rounded-3xl p-6 sm:p-8 shadow-sm border border-[var(--color-tc-blue)]/10 relative overflow-hidden group hover:shadow-md transition-all">
              <!-- Decorative Quote -->
-             <div class="absolute -top-6 -left-2 text-[10rem] leading-none text-[var(--color-tc-blue)] opacity-[0.03] font-serif select-none pointer-events-none">
+             <div class="absolute -top-6 -left-2 text-[10rem] leading-none text-[var(--color-tc-blue)] opacity-5 font-serif select-none pointer-events-none">
                "
              </div>
              
@@ -268,7 +268,7 @@ const messages = guestbookData || [];
              
              <!-- Message -->
              <div class="relative z-10">
-               <p class="text-[var(--color-tc-blue)]/90 italic leading-relaxed text-lg font-serif whitespace-pre-wrap">"{msg.message}"</p>
+               <p class="text-[var(--color-tc-blue)]/90 italic leading-relaxed text-lg font-serif whitespace-pre-wrap">« {msg.message} »</p>
              </div>
 
              <!-- Footer: Admin Delete -->
