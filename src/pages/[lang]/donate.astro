@@ -296,7 +296,7 @@ const otherMessages = allMessages.filter(m => !m.is_featured);
          <svg class="w-5 h-5 group-hover:-translate-y-0.5 transition-transform" id="toggle-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
          </svg>
-         Lire la suite du livre d'or <span class="opacity-60 ml-1">({otherMessages.length})</span>
+         Lire la suite du livre <span class="opacity-60 ml-1">({otherMessages.length})</span>
        </button>
      </div>
    )}
@@ -370,7 +370,7 @@ const otherMessages = allMessages.filter(m => !m.is_featured);
           <svg class="w-5 h-5 group-hover:-translate-y-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
           </svg>
-          Lire la suite du livre d'or <span class="opacity-60 ml-1">(${messagesContainer.querySelectorAll('.group').length})</span>
+          Lire la suite du livre <span class="opacity-60 ml-1">(${messagesContainer.querySelectorAll('.group').length})</span>
         `;
       } else {
         toggleBtn.innerHTML = `
