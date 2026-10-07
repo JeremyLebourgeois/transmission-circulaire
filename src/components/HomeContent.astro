@@ -17,7 +17,7 @@ const { data: books } = await supabase
 
 const { data: events } = await supabase
   .from('events')
-  .select('id, title, date, end_date, location')
+  .select('id, title, date, end_date, location, image_url')
   .order('date', { ascending: false })
   .limit(3);
 ---
@@ -216,10 +216,14 @@ const { data: events } = await supabase
           
           return (
           <Wrapper {...wrapperProps} class={`flex items-center gap-6 p-5 rounded-2xl bg-[var(--color-tc-cream)] border border-[var(--color-tc-blue)]/5 shadow-sm transition-all group ${!isPast ? 'hover:shadow-md hover:-translate-y-0.5 hover:border-[var(--color-tc-mustard)]/50 cursor-pointer block w-full' : 'opacity-80'}`}>
-            <div class={`flex-shrink-0 h-12 w-12 flex items-center justify-center rounded-xl ${!isPast ? 'bg-[var(--color-tc-red)]/10' : 'bg-gray-200'}`}>
-              <svg class={`h-6 w-6 ${!isPast ? 'text-[var(--color-tc-red)]' : 'text-gray-500'}`} fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
-              </svg>
+            <div class={`flex-shrink-0 h-16 w-16 overflow-hidden flex items-center justify-center rounded-xl ${!isPast ? 'bg-[var(--color-tc-red)]/10' : 'bg-gray-200'}`}>
+              {event.image_url ? (
+                <img src={event.image_url} alt={event.title} class={`w-full h-full object-cover ${isPast ? 'grayscale opacity-70' : ''}`} />
+              ) : (
+                <svg class={`h-6 w-6 ${!isPast ? 'text-[var(--color-tc-red)]' : 'text-gray-500'}`} fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+                </svg>
+              )}
             </div>
             <div class="flex-1 min-w-0">
               <p class="font-bold text-[var(--color-tc-blue)] truncate">{event.title}</p>
