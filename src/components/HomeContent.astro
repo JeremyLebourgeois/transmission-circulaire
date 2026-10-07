@@ -150,7 +150,7 @@ const { data: events } = await supabase
       </h2>
       <a
         href={translatePath('/books')}
-        class="text-sm font-semibold text-[var(--color-tc-mustard)] hover:underline flex items-center gap-1 group whitespace-nowrap"
+        class="text-sm font-semibold text-[var(--color-tc-blue)] hover:underline flex items-center gap-1 group whitespace-nowrap"
       >
         Découvrir nos livres
         <span class="group-hover:translate-x-1 transition-transform" aria-hidden="true">→</span>
@@ -160,7 +160,7 @@ const { data: events } = await supabase
     {books && books.length > 0 ? (
       <div class="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
         {books.map(book => (
-          <a href={translatePath(`/books/${book.id}`)} class="group flex flex-col gap-4 rounded-3xl overflow-hidden bg-[var(--color-tc-cream-dark)] border border-[var(--color-tc-blue)]/5 shadow-sm hover:shadow-md transition-shadow">
+          <a href={translatePath(`/books/${book.id}`)} class="group flex flex-col gap-4 rounded-3xl overflow-hidden bg-[var(--color-tc-cream-dark)] border-2 border-[var(--color-tc-blue)] shadow-sm hover:shadow-md transition-shadow">
             {book.main_image_url ? (
               <img src={book.main_image_url} alt={book.title} class="w-full h-52 object-cover" />
             ) : (
