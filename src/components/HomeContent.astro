@@ -205,10 +205,19 @@ const { data: events } = await supabase
 
     {events && events.length > 0 ? (
       <div class="flex flex-col gap-4">
-        {events.map(event => (
-          <div class="flex items-center gap-6 p-5 rounded-2xl bg-[var(--color-tc-cream)] border border-[var(--color-tc-blue)]/5 shadow-sm hover:shadow-md transition-shadow">
-            <div class="flex-shrink-0 h-12 w-12 flex items-center justify-center rounded-xl bg-[var(--color-tc-red)]/10">
-              <svg class="h-6 w-6 text-[var(--color-tc-red)]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+        {events.map(event => {
+          const eventDate = event.end_date ? new Date(event.end_date) : new Date(event.date);
+          // Compare with beginning of today to not make today's events "past"
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+          const isPast = eventDate < today;
+          const Wrapper = isPast ? 'div' : 'a';
+          const wrapperProps = isPast ? {} : { href: translatePath(`/events/${event.id}`) };
+          
+          return (
+          <Wrapper {...wrapperProps} class={`flex items-center gap-6 p-5 rounded-2xl bg-[var(--color-tc-cream)] border border-[var(--color-tc-blue)]/5 shadow-sm transition-all group ${!isPast ? 'hover:shadow-md hover:-translate-y-0.5 hover:border-[var(--color-tc-mustard)]/50 cursor-pointer block w-full' : 'opacity-80'}`}>
+            <div class={`flex-shrink-0 h-12 w-12 flex items-center justify-center rounded-xl ${!isPast ? 'bg-[var(--color-tc-red)]/10' : 'bg-gray-200'}`}>
+              <svg class={`h-6 w-6 ${!isPast ? 'text-[var(--color-tc-red)]' : 'text-gray-500'}`} fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
               </svg>
             </div>
@@ -232,8 +241,16 @@ const { data: events } = await supabase
                 </span>}
               </div>
             </div>
-          </div>
-        ))}
+            {!isPast && (
+              <div class="text-[var(--color-tc-mustard)] opacity-0 group-hover:opacity-100 transition-opacity ml-auto pl-2">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+              </div>
+            )}
+          </Wrapper>
+          );
+        })}
       </div>
     ) : (
       <p class="text-[var(--color-tc-blue)]/50 italic text-sm">Aucun événement à venir pour l'instant. Revenez bientôt !</p>
