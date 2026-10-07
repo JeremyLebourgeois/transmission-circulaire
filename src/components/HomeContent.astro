@@ -191,7 +191,7 @@ const { data: events } = await supabase
 <section class="bg-[var(--color-tc-cream-dark)] py-12 sm:py-20">
   <div class="mx-auto max-w-7xl px-6 lg:px-8">
     <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between mb-8 gap-4">
-      <h2 class="text-3xl font-display font-bold tracking-tight text-[var(--color-tc-blue)] sm:text-4xl">
+      <h2 class="text-3xl font-display font-bold tracking-tight text-[var(--color-tc-olive)] sm:text-4xl">
         Événements
       </h2>
       <a
@@ -215,7 +215,7 @@ const { data: events } = await supabase
           const wrapperProps = isPast ? {} : { href: translatePath(`/events/${event.id}`) };
           
           return (
-          <Wrapper {...wrapperProps} class={`flex items-center gap-6 p-5 rounded-2xl bg-[var(--color-tc-cream)] border border-[var(--color-tc-blue)]/5 shadow-sm transition-all group ${!isPast ? 'hover:shadow-md hover:-translate-y-0.5 hover:border-[var(--color-tc-mustard)]/50 cursor-pointer block w-full' : 'opacity-80'}`}>
+          <Wrapper {...wrapperProps} class={`flex items-center gap-6 p-5 rounded-2xl bg-[var(--color-tc-cream)] border border-[var(--color-tc-olive)]/40 shadow-sm transition-all group ${!isPast ? 'hover:shadow-md hover:-translate-y-0.5 hover:border-[var(--color-tc-mustard)]/70 cursor-pointer block w-full' : 'opacity-80'}`}>
             <div class={`flex-shrink-0 h-16 w-16 overflow-hidden flex items-center justify-center rounded-xl ${!isPast ? 'bg-[var(--color-tc-red)]/10' : 'bg-gray-200'}`}>
               {event.image_url ? (
                 <img src={event.image_url} alt={event.title} class={`w-full h-full object-cover ${isPast ? 'grayscale opacity-70' : ''}`} />
@@ -226,7 +226,7 @@ const { data: events } = await supabase
               )}
             </div>
             <div class="flex-1 min-w-0">
-              <p class="font-bold text-[var(--color-tc-blue)] truncate">{event.title}</p>
+              <p class="font-bold text-[var(--color-tc-olive)] truncate">{event.title}</p>
               <div class="text-xs text-[var(--color-tc-blue)]/50 mt-1 flex flex-col gap-0.5">
                 {event.end_date ? (
                   <>
