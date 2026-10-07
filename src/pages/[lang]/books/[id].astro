@@ -32,7 +32,7 @@ let profileMap: Record<string, any> = {};
 if (userIds.length > 0) {
   const { data: profiles } = await supabase
     .from('profiles')
-    .select('id, full_name, avatar_url')
+    .select('id, full_name, avatar_url, description')
     .in('id', userIds);
   profiles?.forEach((p: any) => { profileMap[p.id] = p; });
 }
@@ -91,7 +91,7 @@ if (userIds.length > 0) {
               const name = profile?.full_name || c.name || 'Inconnu';
               const avatar = profile?.avatar_url;
               return (
-                <div class="bg-[var(--color-tc-card)] rounded-2xl p-6 border border-[var(--color-tc-blue)]/10 shadow-md flex gap-4 items-start">
+                <div class="bg-[var(--color-tc-card)] rounded-2xl p-6 border border-[var(--color-tc-blue)]/10 shadow-md flex gap-4 items-start relative group hover:shadow-lg transition-all cursor-default">
                   <div class="w-14 h-14 rounded-full bg-[var(--color-tc-cream)] border-2 border-[var(--color-tc-mustard)]/50 overflow-hidden flex-shrink-0">
                     {avatar ? (
                       <img src={avatar} alt={name} class="w-full h-full object-cover" />
@@ -105,6 +105,12 @@ if (userIds.length > 0) {
                     <p class="font-bold text-[var(--color-tc-blue)]">{name}</p>
                     {c.contribution_detail && <p class="text-sm text-[var(--color-tc-blue)]/70 mt-1">{c.contribution_detail}</p>}
                   </div>
+                  {profile?.description && (
+                    <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 p-3 bg-[var(--color-tc-blue)] text-white text-xs rounded-xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 shadow-lg line-clamp-6">
+                      {profile.description}
+                      <div class="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-[var(--color-tc-blue)]"></div>
+                    </div>
+                  )}
                 </div>
               );
             })}
@@ -117,11 +123,20 @@ if (userIds.length > 0) {
         <section>
           <h2 class="text-2xl font-display font-bold text-[var(--color-tc-blue)] mb-6">Autres contributeurs</h2>
           <ul class="flex flex-wrap gap-3">
-            {otherCollabs.map((c: any) => (
-              <li class="bg-[var(--color-tc-cream)] border border-[var(--color-tc-blue)]/10 rounded-full px-4 py-2 text-sm text-[var(--color-tc-blue)]">
-                {c.name}
-              </li>
-            ))}
+            {otherCollabs.map((c: any) => {
+              const profile = c.user_id ? profileMap[c.user_id] : null;
+              return (
+                <li class="relative group cursor-default bg-[var(--color-tc-cream)] border border-[var(--color-tc-blue)]/10 rounded-full px-4 py-2 text-sm text-[var(--color-tc-blue)] hover:bg-[var(--color-tc-blue)]/5 transition-colors">
+                  {c.name}
+                  {profile?.description && (
+                    <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 p-2 bg-[var(--color-tc-blue)] text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 shadow-lg text-center line-clamp-4">
+                      {profile.description}
+                      <div class="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-[var(--color-tc-blue)]"></div>
+                    </div>
+                  )}
+                </li>
+              );
+            })}
           </ul>
         </section>
       )}
