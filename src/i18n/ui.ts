@@ -33,9 +33,9 @@ export const ui = {
 
     'privacy.title': 'Mentions Légales & Confidentialité',
     'legal.editor': 'Éditeur du site',
-    'legal.editor.text': 'Association Transmission Circulaire, régie par la loi du 1er juillet 1901. Email : transmission.circulaire@gmail.com',
+    'legal.editor.text': 'Association Transmission Circulaire, régie par la loi du 1er juillet 1901. Siège social : [Votre Adresse]. RNA : [Votre Numéro RNA]. Email : transmission.circulaire@gmail.com',
     'legal.director': 'Directeur de la publication',
-    'legal.director.text': 'Le bureau de l\'association.',
+    'legal.director.text': 'Le Président de l\'association, [Nom et Prénom].',
     'legal.host': 'Hébergement',
     'legal.host.text': 'Vercel Inc., 440 N Barranca Ave #4133, Covina, CA 91723, États-Unis.',
     'privacy.intro': 'L\'association Transmission Circulaire s\'engage à protéger la vie privée de ses membres et des visiteurs de son site web. Cette politique décrit la manière dont nous collectons, utilisons et protégeons vos données personnelles.',
@@ -50,6 +50,8 @@ export const ui = {
     'privacy.p3': 'Les mots de passe sont hachés de manière asymétrique via les protocoles de sécurité de notre partenaire Supabase. Les membres de l\'association n\'ont en aucun cas accès à vos mots de passe en clair.',
     'privacy.h4': '4. Vos droits (RGPD)',
     'privacy.p4': 'Conformément au Règlement Général sur la Protection des Données (RGPD), vous disposez d\'un droit d\'accès, de rectification et d\'effacement de vos données. Vous pouvez supprimer votre compte à tout moment depuis votre tableau de bord ou en nous contactant à : transmission.circulaire@gmail.com.',
+    'privacy.h5': '5. Cookies',
+    'privacy.p5': 'Ce site utilise uniquement des cookies techniques strictement nécessaires à son fonctionnement (maintien de votre session de connexion à l\'espace membre). Aucun cookie de suivi publicitaire ou analytique intrusif n\'est utilisé. Par conséquent, ils sont exemptés du recueil de consentement préalable.',
 
     'dashboard.title': 'Tableau de bord',
     'dashboard.welcome': 'Bienvenue, ',
@@ -126,6 +128,8 @@ export const ui = {
     'privacy.p3': 'Passwords are asymmetrically hashed via the security protocols of our partner Supabase. Members of the association never have access to your plain-text passwords.',
     'privacy.h4': '4. Your Rights (GDPR)',
     'privacy.p4': 'In accordance with the General Data Protection Regulation (GDPR), you have the right to access, rectify, and delete your data. You can delete your account at any time from your dashboard or by contacting us at: transmission.circulaire@gmail.com.',
+    'privacy.h5': '5. Cookies',
+    'privacy.p5': 'This site uses only technical cookies strictly necessary for its operation (maintaining your login session to the member area). No intrusive advertising or analytical tracking cookies are used. Therefore, they are exempt from prior consent collection.',
 
     'dashboard.title': 'Dashboard',
     'dashboard.welcome': 'Welcome, ',
@@ -202,6 +206,8 @@ export const ui = {
     'privacy.p3': 'Las contraseñas son codificadas asimétricamente a través de los protocolos de seguridad de nuestro socio Supabase. Los miembros de la asociación no tienen acceso en ningún caso a sus contraseñas en texto claro.',
     'privacy.h4': '4. Sus derechos (RGPD)',
     'privacy.p4': 'De acuerdo con el Reglamento General de Protección de Datos (RGPD), tiene derecho a acceder, rectificar y eliminar sus datos. Puede eliminar su cuenta en cualquier momento desde su panel de control o contactándonos en: transmission.circulaire@gmail.com.',
+    'privacy.h5': '5. Cookies',
+    'privacy.p5': 'Este sitio utiliza únicamente cookies técnicas estrictamente necesarias para su funcionamiento (mantener su sesión de inicio de sesión en el área de miembros). No se utilizan cookies publicitarias intrusivas ni de seguimiento analítico. Por tanto, están exentos de recogida de consentimiento previo.',
 
     'dashboard.title': 'Panel de control',
     'dashboard.welcome': 'Bienvenido/a, ',
@@ -275,6 +281,8 @@ export const ui = {
     'privacy.p3': 'Passwörter werden durch die Sicherheitsprotokolle unseres Partners Supabase asymmetrisch gehasht. Mitglieder des Vereins haben unter keinen Umständen Zugriff auf Ihre Passwörter im Klartext.',
     'privacy.h4': '4. Ihre Rechte (DSGVO)',
     'privacy.p4': 'Gemäß der Datenschutz-Grundverordnung (DSGVO) haben Sie das Recht auf Zugang, Berichtigung und Löschung Ihrer Daten. Sie können Ihr Konto jederzeit in Ihrem Dashboard löschen oder uns kontaktieren unter: transmission.circulaire@gmail.com.',
+    'privacy.h5': '5. Cookies',
+    'privacy.p5': 'Diese Website verwendet ausschließlich technische Cookies, die für ihren Betrieb unbedingt erforderlich sind (Aufrechterhaltung Ihrer Anmeldesitzung im Mitgliederbereich). Es werden keine aufdringlichen Werbe- oder analytischen Tracking-Cookies verwendet. Daher sind sie von der vorherigen Einholung einer Einwilligung befreit.',
 
     'dashboard.title': 'Dashboard',
     'dashboard.welcome': 'Willkommen, ',
