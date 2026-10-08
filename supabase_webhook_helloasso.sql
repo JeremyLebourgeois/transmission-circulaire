@@ -35,10 +35,16 @@ BEGIN
   END IF;
 
   -- Insérer ou mettre à jour le rôle pour 'Adhérent' et définir l'expiration à +1 an
+  -- Si une date future existe déjà, on ajoute 1 an à cette date.
   INSERT INTO user_roles (id, role, expires_at)
   VALUES (target_user_id, 'Adhérent', NOW() + INTERVAL '1 year')
   ON CONFLICT (id) DO UPDATE
-  SET role = 'Adhérent', expires_at = NOW() + INTERVAL '1 year';
+  SET 
+    role = 'Adhérent', 
+    expires_at = CASE 
+      WHEN user_roles.expires_at > NOW() THEN user_roles.expires_at + INTERVAL '1 year'
+      ELSE NOW() + INTERVAL '1 year'
+    END;
 
   RETURN TRUE;
 END;
