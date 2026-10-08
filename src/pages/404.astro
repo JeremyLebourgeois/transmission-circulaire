@@ -1,0 +1,45 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { getLangFromUrl, useTranslations, useTranslatedPath } from '../i18n/utils';
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+const translatePath = useTranslatedPath(lang);
+---
+
+<Layout title="Page introuvable (404)">
+  <main class="min-h-screen bg-[var(--color-tc-cream)] flex items-center justify-center py-20 px-4">
+    <div class="max-w-3xl mx-auto text-center">
+      <!-- Icon or Illustration -->
+      <div class="mb-8 flex justify-center">
+        <div class="relative w-32 h-32 flex items-center justify-center bg-[var(--color-tc-mustard)]/10 rounded-full">
+          <svg class="w-16 h-16 text-[var(--color-tc-mustard)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Content -->
+      <h1 class="text-6xl sm:text-8xl font-display font-bold text-[var(--color-tc-blue)] mb-6">
+        404
+      </h1>
+      <h2 class="text-2xl sm:text-3xl font-bold text-[var(--color-tc-blue)]/80 mb-6">
+        Oups ! Cette page semble s'être égarée...
+      </h2>
+      <p class="text-lg text-[var(--color-tc-blue)]/60 mb-10 max-w-xl mx-auto">
+        Il semblerait que le lien que vous avez suivi soit cassé, ou que la page ait été déplacée. Pas d'inquiétude, la transmission continue !
+      </p>
+
+      <!-- Action -->
+      <a 
+        href={translatePath('/')} 
+        class="inline-flex justify-center items-center rounded-full bg-[var(--color-tc-olive)] px-8 py-4 text-lg font-bold text-white shadow-xl hover:-translate-y-1 hover:shadow-2xl hover:bg-[#6b7c4a] transition-all duration-300"
+      >
+        <svg class="w-5 h-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        Retourner à l'accueil
+      </a>
+    </div>
+  </main>
+</Layout>
