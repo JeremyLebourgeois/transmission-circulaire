@@ -3,6 +3,11 @@ import Layout from '../../layouts/Layout.astro';
 import Hero from '../../components/Hero.astro';
 import { languages } from '../../i18n/ui';
 
+const { lang } = Astro.params;
+if (!Object.keys(languages).includes(lang as string)) {
+  return Astro.redirect('/404');
+}
+
 export function getStaticPaths() {
  const paths = Object.keys(languages)
  .filter((lang) => lang !== 'fr') // 'fr' is the default and handled by /src/pages/index.astro
