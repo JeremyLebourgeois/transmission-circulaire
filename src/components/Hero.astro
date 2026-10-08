@@ -26,6 +26,16 @@ const translatePath = useTranslatedPath(lang);
  {t('hero.subtitle')}
  </p>
 
+ <div class="mt-10 flex flex-wrap items-center gap-4 sm:gap-6">
+   <a href={translatePath('/register')} class="rounded-full bg-[var(--color-tc-olive)] px-6 py-3 text-sm font-semibold text-white shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-tc-olive)]">
+     Rejoindre l'association
+   </a>
+   <a href={translatePath('/donate')} class="text-sm font-semibold leading-6 text-[var(--color-tc-mustard)] hover:text-opacity-80 group flex items-center gap-2">
+     Soutenir l'association
+     <span class="group-hover:translate-x-1 transition-transform" aria-hidden="true">→</span>
+   </a>
+ </div>
+
  </div>
  <div class="mx-auto mt-16 flex max-w-2xl sm:mt-24 lg:ml-10 lg:mr-0 lg:mt-0 lg:max-w-none lg:flex-none xl:ml-32">
  <div class="max-w-3xl flex-none sm:max-w-5xl lg:max-w-none w-full">
