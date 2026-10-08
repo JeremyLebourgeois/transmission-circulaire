@@ -54,13 +54,15 @@ if (Astro.request.method === 'POST' && user) {
       isError = true;
       message = "Votre adhésion sera expirée au moment de cet événement. Veuillez la renouveler pour vous inscrire.";
     } else {
-      const { error } = await supabase.from('event_registrations').insert({ event_id: id, user_id: user.id });
+      const isPaidEvent = evt.price && parseFloat(evt.price) > 0;
+      const initialPaymentStatus = isPaidEvent ? 'en_attente' : 'non_requis';
+      const { error } = await supabase.from('event_registrations').insert({ event_id: id, user_id: user.id, payment_status: initialPaymentStatus });
       if (error) {
         isError = true;
         message = "Erreur lors de l'inscription : " + error.message;
         console.error(error);
       } else {
-        message = "Inscription confirmée !";
+        message = isPaidEvent ? "Inscription enregistrée ! Veuillez finaliser votre paiement ci-dessous." : "Inscription confirmée !";
       }
     }
   } else if (action === 'unregister') {
@@ -115,12 +117,18 @@ const { count: registrationsCount } = await supabase
   .select('*', { count: 'exact', head: true })
   .eq('event_id', id);
 
-const { count: userRegCount } = user ? await supabase
+const { data: userReg } = user ? await supabase
   .from('event_registrations')
-  .select('*', { count: 'exact', head: true })
-  .match({ event_id: id, user_id: user.id }) : { count: 0 };
+  .select('id, payment_status')
+  .match({ event_id: id, user_id: user.id })
+  .single() : { data: null };
+
+const userRegCount = userReg ? 1 : 0;
 
 const isRegistered = (userRegCount || 0) > 0;
+const paymentStatus = userReg?.payment_status || 'non_requis';
+const isPaymentRequired = evt.price && parseFloat(evt.price) > 0;
+const isPaidEvent = isPaymentRequired;
 const spotsRemaining = evt.max_spots ? evt.max_spots - (registrationsCount || 0) : null;
 const isFull = evt.max_spots !== null && spotsRemaining !== null && spotsRemaining <= 0;
 const targetDate = (evt.end_date && evt.end_date.trim() !== '') ? evt.end_date : evt.date;
@@ -178,11 +186,45 @@ const canRegister = user && canUserRegisterToThis && !isPast;
               Réservé aux adhérents
             </div>
           )}
+          <!-- Badge prix -->
+          {isPaidEvent ? (
+            <div class="bg-[var(--color-tc-mustard)]/20 text-[var(--color-tc-mustard)] rounded-full px-4 py-2 border border-[var(--color-tc-mustard)]/30 text-sm font-bold">
+              {parseFloat(evt.price).toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' })}
+            </div>
+          ) : (
+            <div class="bg-green-500/20 text-green-300 rounded-full px-4 py-2 border border-green-500/30 text-sm font-bold">
+              Gratuit
+            </div>
+          )}
         </div>
 
         {message && (
           <div class={`mt-6 p-4 rounded-xl text-sm font-medium border w-fit mx-auto sm:mx-0 ${isError ? 'bg-red-500/20 border-red-500/50 text-red-100' : 'bg-green-500/20 border-green-500/50 text-green-100'}`}>
             {message}
+          </div>
+        )}
+
+        {/* Payment CTA when registered but payment pending */}
+        {isRegistered && isPaidEvent && paymentStatus === 'en_attente' && (
+          <div class="mt-6 p-4 rounded-2xl bg-[var(--color-tc-mustard)]/20 border border-[var(--color-tc-mustard)]/40">
+            <div class="flex items-center gap-2 mb-3">
+              <svg class="w-5 h-5 text-[var(--color-tc-mustard)]" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" /></svg>
+              <p class="text-[var(--color-tc-mustard)] font-bold text-sm">Paiement en attente</p>
+            </div>
+            {evt.ticket_url ? (
+              <a href={evt.ticket_url} target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 bg-[var(--color-tc-mustard)] text-[var(--color-tc-blue)] px-6 py-2.5 rounded-full font-bold text-sm hover:scale-105 transition-all shadow-lg">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" /></svg>
+                Finaliser mon paiement sur HelloAsso
+              </a>
+            ) : (
+              <p class="text-white/80 text-sm">Règlement à effectuer sur place.</p>
+            )}
+          </div>
+        )}
+        {isRegistered && isPaidEvent && paymentStatus === 'effectue' && (
+          <div class="mt-6 p-3 rounded-2xl bg-green-500/20 border border-green-500/40 flex items-center gap-2 w-fit">
+            <svg class="w-5 h-5 text-green-400" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+            <p class="text-green-300 font-bold text-sm">Paiement effectué ✓</p>
           </div>
         )}
 

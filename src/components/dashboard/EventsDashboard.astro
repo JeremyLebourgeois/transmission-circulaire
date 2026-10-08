@@ -99,6 +99,9 @@ if (Astro.request.method === 'POST') {
 
       updateData.max_spots = maxSpots;
       updateData.audience = audience;
+      const priceRaw = formData.get('price')?.toString();
+      updateData.price = priceRaw ? parseFloat(priceRaw) : 0;
+      updateData.ticket_url = formData.get('ticket_url')?.toString() || null;
 
       const { error: eventError } = await supabase.from('events').update(updateData).eq('id', eventId);
       if (eventError) throw eventError;
@@ -133,10 +136,13 @@ if (Astro.request.method === 'POST') {
       const maxSpotsRaw = formData.get('max_spots')?.toString();
       const maxSpots = maxSpotsRaw ? parseInt(maxSpotsRaw, 10) : null;
       const audience = formData.get('audience')?.toString() || 'all';
+      const priceRaw = formData.get('price')?.toString();
+      const price = priceRaw ? parseFloat(priceRaw) : 0;
+      const ticketUrl = formData.get('ticket_url')?.toString() || null;
 
       const { data: newEvent, error: eventError } = await supabase
         .from('events')
-        .insert({ title, date, end_date: endDate, location, description, image_url: imageUrl, max_spots: maxSpots, audience })
+        .insert({ title, date, end_date: endDate, location, description, image_url: imageUrl, max_spots: maxSpots, audience, price, ticket_url: ticketUrl })
         .select()
         .single();
         
@@ -243,6 +249,28 @@ if (fetchError && fetchError.code === '42P01') { // table does not exist
                   <option value="all" selected={eventToEdit?.audience !== 'collaborator_only'}>Ouvert à tous</option>
                   <option value="collaborator_only" selected={eventToEdit?.audience === 'collaborator_only'}>Réservé aux adhérents</option>
                 </select>
+              </div>
+            </div>
+
+            <!-- Prix & Billetterie -->
+            <div class="border-t border-[var(--color-tc-blue)]/10 pt-6">
+              <h3 class="text-md font-bold text-[var(--color-tc-blue)] mb-4">Prix & Billetterie</h3>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div>
+                  <label class="block text-sm font-medium text-[var(--color-tc-blue)] mb-2">Prix (€) <span class="text-[var(--color-tc-blue)]/50 font-normal">— laisser 0 pour gratuit</span></label>
+                  <input type="number" min="0" step="0.01" name="price" value={eventToEdit?.price ?? '0'} placeholder="0" class="w-full rounded-xl border-0 py-3 px-4 bg-[var(--color-tc-cream)] ring-1 ring-[var(--color-tc-blue)]/20 focus:ring-2 focus:ring-[var(--color-tc-mustard)] text-[var(--color-tc-blue)] text-sm" />
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-[var(--color-tc-blue)] mb-2">Lien de billetterie HelloAsso <span class="text-[var(--color-tc-blue)]/50 font-normal">(optionnel)</span></label>
+                  <div class="flex gap-2">
+                    <input type="url" name="ticket_url" value={eventToEdit?.ticket_url || ''} placeholder="https://www.helloasso.com/..." class="flex-1 rounded-xl border-0 py-3 px-4 bg-[var(--color-tc-cream)] ring-1 ring-[var(--color-tc-blue)]/20 focus:ring-2 focus:ring-[var(--color-tc-mustard)] text-[var(--color-tc-blue)] text-sm" />
+                    <a href="https://admin.helloasso.com/transmission-circulaire/evenements/creation" target="_blank" rel="noopener noreferrer" class="flex-shrink-0 inline-flex items-center gap-1.5 px-3 py-2 bg-[var(--color-tc-mustard)] text-[var(--color-tc-blue)] rounded-xl text-xs font-bold hover:bg-opacity-90 transition-all" title="Créer la billetterie sur HelloAsso">
+                      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" /></svg>
+                      Créer la billetterie
+                    </a>
+                  </div>
+                  <p class="text-xs text-[var(--color-tc-blue)]/50 mt-1">Si vide et prix > 0, "Règlement sur place" sera affiché.</p>
+                </div>
               </div>
             </div>
 
