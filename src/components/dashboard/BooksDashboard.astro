@@ -56,6 +56,7 @@ if (Astro.request.method === 'POST') {
       const title = formData.get('title')?.toString() || '';
       const shortDesc = formData.get('short_description')?.toString() || '';
       const longDesc = formData.get('long_description')?.toString() || '';
+      const shopUrl = formData.get('shop_url')?.toString() || '';
       const mainImageFile = formData.get('main_image') as File;
 
       let mainImageUrl = '';
@@ -74,7 +75,7 @@ if (Astro.request.method === 'POST') {
 
       if (action === 'update') {
         const bookId = formData.get('bookId')?.toString();
-        const updateData: any = { title, short_description: shortDesc, long_description: longDesc };
+        const updateData: any = { title, short_description: shortDesc, long_description: longDesc, shop_url: shopUrl };
         if (mainImageUrl) updateData.main_image_url = mainImageUrl;
         
         const { error: bookError } = await supabase.from('books').update(updateData).eq('id', bookId);
@@ -86,7 +87,7 @@ if (Astro.request.method === 'POST') {
       } else {
         const { data: newBook, error: bookError } = await supabase
           .from('books')
-          .insert({ title, short_description: shortDesc, long_description: longDesc, main_image_url: mainImageUrl })
+          .insert({ title, short_description: shortDesc, long_description: longDesc, main_image_url: mainImageUrl, shop_url: shopUrl })
           .select()
           .single();
         if (bookError) throw bookError;
@@ -206,6 +207,12 @@ const { data: users } = await supabase
           <div>
             <label class="block text-sm font-medium text-[var(--color-tc-blue)] mb-2">Description longue (pour la page détail)</label>
             <textarea name="long_description" rows="5" placeholder="Contenu détaillé du livre..." class="w-full rounded-xl border-0 py-3 px-4 bg-[var(--color-tc-cream)] ring-1 ring-[var(--color-tc-blue)]/20 focus:ring-2 focus:ring-[var(--color-tc-mustard)] text-[var(--color-tc-blue)] text-sm">{bookToEdit?.long_description || ''}</textarea>
+          </div>
+
+          <!-- Lien vers la boutique -->
+          <div>
+            <label class="block text-sm font-medium text-[var(--color-tc-blue)] mb-2">Lien vers la boutique (optionnel)</label>
+            <input type="url" name="shop_url" value={bookToEdit?.shop_url || ''} placeholder="https://www.helloasso.com/..." class="w-full rounded-xl border-0 py-3 px-4 bg-[var(--color-tc-cream)] ring-1 ring-[var(--color-tc-blue)]/20 focus:ring-2 focus:ring-[var(--color-tc-mustard)] text-[var(--color-tc-blue)] text-sm" />
           </div>
 
           <!-- Collaborateurs principaux (inscrits) -->
