@@ -23,6 +23,21 @@ if (user) {
 const isCollaborator = ['adherent', 'tresorier', 'admin', 'super_admin'].includes(userRole);
 const isAdmin = userRole === 'admin' || userRole === 'super_admin';
 
+// Récupération de l'événement pour vérifier les dates
+const { data: evt } = await supabase
+  .from('events')
+  .select('*')
+  .eq('id', id)
+  .single();
+
+if (!evt) {
+  return Astro.redirect(translatePath('/events'));
+}
+
+const eventStartDate = new Date(evt.date);
+const isAdherentExpiredForEvent = userRole === 'adherent' && userExpiresAt && new Date(userExpiresAt) < eventStartDate;
+const canUserRegisterToThis = (evt.audience !== 'collaborator_only' || (isCollaborator && !isAdherentExpiredForEvent));
+
 let message = '';
 let isError = false;
 
@@ -31,13 +46,18 @@ if (Astro.request.method === 'POST' && user) {
   const action = formData.get('action');
 
   if (action === 'register') {
-    const { error } = await supabase.from('event_registrations').insert({ event_id: id, user_id: user.id });
-    if (error) {
+    if (!canUserRegisterToThis) {
       isError = true;
-      message = "Erreur lors de l'inscription : " + error.message;
-      console.error(error);
+      message = "Votre adhésion sera expirée au moment de cet événement. Veuillez la renouveler pour vous inscrire.";
     } else {
-      message = "Inscription confirmée !";
+      const { error } = await supabase.from('event_registrations').insert({ event_id: id, user_id: user.id });
+      if (error) {
+        isError = true;
+        message = "Erreur lors de l'inscription : " + error.message;
+        console.error(error);
+      } else {
+        message = "Inscription confirmée !";
+      }
     }
   } else if (action === 'unregister') {
     const { error } = await supabase.from('event_registrations').delete().match({ event_id: id, user_id: user.id });
@@ -86,16 +106,6 @@ if (isAdmin) {
   }
 }
 
-const { data: evt } = await supabase
-  .from('events')
-  .select('*')
-  .eq('id', id)
-  .single();
-
-if (!evt) {
-  return Astro.redirect(translatePath('/events'));
-}
-
 const { count: registrationsCount } = await supabase
   .from('event_registrations')
   .select('*', { count: 'exact', head: true })
@@ -111,7 +121,7 @@ const spotsRemaining = evt.max_spots ? evt.max_spots - (registrationsCount || 0)
 const isFull = evt.max_spots !== null && spotsRemaining !== null && spotsRemaining <= 0;
 const targetDate = (evt.end_date && evt.end_date.trim() !== '') ? evt.end_date : evt.date;
 const isPast = new Date(targetDate).getTime() < Date.now();
-const canRegister = user && (evt.audience !== 'collaborator_only' || isCollaborator) && !isPast;
+const canRegister = user && canUserRegisterToThis && !isPast;
 ---
 
 <Layout title={`${evt.title} | Événements`}>

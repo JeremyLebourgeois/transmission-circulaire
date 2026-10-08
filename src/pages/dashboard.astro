@@ -142,24 +142,6 @@ if (Astro.request.method === 'POST') {
         </svg>
         <p class="font-medium text-sm">Votre adhésion a expiré.</p>
       </div>
-      <a href="https://www.helloasso.com/associations/transmission-circulaire/formulaires/1" target="_blank" class="inline-flex justify-center items-center px-4 py-2 bg-red-600 text-white rounded-full font-bold text-sm hover:bg-red-700 transition-colors shadow-sm whitespace-nowrap">
-        Renouveler mon adhésion
-      </a>
-    </div>
-  )}
-
-  {/* Notification for upcoming expiration (less than 30 days) */}
-  {roleData?.expires_at && new Date(roleData.expires_at) >= new Date() && new Date(roleData.expires_at) < new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) && (
-    <div class="px-6 sm:px-8 lg:px-10 py-4 bg-orange-50 border-b border-orange-100 flex flex-col sm:flex-row items-center justify-between gap-4">
-      <div class="flex items-center gap-3 text-orange-800">
-        <svg class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-        </svg>
-        <p class="font-medium text-sm">Votre adhésion expire dans moins de 30 jours (le {new Date(roleData.expires_at).toLocaleDateString('fr-FR')}).</p>
-      </div>
-      <a href="https://www.helloasso.com/associations/transmission-circulaire/formulaires/1" target="_blank" class="inline-flex justify-center items-center px-4 py-2 bg-orange-500 text-white rounded-full font-bold text-sm hover:bg-orange-600 transition-colors shadow-sm whitespace-nowrap">
-        Renouveler dès maintenant
-      </a>
     </div>
   )}
  </div>
