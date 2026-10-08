@@ -207,8 +207,8 @@ const canRegister = user && canUserRegisterToThis && !isPast;
               Complet
             </div>
           ) : !canRegister ? (
-            <div class="inline-flex items-center gap-2 bg-white/10 text-white/50 px-6 py-3 rounded-full font-bold cursor-not-allowed border border-white/10" title={isAdherentExpiredForEvent ? "Votre adhésion sera expirée" : "Réservé aux adhérents"}>
-              {isAdherentExpiredForEvent ? "Adhésion expirée à cette date" : "Réservé aux adhérents"}
+            <div class="inline-flex items-center gap-2 bg-white/10 text-white/50 px-8 py-3 rounded-full font-bold cursor-not-allowed border border-white/10" title={isAdherentExpiredForEvent ? "Votre adhésion aura expiré à cette date" : "Réservé aux adhérents"}>
+              S'inscrire à l'événement
             </div>
           ) : (
             <form method="POST" class="inline-block">
