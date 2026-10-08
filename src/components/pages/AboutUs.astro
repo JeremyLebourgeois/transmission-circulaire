@@ -4,63 +4,176 @@ import { getLangFromUrl, useTranslations } from '../../i18n/utils';
 
 const lang = getLangFromUrl(Astro.url);
 const t = useTranslations(lang);
+
+const team = [
+  {
+    name: 'Meltem Etcheberry',
+    role: 'Co-Présidente & Fondatrice',
+    image: 'https://ui-avatars.com/api/?name=Meltem+Etcheberry&background=022b5e&color=fff&size=256'
+  },
+  {
+    name: 'Eloïne Ramon-Burgada',
+    role: 'Co-Présidente & Fondatrice',
+    image: 'https://ui-avatars.com/api/?name=Eloine+Ramon-Burgada&background=d8a342&color=fff&size=256'
+  },
+  {
+    name: 'Thomas Lesomptier',
+    role: 'Trésorier',
+    image: 'https://ui-avatars.com/api/?name=Thomas+Lesomptier&background=94a370&color=fff&size=256'
+  },
+  {
+    name: 'Charlotte de Montgolfier',
+    role: 'Secrétaire',
+    image: 'https://ui-avatars.com/api/?name=Charlotte+de+Montgolfier&background=a73034&color=fff&size=256'
+  },
+  {
+    name: 'Jean-Emre Etcheberry',
+    role: 'Secrétaire Adjoint',
+    image: 'https://ui-avatars.com/api/?name=Jean-Emre+Etcheberry&background=022b5e&color=fff&size=256'
+  }
+];
+
+const routes = [
+  { name: 'Route du Parfum', sense: 'Sentir', desc: 'Matières premières, mémoire olfactive et gestes de la parfumerie.', color: 'bg-[var(--color-tc-olive)]' },
+  { name: 'Route du Raphia', sense: 'Toucher', desc: 'Matière, geste artisanal et territoires de transmission.', color: 'bg-[var(--color-tc-mustard)]' },
+  { name: 'Route du Vin & Gastronomie', sense: 'Goûter', desc: 'Terroirs, traditions culinaires et rapport au goût.', color: 'bg-[var(--color-tc-red)]' },
+  { name: 'Route de la Joaillerie', sense: 'Voir', desc: 'Matières, création et savoir-faire liés à la joaillerie.', color: 'bg-[var(--color-tc-blue)]' },
+  { name: 'Route de la Musique & du Folklore', sense: 'Écouter', desc: 'Traditions musicales, rythme et oralité.', color: 'bg-indigo-900' },
+];
 ---
 
-<Layout title={t('nav.about')}>
- <div class="bg-[var(--color-tc-cream)] pt-12 pb-24 sm:pt-16 sm:pb-32">
- <div class="mx-auto max-w-7xl px-6 lg:px-8">
- <div class="mx-auto max-w-3xl text-center">
- <h2 class="text-3xl font-display font-bold tracking-tight text-[var(--color-tc-blue)] sm:text-4xl">{t('nav.about')}</h2>
- <p class="mt-6 text-lg leading-8 text-[var(--color-tc-blue)]/80 ">
- Transmission Circulaire est une structure ancrée dans la transmission intergénérationnelle, de la paix et du partage des valeurs et de la culture.
- </p>
- </div>
- 
- <div class="mx-auto mt-16 max-w-2xl sm:mt-20 lg:mt-24 lg:max-w-none">
- <dl class="grid max-w-xl grid-cols-1 gap-x-8 gap-y-16 lg:max-w-none lg:grid-cols-3">
- <div class="flex flex-col">
- <dt class="flex items-center gap-x-3 text-base font-semibold leading-7 text-[var(--color-tc-blue)] ">
- <div class="text-[var(--color-tc-blue)] h-10 w-10 flex items-center justify-center rounded-lg bg-[var(--color-tc-cream)] border border-[var(--color-tc-blue)]/20">
- <svg class="h-6 w-6 text-[var(--color-tc-blue)]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
- <path stroke-linecap="round" stroke-linejoin="round" d="M12 21v-8.25M15.75 21v-8.25M8.25 21v-8.25M3 9l9-6 9 6m-1.5 12V10.332A48.315 48.315 0 0012 9.75c-2.551 0-5.056.2-7.5.582V21M3 21h18M12 6.75h.008v.008H12V6.75z" />
- </svg>
- </div>
- Notre Mission
- </dt>
- <dd class="mt-4 flex flex-auto flex-col text-base leading-7 text-[var(--color-tc-blue)]/80 ">
- <p class="flex-auto">Favoriser le dialogue entre les générations et promouvoir la culture comme vecteur de paix et d'enrichissement mutuel.</p>
- </dd>
- </div>
- 
- <div class="flex flex-col">
- <dt class="flex items-center gap-x-3 text-base font-semibold leading-7 text-[var(--color-tc-blue)] ">
- <div class="h-10 w-10 flex items-center justify-center rounded-lg bg-[var(--color-tc-olive)]">
- <svg class="h-6 w-6 text-[var(--color-tc-cream)]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
- <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
- </svg>
- </div>
- Notre Public
- </dt>
- <dd class="mt-4 flex flex-auto flex-col text-base leading-7 text-[var(--color-tc-blue)]/80 ">
- <p class="flex-auto">Nous nous adressons aux jeunes, à nos adhérents, bénévoles, donateurs et au grand public soucieux des enjeux de transmission.</p>
- </dd>
- </div>
- 
- <div class="flex flex-col">
- <dt class="flex items-center gap-x-3 text-base font-semibold leading-7 text-[var(--color-tc-blue)] ">
- <div class="h-10 w-10 flex items-center justify-center rounded-lg bg-[var(--color-tc-red)]">
- <svg class="h-6 w-6 text-[var(--color-tc-cream)]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
- <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
- </svg>
- </div>
- Notre Histoire
- </dt>
- <dd class="mt-4 flex flex-auto flex-col text-base leading-7 text-[var(--color-tc-blue)]/80 ">
- <p class="flex-auto">Fondée le 18 juin 2026, l'association s'est rapidement développée autour de projets éditoriaux et d'événements fédérateurs.</p>
- </dd>
- </div>
- </dl>
- </div>
- </div>
- </div>
+<Layout title="L'Association | Transmission Circulaire">
+  <main class="bg-[var(--color-tc-cream)] selection:bg-[var(--color-tc-mustard)] selection:text-[var(--color-tc-blue)]">
+    
+    <!-- Hero Section -->
+    <section class="relative pt-24 pb-16 sm:pt-32 sm:pb-24 overflow-hidden border-b border-[var(--color-tc-blue)]/10">
+      <div class="absolute inset-0 bg-[var(--color-tc-cream)] -z-10">
+        <div class="absolute -top-24 -right-24 w-96 h-96 bg-[var(--color-tc-mustard)]/10 rounded-full blur-3xl"></div>
+        <div class="absolute top-48 -left-24 w-72 h-72 bg-[var(--color-tc-olive)]/10 rounded-full blur-3xl"></div>
+      </div>
+      <div class="max-w-4xl mx-auto px-6 lg:px-8 text-center">
+        <h1 class="text-4xl font-display font-bold tracking-tight text-[var(--color-tc-blue)] sm:text-6xl mb-6">
+          Laisser une sublime trace <span class="text-[var(--color-tc-mustard)]">intergénérationnelle</span>
+        </h1>
+        <p class="text-xl leading-8 text-[var(--color-tc-blue)]/80 mb-8 max-w-2xl mx-auto">
+          Transmettre les savoir-faire. Relier les générations et les cultures. Construire la Paix par l’Artisanat.
+        </p>
+        <blockquote class="italic text-lg text-[var(--color-tc-olive)] border-l-4 border-[var(--color-tc-olive)] pl-4 py-2 w-fit mx-auto bg-white/50 pr-6 rounded-r-lg shadow-sm">
+          « L’homme jeune marche plus vite que l’ancien, mais l’ancien connaît la route. » <br/>
+          <span class="text-sm font-semibold mt-2 block">— Proverbe africain</span>
+        </blockquote>
+      </div>
+    </section>
+
+    <!-- Notre Mission & Vision -->
+    <section class="py-16 sm:py-24 max-w-7xl mx-auto px-6 lg:px-8">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+        <div>
+          <h2 class="text-3xl font-display font-bold text-[var(--color-tc-blue)] mb-6">Qui sommes-nous ?</h2>
+          <div class="space-y-6 text-lg text-[var(--color-tc-blue)]/80 leading-relaxed">
+            <p>
+              <strong>TRANSMISSION CIRCULAIRE ©</strong> est une association internationale dédiée à la transmission intergénérationnelle des savoir-faire, à la préservation des patrimoines culturels vivants et au dialogue entre les générations, les cultures et les territoires.
+            </p>
+            <p>
+              Notre conviction est simple : <strong>ce qui se transmet continue de vivre</strong>. Nous croyons que les savoirs du passé constituent des ressources essentielles pour construire les solutions de demain.
+            </p>
+            <p>
+              La transmission n’est pas un mouvement à sens unique. Les générations expérimentées partagent leurs gestes et leur mémoire, tandis que les nouvelles générations apportent leur créativité et leur vision du futur. 
+            </p>
+          </div>
+        </div>
+        <div class="bg-white rounded-3xl p-8 sm:p-10 shadow-xl border border-[var(--color-tc-blue)]/5 relative">
+          <div class="absolute -top-4 -right-4 w-24 h-24 bg-[var(--color-tc-red)]/10 rounded-full blur-2xl"></div>
+          <h3 class="text-2xl font-bold text-[var(--color-tc-blue)] mb-8">Nos 3 piliers fondateurs</h3>
+          <ul class="space-y-8">
+            <li class="flex gap-4">
+              <div class="flex-shrink-0 w-12 h-12 rounded-full bg-[var(--color-tc-olive)]/20 flex items-center justify-center text-[var(--color-tc-olive)]">
+                1
+              </div>
+              <div>
+                <h4 class="font-bold text-[var(--color-tc-blue)] text-lg">Transmission Intergénérationnelle</h4>
+                <p class="text-[var(--color-tc-blue)]/70 text-sm mt-1">Créer des passerelles entre les générations pour apprendre mutuellement et transmettre les patrimoines culturels.</p>
+              </div>
+            </li>
+            <li class="flex gap-4">
+              <div class="flex-shrink-0 w-12 h-12 rounded-full bg-[var(--color-tc-mustard)]/20 flex items-center justify-center text-[var(--color-tc-mustard)]">
+                2
+              </div>
+              <div>
+                <h4 class="font-bold text-[var(--color-tc-blue)] text-lg">Intelligence Artisanale & Innovéthique</h4>
+                <p class="text-[var(--color-tc-blue)]/70 text-sm mt-1">Associer innovation et éthique pour permettre aux traditions d'évoluer de manière responsable sans perdre leur identité.</p>
+              </div>
+            </li>
+            <li class="flex gap-4">
+              <div class="flex-shrink-0 w-12 h-12 rounded-full bg-[var(--color-tc-red)]/20 flex items-center justify-center text-[var(--color-tc-red)]">
+                3
+              </div>
+              <div>
+                <h4 class="font-bold text-[var(--color-tc-blue)] text-lg">Paix par la Culture</h4>
+                <p class="text-[var(--color-tc-blue)]/70 text-sm mt-1">Considérer l'artisanat comme un langage commun capable de créer de la coopération et de la compréhension entre les peuples.</p>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Les Routes Circulaires -->
+    <section class="py-16 sm:py-24 bg-[var(--color-tc-blue)] text-white relative overflow-hidden">
+      <div class="max-w-7xl mx-auto px-6 lg:px-8">
+        <div class="text-center max-w-3xl mx-auto mb-16">
+          <h2 class="text-3xl font-display font-bold sm:text-4xl mb-6 text-white">Notre Modèle : Les Routes Circulaires</h2>
+          <p class="text-lg text-white/80">
+            Inspirées des grandes routes historiques d’échanges, les Routes Circulaires constituent le cœur opérationnel de l'association. Elles réunissent artisans, chercheurs, institutions et jeunes autour de thématiques liées aux 5 sens.
+          </p>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+          {routes.map(route => (
+            <div class="bg-white/10 rounded-2xl p-6 border border-white/10 hover:bg-white/20 transition-colors group">
+              <span class={`inline-block px-3 py-1 rounded-full text-xs font-bold mb-4 text-white ${route.color}`}>{route.sense}</span>
+              <h3 class="text-xl font-bold mb-2 text-white group-hover:text-[var(--color-tc-mustard)] transition-colors">{route.name}</h3>
+              <p class="text-sm text-white/70">{route.desc}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <!-- L'Équipe / Le Bureau -->
+    <section class="py-16 sm:py-24 max-w-7xl mx-auto px-6 lg:px-8">
+      <div class="text-center max-w-2xl mx-auto mb-16">
+        <h2 class="text-3xl font-display font-bold text-[var(--color-tc-blue)] mb-4">Notre Équipe Fondatrice</h2>
+        <p class="text-lg text-[var(--color-tc-blue)]/70">
+          Transmission Circulaire adopte un mode de gouvernance inspiré de la sociocratie (intelligence collective, responsabilité partagée, consentement et transparence).
+        </p>
+      </div>
+      
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 justify-center">
+        {team.map((member, index) => (
+          <div class={`bg-white rounded-3xl p-8 text-center shadow-md border border-[var(--color-tc-blue)]/5 hover:shadow-xl transition-shadow ${index === 3 ? 'lg:col-start-2' : ''}`}>
+            <img src={member.image} alt={member.name} class="w-32 h-32 mx-auto rounded-full object-cover mb-6 ring-4 ring-[var(--color-tc-cream)] shadow-sm" />
+            <h3 class="text-xl font-bold text-[var(--color-tc-blue)]">{member.name}</h3>
+            <p class="text-[var(--color-tc-mustard)] font-medium mt-1">{member.role}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <!-- L'Origine -->
+    <section class="py-16 sm:py-24 bg-white border-t border-[var(--color-tc-blue)]/10">
+      <div class="max-w-4xl mx-auto px-6 lg:px-8 text-center">
+        <h2 class="text-3xl font-display font-bold text-[var(--color-tc-blue)] mb-6">Une aventure née d'un livre</h2>
+        <p class="text-lg leading-8 text-[var(--color-tc-blue)]/80 mb-8">
+          Le projet trouve son origine dans l’ouvrage éponyme publié aux Éditions Maïa en 2026. À travers trois tomes, le projet développe une réflexion autour d’une idée centrale : <strong>nous sommes tous à la fois héritiers et transmetteurs</strong>.
+        </p>
+        <div class="inline-flex items-center justify-center p-6 bg-[var(--color-tc-cream)] rounded-2xl border border-[var(--color-tc-mustard)]/30">
+          <p class="text-[var(--color-tc-blue)] font-serif italic text-lg">
+            "Le livre a donné naissance à une philosophie.<br/>L’association lui donne vie à travers l’action."
+          </p>
+        </div>
+      </div>
+    </section>
+
+  </main>
 </Layout>
