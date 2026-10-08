@@ -42,11 +42,12 @@ if (Astro.request.method === 'POST') {
 
       if (!targetUserId || !newRole) throw new Error('Informations manquantes');
       
+      const newExpiresAt = formData.get('expiresAt')?.toString() || null;
+
       // Sécurité : Impossible d'attribuer le rôle super_admin via cette interface
       if (newRole === 'super_admin') throw new Error('Action non autorisée');
       
       // Sécurité supplémentaire : On vérifie que l'utilisateur cible n'est pas déjà super_admin
-      // (Optionnel selon les règles, mais plus sûr pour éviter qu'un super_admin se rétrograde)
       const { data: targetRoleData } = await supabase
         .from('user_roles')
         .select('role')
@@ -57,9 +58,10 @@ if (Astro.request.method === 'POST') {
          throw new Error('Impossible de modifier le rôle d\'un Super Admin');
       }
 
-      const { error } = await supabase.rpc('update_user_role', { 
+      const { error } = await supabase.rpc('update_user_role_and_expiration', { 
         target_user_id: targetUserId, 
-        new_role: newRole 
+        new_role: newRole,
+        new_expires_at: newExpiresAt ? new Date(newExpiresAt).toISOString() : null
       });
         
       if (error) throw error;
@@ -91,7 +93,8 @@ const members = (profilesData || []).map(profile => {
   const roleRecord = (rolesData || []).find(r => r.id === profile.id);
   return {
     ...profile,
-    role: roleRecord ? roleRecord.role : 'membre'
+    role: roleRecord ? roleRecord.role : 'membre',
+    expires_at: roleRecord?.expires_at ? new Date(roleRecord.expires_at).toISOString().split('T')[0] : ''
   };
 });
 ---
@@ -193,6 +196,11 @@ const members = (profilesData || []).map(profile => {
                        member.role === 'tresorier' ? 'Trésorier' :
                        member.role === 'adherent' ? 'Adhérent' : 'Membre'}
                     </span>
+                    {member.expires_at && (member.role === 'adherent' || member.role === 'membre') && (
+                      <div class={`text-xs mt-1 ml-1 ${new Date(member.expires_at) < new Date() ? 'text-red-500 font-bold' : 'text-gray-500'}`}>
+                        Exp: {new Date(member.expires_at).toLocaleDateString('fr-FR')}
+                      </div>
+                    )}
                   </td>
                   {currentUserRole === 'super_admin' && (
                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -207,6 +215,7 @@ const members = (profilesData || []).map(profile => {
                               <option value="tresorier" selected={member.role === 'tresorier'}>Trésorier</option>
                               <option value="admin" selected={member.role === 'admin'}>Admin</option>
                             </select>
+                            <input type="date" name="expiresAt" value={member.expires_at} class="text-sm border-gray-300 rounded-lg focus:ring-[var(--color-tc-red)] focus:border-[var(--color-tc-red)] py-1.5 px-2 shadow-sm" title="Date d'expiration" />
                             <button type="submit" class="text-[var(--color-tc-red)] hover:text-red-900 font-bold bg-red-50 px-3 py-1.5 rounded-lg border border-red-100 hover:bg-red-100 transition-colors shadow-sm">
                               Appliquer
                             </button>
