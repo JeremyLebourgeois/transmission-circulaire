@@ -148,9 +148,9 @@ const routes = [
         </p>
       </div>
       
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 justify-center">
+      <div class="flex flex-wrap justify-center gap-8">
         {team.map((member, index) => (
-          <div class={`bg-white rounded-3xl p-8 text-center shadow-md border border-[var(--color-tc-blue)]/5 hover:shadow-xl transition-shadow ${index === 3 ? 'lg:col-start-2' : ''}`}>
+          <div class="w-full sm:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1.5rem)] max-w-sm bg-white rounded-3xl p-8 text-center shadow-md border border-[var(--color-tc-blue)]/5 hover:shadow-xl transition-shadow">
             <img src={member.image} alt={member.name} class="w-32 h-32 mx-auto rounded-full object-cover mb-6 ring-4 ring-[var(--color-tc-cream)] shadow-sm" />
             <h3 class="text-xl font-bold text-[var(--color-tc-blue)]">{member.name}</h3>
             <p class="text-[var(--color-tc-mustard)] font-medium mt-1">{member.role}</p>
