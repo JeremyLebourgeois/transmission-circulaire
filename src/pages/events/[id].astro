@@ -89,7 +89,7 @@ let registeredUsers = [];
 if (isAdmin) {
   const { data: regs } = await supabase
     .from('event_registrations')
-    .select('id, user_id')
+    .select('id, user_id, payment_status')
     .eq('event_id', id);
     
   if (regs && regs.length > 0) {
@@ -106,7 +106,8 @@ if (isAdmin) {
         user_id: reg.user_id,
         first_name: p ? (p.first_name || p.full_name || 'Inconnu') : 'Inconnu',
         last_name: p ? (p.last_name || '') : '',
-        email: p ? (p.email || 'N/A') : 'N/A'
+        email: p ? (p.email || 'N/A') : 'N/A',
+        payment_status: reg.payment_status
       };
     });
   }
@@ -279,6 +280,25 @@ const canRegister = user && canUserRegisterToThis && !isPast;
 
     <!-- Content -->
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 space-y-16">
+
+
+      {evt.image_url && (
+        <div class="rounded-3xl overflow-hidden shadow-2xl border border-[var(--color-tc-blue)]/10 bg-[var(--color-tc-cream)]">
+          <img src={evt.image_url} alt={evt.title} class="w-full object-cover max-h-[600px]" />
+        </div>
+      )}
+      
+      {evt.description && (
+        <section class="bg-white rounded-3xl p-8 sm:p-12 shadow-sm border border-[var(--color-tc-blue)]/5">
+          <h2 class="text-2xl font-display font-bold text-[var(--color-tc-blue)] mb-6 flex items-center gap-3">
+            <svg class="w-6 h-6 text-[var(--color-tc-olive)]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
+            </svg>
+            À propos de cet événement
+          </h2>
+          <div class="prose prose-lg max-w-none text-[var(--color-tc-blue)]/80 leading-relaxed whitespace-pre-wrap">{evt.description}</div>
+        </section>
+      )}
       {isAdmin && (
         <section class="bg-white rounded-3xl p-8 sm:p-12 shadow-sm border border-red-500/20">
           <h2 class="text-2xl font-display font-bold text-red-600 mb-6 flex items-center gap-3">
@@ -294,6 +314,7 @@ const canRegister = user && canUserRegisterToThis && !isPast;
                 <thead>
                   <tr class="border-b border-gray-200">
                     <th class="py-3 px-4 text-sm font-semibold text-gray-600">Nom</th>
+                    {isPaidEvent && <th class="py-3 px-4 text-sm font-semibold text-gray-600 text-center">Paiement</th>}
                     <th class="py-3 px-4 text-sm font-semibold text-gray-600 text-right">Actions</th>
                   </tr>
                 </thead>
@@ -303,6 +324,19 @@ const canRegister = user && canUserRegisterToThis && !isPast;
                       <td class="py-3 px-4 text-sm text-gray-800 font-medium">
                         {reg.first_name} {reg.last_name}
                       </td>
+                      {isPaidEvent && (
+                        <td class="py-3 px-4 text-sm text-center">
+                          {reg.payment_status === 'effectue' ? (
+                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                              ✓ Effectué
+                            </span>
+                          ) : (
+                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                              ⌛ En attente
+                            </span>
+                          )}
+                        </td>
+                      )}
                       <td class="py-3 px-4 text-sm text-right">
                         <form method="POST" class="inline" onsubmit="return confirm('Êtes-vous sûr de vouloir désinscrire cette personne ?');">
                           <input type="hidden" name="action" value="force_unregister" />
@@ -320,24 +354,6 @@ const canRegister = user && canUserRegisterToThis && !isPast;
           ) : (
             <p class="text-gray-500 italic">Aucun inscrit pour le moment.</p>
           )}
-        </section>
-      )}
-
-      {evt.image_url && (
-        <div class="rounded-3xl overflow-hidden shadow-2xl border border-[var(--color-tc-blue)]/10 bg-[var(--color-tc-cream)]">
-          <img src={evt.image_url} alt={evt.title} class="w-full object-cover max-h-[600px]" />
-        </div>
-      )}
-      
-      {evt.description && (
-        <section class="bg-white rounded-3xl p-8 sm:p-12 shadow-sm border border-[var(--color-tc-blue)]/5">
-          <h2 class="text-2xl font-display font-bold text-[var(--color-tc-blue)] mb-6 flex items-center gap-3">
-            <svg class="w-6 h-6 text-[var(--color-tc-olive)]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
-            </svg>
-            À propos de cet événement
-          </h2>
-          <div class="prose prose-lg max-w-none text-[var(--color-tc-blue)]/80 leading-relaxed whitespace-pre-wrap">{evt.description}</div>
         </section>
       )}
     </div>
