@@ -13,26 +13,11 @@ const translatePath = useTranslatedPath(lang);
  <img src="/logo.jpeg" alt="Logo" class="h-8 w-8 rounded-full object-cover" />
  <span class="font-display font-bold text-lg text-[var(--color-tc-blue)] ">Transmission Circulaire</span>
  </div>
- <p class="text-sm text-[var(--color-tc-blue)]/70 leading-relaxed max-w-md">
+ <p class="text-sm text-[var(--color-tc-blue)]/70 leading-relaxed max-w-md mb-4">
  {t('footer.description')}
  </p>
- </div>
- <div>
- <h3 class="font-bold text-[var(--color-tc-blue)] mb-4 uppercase tracking-wider text-xs">Navigation</h3>
- <ul class="space-y-3 text-sm text-[var(--color-tc-blue)]/80 ">
- <li><a href={translatePath('/')} class="hover:text-[var(--color-tc-mustard)] transition-colors">{t('nav.home')}</a></li>
- <li><a href={translatePath('/about')} class="hover:text-[var(--color-tc-mustard)] transition-colors">{t('nav.about')}</a></li>
- <li><a href={translatePath('/books')} class="hover:text-[var(--color-tc-mustard)] transition-colors">{t('nav.books')}</a></li>
- <li><a href={translatePath('/events')} class="hover:text-[var(--color-tc-mustard)] transition-colors">{t('nav.events')}</a></li>
- </ul>
- </div>
- <div>
- <h3 class="font-bold text-[var(--color-tc-blue)] mb-4 uppercase tracking-wider text-xs">Contact</h3>
- <ul class="space-y-3 text-sm text-[var(--color-tc-blue)]/80 mb-6">
- <li><a href="mailto:transmission.circulaire@gmail.com" class="hover:text-[var(--color-tc-mustard)] transition-colors">transmission.circulaire@gmail.com</a></li>
- <li>Association loi 1901</li>
- <li>Fondée le 10 juin 2026</li>
- </ul>
+ <p class="text-sm font-semibold text-[var(--color-tc-blue)]/80 mb-1">Association loi 1901</p>
+ <p class="text-sm text-[var(--color-tc-blue)]/70 mb-6">Fondée le 10 juin 2026</p>
  <div class="flex items-center gap-4">
    <a href="https://www.linkedin.com/company/transmission-circulaire/home/" target="_blank" rel="noopener noreferrer" class="text-[var(--color-tc-blue)]/70 hover:text-[var(--color-tc-mustard)] transition-colors" title="Suivez-nous sur LinkedIn">
      <span class="sr-only">LinkedIn</span>
@@ -47,6 +32,21 @@ const translatePath = useTranslatedPath(lang);
      </svg>
    </a>
  </div>
+ </div>
+ <div>
+ <h3 class="font-bold text-[var(--color-tc-blue)] mb-4 uppercase tracking-wider text-xs">Navigation</h3>
+ <ul class="space-y-3 text-sm text-[var(--color-tc-blue)]/80 ">
+ <li><a href={translatePath('/')} class="hover:text-[var(--color-tc-mustard)] transition-colors">{t('nav.home')}</a></li>
+ <li><a href={translatePath('/about')} class="hover:text-[var(--color-tc-mustard)] transition-colors">{t('nav.about')}</a></li>
+ <li><a href={translatePath('/books')} class="hover:text-[var(--color-tc-mustard)] transition-colors">{t('nav.books')}</a></li>
+ <li><a href={translatePath('/events')} class="hover:text-[var(--color-tc-mustard)] transition-colors">{t('nav.events')}</a></li>
+ </ul>
+ </div>
+ <div>
+ <h3 class="font-bold text-[var(--color-tc-blue)] mb-4 uppercase tracking-wider text-xs">Contact</h3>
+ <ul class="space-y-3 text-sm text-[var(--color-tc-blue)]/80 mb-6">
+ <li><a href="mailto:transmission.circulaire@gmail.com" class="hover:text-[var(--color-tc-mustard)] transition-colors">transmission.circulaire@gmail.com</a></li>
+ </ul>
  </div>
  </div>
  <div class="border-t border-[var(--color-tc-blue)]/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
