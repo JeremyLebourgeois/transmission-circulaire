@@ -192,8 +192,15 @@ const canRegister = user && canUserRegisterToThis && !isPast;
               Gratuit
             </div>
           ) : (
-            <div class="bg-[var(--color-tc-mustard)]/20 text-[var(--color-tc-mustard)] rounded-full px-4 py-2 border border-[var(--color-tc-mustard)]/30 text-sm font-bold">
-              {parseFloat(evt.price).toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' })}
+            <div class="flex items-center gap-2">
+              <div class="bg-[var(--color-tc-mustard)]/20 text-[var(--color-tc-mustard)] rounded-full px-4 py-2 border border-[var(--color-tc-mustard)]/30 text-sm font-bold">
+                {parseFloat(evt.price).toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' })}
+              </div>
+              {!evt.ticket_url && (
+                <div class="bg-white/10 text-white/70 rounded-full px-4 py-2 border border-white/20 text-sm font-medium">
+                  Règlement sur place
+                </div>
+              )}
             </div>
           )}
         </div>
