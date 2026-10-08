@@ -190,7 +190,7 @@ if (fetchError && fetchError.code === '42P01') { // table does not exist
       {!dbMissing && (
         <div class="bg-[var(--color-tc-card)] rounded-3xl shadow-xl border border-[var(--color-tc-blue)]/10 p-6 sm:p-8" id="event-form">
           <h2 class="text-xl font-bold text-[var(--color-tc-blue)] mb-6">{eventToEdit ? "Modifier l'événement" : "Ajouter un nouvel événement"}</h2>
-          <form method="POST" enctype="multipart/form-data" class="space-y-6">
+          <form method="POST" enctype="multipart/form-data" class="space-y-6" onsubmit="const btn = this.querySelector('button[type=submit]'); btn.disabled = true; btn.innerText = 'Traitement en cours...';">
             <input type="hidden" name="action" value={eventToEdit ? "update" : "add"} />
             {eventToEdit && <input type="hidden" name="eventId" value={eventToEdit.id} />}
             
