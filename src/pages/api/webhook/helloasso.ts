@@ -22,35 +22,49 @@ export const POST: APIRoute = async ({ request, url, cookies }) => {
       return new Response('No email found in payload, ignored', { status: 200 });
     }
 
-    // 3. Sécurité vitale : Vérifier qu'il s'agit bien de la campagne d'adhésion (et pas d'un don libre)
-    // On vérifie le slug de la campagne ou le type de formulaire (HelloAsso V5)
+    const formSlug = dataInfo?.formSlug || '';
+    
+    // 3. Traiter l'adhésion si c'est la campagne d'adhésion
     const isMembership = 
-      dataInfo?.formSlug === 'devenir-adherent' || 
+      formSlug === 'devenir-adherent' || 
       dataInfo?.formType === 'Membership' || 
       JSON.stringify(payload).includes('devenir-adherent');
 
-    if (!isMembership) {
-      console.log(`Webhook ignoré : Paiement reçu de ${email} mais ce n'est pas une adhésion.`);
-      return new Response('Not a membership campaign, ignored', { status: 200 });
-    }
-
-    // 4. Initialiser Supabase et appeler la fonction sécurisée
     const supabase = getSupabaseServerClient(cookies);
-    
-    const { data, error } = await supabase.rpc('grant_adhesion_by_email', {
-      payer_email: email.toLowerCase().trim(),
-      secret_token: 'tc_webhook_secret_2026'
-    });
 
-    if (error) {
-      console.error('Erreur lors de la mise à jour du rôle (RPC):', error);
-      return new Response('Database error', { status: 500 });
-    }
+    if (isMembership) {
+      const { data, error } = await supabase.rpc('grant_adhesion_by_email', {
+        payer_email: email.toLowerCase().trim(),
+        secret_token: 'tc_webhook_secret_2026'
+      });
 
-    if (data === false) {
-      console.log(`Webhook HelloAsso : ${email} a payé, mais ne possède pas de compte sur le site.`);
+      if (error) {
+        console.error('Erreur RPC (Adhésion):', error);
+      } else if (data === false) {
+        console.log(`Webhook: ${email} a payé l'adhésion, mais pas de compte trouvé.`);
+      } else {
+        console.log(`Webhook: Succès ! ${email} est maintenant adhérent.`);
+      }
     } else {
-      console.log(`Webhook HelloAsso : Succès ! ${email} est maintenant adhérent pour 1 an.`);
+      // 4. Si ce n'est pas une adhésion, on tente de valider un paiement d'événement
+      // Le formSlug correspondra potentiellement à un ticket_url d'un événement
+      if (formSlug) {
+        const { data, error } = await supabase.rpc('confirm_event_payment', {
+          payer_email: email.toLowerCase().trim(),
+          event_form_slug: formSlug,
+          secret_token: 'tc_webhook_secret_2026'
+        });
+
+        if (error) {
+          console.error('Erreur RPC (Événement):', error);
+        } else if (data === false) {
+          console.log(`Webhook: Aucun événement correspondant trouvé pour le slug '${formSlug}' ou aucun inscrit pour '${email}'.`);
+        } else {
+          console.log(`Webhook: Succès ! Paiement de l'événement validé pour ${email}.`);
+        }
+      } else {
+        console.log(`Webhook ignoré : Paiement reçu mais aucun formSlug défini.`);
+      }
     }
 
     // Il faut toujours répondre 200 OK à HelloAsso pour qu'ils arrêtent d'envoyer le webhook
