@@ -590,12 +590,14 @@ const enrichedPoints = routePoints.map(pt => {
             }).addTo(map);
 
             if (conn.title || conn.description) {
-              polyline.bindTooltip(`
+              const htmlContent = `
                 <div class="p-1 max-w-[200px]">
                   <h3 class="font-bold text-[var(--color-tc-blue)] text-sm">${conn.title || 'Action'}</h3>
                   ${conn.description ? `<p class="text-xs text-gray-600 mt-1">${conn.description}</p>` : ''}
                 </div>
-              `, { sticky: true, className: 'bg-white rounded-xl shadow-lg border-0' });
+              `;
+              polyline.bindTooltip(htmlContent, { sticky: true, className: 'bg-white rounded-xl shadow-lg border-0' });
+              polyline.bindPopup(htmlContent);
             }
 
             const arrowIcon = L.divIcon({
@@ -663,12 +665,14 @@ const enrichedPoints = routePoints.map(pt => {
           collabsHtml += `</div></div>`;
         }
 
-        marker.bindTooltip(`
+        const popupHtml = `
           <div class="p-1 min-w-[150px]">
             <h3 class="font-bold text-[#2A4365] text-sm">${pt.location_name}</h3>
             ${collabsHtml}
           </div>
-        `, { direction: 'top', offset: [0, -12], className: 'bg-white rounded-xl shadow-lg border-0' });
+        `;
+        marker.bindTooltip(popupHtml, { direction: 'top', offset: [0, -12], className: 'bg-white rounded-xl shadow-lg border-0' });
+        marker.bindPopup(popupHtml, { offset: [0, -12] });
       });
 
       // Ajuster la vue pour voir tous les points si la carte n'est pas vide
