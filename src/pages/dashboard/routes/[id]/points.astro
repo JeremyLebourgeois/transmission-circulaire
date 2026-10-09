@@ -398,7 +398,9 @@ const enrichedPoints = routePoints.map(pt => {
         );
 
         const points = [];
-        for (let t = 0; t <= 1; t += 0.05) {
+        const numSteps = 20;
+        for (let i = 0; i <= numSteps; i++) {
+          const t = i / numSteps;
           const u = 1 - t;
           const x = u * u * p1.x + 2 * u * t * ctrlP.x + t * t * p2.x;
           const y = u * u * p1.y + 2 * u * t * ctrlP.y + t * t * p2.y;
