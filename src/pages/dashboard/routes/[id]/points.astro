@@ -87,6 +87,26 @@ if (Astro.request.method === 'POST') {
       if (error) throw error;
       successMessage = "Point ajouté avec succès sur la carte !";
     } 
+    else if (action === 'edit_point') {
+      const pointId = formData.get('point_id')?.toString();
+      const collabs = formData.getAll('collaborators[]');
+      const extCollabsRaw = formData.get('external_collaborators')?.toString();
+      
+      let extCollabs = [];
+      if (extCollabsRaw) {
+         extCollabs = extCollabsRaw.split(',').map(s => s.trim()).filter(s => s.length > 0);
+      }
+
+      if (!pointId) throw new Error("ID du point manquant.");
+
+      const { error } = await supabase.from('route_points').update({
+        collaborators: collabs,
+        external_collaborators: extCollabs
+      }).eq('id', pointId);
+
+      if (error) throw error;
+      successMessage = "Collaborateurs mis à jour !";
+    }
     else if (action === 'delete_point') {
       const pointId = formData.get('point_id')?.toString();
       const { error } = await supabase.from('route_points').delete().eq('id', pointId);
@@ -326,13 +346,54 @@ const enrichedPoints = routePoints.map(pt => {
                     {enrichedPoints.map(pt => (
                       <li class="flex items-center justify-between text-sm py-1 border-b border-gray-50">
                         <span class="font-medium">{pt.location_name}</span>
-                        <form method="POST" class="inline" onsubmit="return confirm('Supprimer ce point supprimera aussi les liaisons associées. Poursuivre ?');">
-                          <input type="hidden" name="action" value="delete_point" />
-                          <input type="hidden" name="point_id" value={pt.id} />
-                          <button type="submit" class="text-red-500 hover:text-red-700 p-1">
-                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                        <div class="flex items-center gap-2">
+                          <button type="button" onclick={`document.getElementById('edit-collabs-${pt.id}').showModal()`} class="text-blue-500 hover:text-blue-700 p-1" title="Modifier les membres">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
                           </button>
-                        </form>
+                          <form method="POST" class="inline" onsubmit="return confirm('Supprimer ce point supprimera aussi les liaisons associées. Poursuivre ?');">
+                            <input type="hidden" name="action" value="delete_point" />
+                            <input type="hidden" name="point_id" value={pt.id} />
+                            <button type="submit" class="text-red-500 hover:text-red-700 p-1">
+                              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                            </button>
+                          </form>
+                        </div>
+                        
+                        <!-- Modal de modification -->
+                        <dialog id={`edit-collabs-${pt.id}`} class="p-6 rounded-3xl shadow-xl backdrop:bg-black/50 w-full max-w-md border-0">
+                          <h3 class="text-lg font-bold text-[var(--color-tc-blue)] mb-4">Membres - {pt.location_name}</h3>
+                          <form method="POST" class="space-y-4">
+                            <input type="hidden" name="action" value="edit_point" />
+                            <input type="hidden" name="point_id" value={pt.id} />
+                            
+                            <div>
+                              <label class="block text-sm font-medium text-[var(--color-tc-blue)] mb-2">Membres avec un compte</label>
+                              <div class="max-h-40 overflow-y-auto bg-gray-50 rounded-xl border border-gray-200 p-2 space-y-1">
+                                {allProfiles.map(p => (
+                                  <label class="flex items-center gap-2 p-1 hover:bg-white rounded cursor-pointer">
+                                    <input type="checkbox" name="collaborators[]" value={p.id} checked={(pt.collaborators || []).includes(p.id)} class="rounded text-[var(--color-tc-olive)] focus:ring-[var(--color-tc-olive)]" />
+                                    {p.avatar_url ? (
+                                       <img src={p.avatar_url} class="w-5 h-5 rounded-full object-cover" />
+                                    ) : (
+                                       <div class="w-5 h-5 rounded-full bg-gray-200 flex items-center justify-center text-[8px] font-bold">{p.full_name?.charAt(0) || '?'}</div>
+                                    )}
+                                    <span class="text-sm font-medium text-gray-700">{p.full_name}</span>
+                                  </label>
+                                ))}
+                              </div>
+                            </div>
+
+                            <div>
+                              <label class="block text-sm font-medium text-[var(--color-tc-blue)] mb-1">Autres personnes</label>
+                              <input type="text" name="external_collaborators" value={(pt.external_collaborators || []).join(', ')} placeholder="Ex: Jean, Marie" class="w-full rounded-xl border-0 py-2.5 px-4 bg-gray-50 ring-1 ring-gray-200 focus:ring-2 focus:ring-[var(--color-tc-blue)] text-sm" />
+                            </div>
+
+                            <div class="flex justify-end gap-3 mt-6">
+                              <button type="button" onclick={`document.getElementById('edit-collabs-${pt.id}').close()`} class="px-4 py-2 text-sm font-medium text-[var(--color-tc-blue)] bg-gray-100 rounded-full hover:bg-gray-200 transition-colors">Annuler</button>
+                              <button type="submit" class="px-4 py-2 text-sm font-bold text-white bg-[var(--color-tc-blue)] rounded-full hover:bg-opacity-90 transition-colors">Mettre à jour</button>
+                            </div>
+                          </form>
+                        </dialog>
                       </li>
                     ))}
                   </ul>
