@@ -81,7 +81,9 @@ if (Astro.request.method === 'POST') {
         latitude: lat,
         longitude: lon,
         collaborators: collabs,
-        external_collaborators: extCollabs
+        external_collaborators: extCollabs,
+        bg_color: formData.get('bg_color')?.toString() || '#FAF9F6',
+        border_color: formData.get('border_color')?.toString() || '#9B2C2C'
       });
 
       if (error) throw error;
@@ -101,7 +103,9 @@ if (Astro.request.method === 'POST') {
 
       const { error } = await supabase.from('route_points').update({
         collaborators: collabs,
-        external_collaborators: extCollabs
+        external_collaborators: extCollabs,
+        bg_color: formData.get('bg_color')?.toString() || '#FAF9F6',
+        border_color: formData.get('border_color')?.toString() || '#9B2C2C'
       }).eq('id', pointId);
 
       if (error) throw error;
@@ -291,6 +295,17 @@ const enrichedPoints = routePoints.map(pt => {
                 <input type="text" name="external_collaborators" placeholder="Prénom Nom, Prénom Nom (ex: Jean Dupont, Marie Martin)" class="w-full rounded-xl border-0 py-2.5 px-4 bg-[var(--color-tc-cream)] ring-1 ring-[var(--color-tc-blue)]/20 focus:ring-2 focus:ring-[var(--color-tc-red)] text-sm" />
               </div>
 
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-sm font-medium text-[var(--color-tc-blue)] mb-1">Couleur de fond</label>
+                  <input type="color" name="bg_color" value="#FAF9F6" class="w-full h-10 rounded-xl cursor-pointer" />
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-[var(--color-tc-blue)] mb-1">Bordure</label>
+                  <input type="color" name="border_color" value="#9B2C2C" class="w-full h-10 rounded-xl cursor-pointer" />
+                </div>
+              </div>
+
               <button type="submit" class="w-full rounded-full bg-[var(--color-tc-blue)] px-4 py-2 text-sm font-bold text-white shadow-sm hover:bg-opacity-90 transition-all">
                 Placer sur la carte
               </button>
@@ -417,6 +432,17 @@ const enrichedPoints = routePoints.map(pt => {
                             <div>
                               <label class="block text-sm font-medium text-[var(--color-tc-blue)] mb-1">Autres personnes</label>
                               <input type="text" name="external_collaborators" value={(pt.external_collaborators || []).join(', ')} placeholder="Prénom Nom, Prénom Nom (ex: Jean Dupont, Marie Martin)" class="w-full rounded-xl border-0 py-2.5 px-4 bg-gray-50 ring-1 ring-gray-200 focus:ring-2 focus:ring-[var(--color-tc-blue)] text-sm" />
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-4 mt-4">
+                              <div>
+                                <label class="block text-sm font-medium text-[var(--color-tc-blue)] mb-1">Couleur de fond</label>
+                                <input type="color" name="bg_color" value={pt.bg_color || '#FAF9F6'} class="w-full h-10 rounded-xl cursor-pointer" />
+                              </div>
+                              <div>
+                                <label class="block text-sm font-medium text-[var(--color-tc-blue)] mb-1">Bordure</label>
+                                <input type="color" name="border_color" value={pt.border_color || '#9B2C2C'} class="w-full h-10 rounded-xl cursor-pointer" />
+                              </div>
                             </div>
 
                             <div class="flex justify-end gap-3 mt-6">
@@ -647,8 +673,8 @@ const enrichedPoints = routePoints.map(pt => {
         const markerHtml = `
           <div style="
             width: 24px; height: 24px; 
-            background-color: ${tcCream}; 
-            border: 4px solid ${tcRed}; 
+            background-color: ${pt.bg_color || tcCream}; 
+            border: 4px solid ${pt.border_color || tcRed}; 
             border-radius: 50%; 
             box-shadow: 0 4px 6px rgba(0,0,0,0.3);
             transition: transform 0.2s;
