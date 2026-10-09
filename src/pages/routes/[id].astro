@@ -46,7 +46,7 @@ const enrichedPoints = (routePoints || []).map(pt => {
   <main class="min-h-screen bg-[var(--color-tc-cream)] pb-16">
     
     <!-- Hero / Map Section -->
-    <section class="relative w-full h-[60vh] min-h-[500px] bg-gray-100 border-b-4 border-[var(--color-tc-blue)]">
+    <section class="relative w-full bg-gray-100 border-b-4 border-[var(--color-tc-blue)]" style="height: 60vh; min-height: 500px;">
       <div id="public-map" class="absolute inset-0 z-0"></div>
       
       <!-- Overlay text over map (Optional, but looks cool if we have a gradient) -->
@@ -117,7 +117,8 @@ const enrichedPoints = (routePoints || []).map(pt => {
   <script is:inline src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
   
   <script is:inline define:vars={{ enrichedPoints, routeConnections }}>
-    document.addEventListener("DOMContentLoaded", () => {
+    // On exécute directement car le script est en bas de page
+    setTimeout(() => {
       // 1. Initialiser la carte
       const map = L.map('public-map', {
         zoomControl: false,
@@ -206,6 +207,6 @@ const enrichedPoints = (routePoints || []).map(pt => {
         const group = new L.featureGroup(Object.values(markers));
         map.fitBounds(group.getBounds(), { padding: [50, 50], maxZoom: 6 });
       }
-    });
+    }, 100);
   </script>
 </Layout>
