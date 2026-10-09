@@ -372,11 +372,10 @@ const enrichedPoints = routePoints.map(pt => {
       // Contrôle de zoom en bas à droite
       L.control.zoom({ position: 'bottomright' }).addTo(map);
 
-      // 2. Fond de carte OpenStreetMap (Totalement gratuit, sans API Key)
-      // Le style élégant (gris) est géré par le CSS au-dessus
-      L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; OpenStreetMap contributors',
-        maxZoom: 19
+      // 2. Fond de carte Esri (Sans labels, très épuré, gratuit)
+      L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
+        attribution: 'Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ',
+        maxZoom: 16
       }).addTo(map);
 
       const points = window.tcMapPoints || [];
