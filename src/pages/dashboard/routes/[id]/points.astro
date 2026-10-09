@@ -1,0 +1,473 @@
+---
+export const prerender = false;
+
+import Layout from '../../../../layouts/Layout.astro';
+import { getLangFromUrl, useTranslatedPath } from '../../../../i18n/utils';
+import { getSupabaseServerClient } from '../../../../lib/supabase-server';
+
+const lang = getLangFromUrl(Astro.url);
+const translatePath = useTranslatedPath(lang);
+const { id: routeId } = Astro.params;
+
+const supabase = getSupabaseServerClient(Astro.cookies);
+const { data: { user }, error: userError } = await supabase.auth.getUser();
+
+if (!user || userError) {
+  return Astro.redirect(translatePath('/login'));
+}
+
+const { data: roleData } = await supabase.from('user_roles').select('role').eq('id', user.id).single();
+const userRole = roleData?.role || 'Membre';
+
+if (userRole !== 'admin' && userRole !== 'super_admin') {
+  return Astro.redirect(translatePath('/dashboard'));
+}
+
+let errorMessage = '';
+let successMessage = '';
+
+// Handling actions (Server-side)
+if (Astro.request.method === 'POST') {
+  const formData = await Astro.request.formData();
+  const action = formData.get('action');
+
+  try {
+    if (action === 'add_point') {
+      const locationName = formData.get('location_name')?.toString();
+      const collabs = formData.getAll('collaborators[]');
+
+      if (!locationName) throw new Error("Le nom du lieu est requis.");
+
+      // 1. Geocoding via Nominatim (OpenStreetMap API)
+      // On ajoute un User-Agent personnalisé car Nominatim bloque les requêtes anonymes
+      // On force la langue en français pour éviter les noms en japonais/arabe etc.
+      const geocodeRes = await fetch(
+        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(locationName)}&format=json&limit=1&accept-language=fr`,
+        {
+          headers: {
+            'User-Agent': 'TransmissionCirculaireApp/1.0 (transmission.circulaire@gmail.com)'
+          }
+        }
+      );
+      
+      const responseText = await geocodeRes.text();
+      let geocodeData;
+      try {
+        geocodeData = JSON.parse(responseText);
+      } catch (err) {
+        throw new Error("Erreur de géolocalisation avec OpenStreetMap : " + responseText);
+      }
+      
+      let lat = null;
+      let lon = null;
+      
+      if (geocodeData && geocodeData.length > 0) {
+        lat = parseFloat(geocodeData[0].lat);
+        lon = parseFloat(geocodeData[0].lon);
+      } else {
+        throw new Error(`Impossible de trouver les coordonnées pour : ${locationName}. Essayez d'être plus précis (ex: "Paris, France").`);
+      }
+
+      // 2. Insert into database
+      const { error } = await supabase.from('route_points').insert({
+        route_id: routeId,
+        location_name: geocodeData[0].display_name.split(',')[0], // On garde le nom simplifié court
+        latitude: lat,
+        longitude: lon,
+        collaborators: collabs
+      });
+
+      if (error) throw error;
+      successMessage = "Point ajouté avec succès sur la carte !";
+    } 
+    else if (action === 'delete_point') {
+      const pointId = formData.get('point_id')?.toString();
+      const { error } = await supabase.from('route_points').delete().eq('id', pointId);
+      if (error) throw error;
+      successMessage = "Point supprimé.";
+    }
+    else if (action === 'add_connection') {
+      const startPoint = formData.get('start_point_id')?.toString();
+      const endPoint = formData.get('end_point_id')?.toString();
+      const title = formData.get('title')?.toString();
+      const desc = formData.get('description')?.toString();
+
+      if (startPoint === endPoint) throw new Error("Le point de départ et d'arrivée doivent être différents.");
+
+      const { error } = await supabase.from('route_connections').insert({
+        route_id: routeId,
+        start_point_id: startPoint,
+        end_point_id: endPoint,
+        title: title || '',
+        description: desc || ''
+      });
+
+      if (error) throw error;
+      successMessage = "Liaison créée avec succès !";
+    }
+    else if (action === 'delete_connection') {
+      const connId = formData.get('connection_id')?.toString();
+      const { error } = await supabase.from('route_connections').delete().eq('id', connId);
+      if (error) throw error;
+      successMessage = "Liaison supprimée.";
+    }
+  } catch (e: any) {
+    errorMessage = e.message;
+  }
+}
+
+// Fetch Route Details
+const { data: route } = await supabase.from('routes').select('*').eq('id', routeId).single();
+if (!route) {
+  return Astro.redirect('/dashboard/routes');
+}
+
+// Fetch Points
+const { data: points } = await supabase.from('route_points').select('*').eq('route_id', routeId);
+const routePoints = points || [];
+
+// Fetch Connections
+const { data: conns } = await supabase.from('route_connections').select('*').eq('route_id', routeId);
+const routeConnections = conns || [];
+
+// Fetch Profiles (for collaborators selection)
+const { data: profiles } = await supabase.from('profiles').select('id, first_name, last_name, avatar_url').order('first_name');
+const allProfiles = profiles || [];
+
+// Enrich points with collaborators data for UI
+const enrichedPoints = routePoints.map(pt => {
+  const collabsData = (pt.collaborators || []).map((collabId: string) => {
+    return allProfiles.find(p => p.id === collabId) || { id: collabId, first_name: 'Inconnu' };
+  });
+  return { ...pt, collabsData };
+});
+---
+
+<Layout title={`Carte : ${route.title} | Transmission Circulaire`}>
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+  
+  <main class="min-h-screen bg-[var(--color-tc-cream)] py-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="mb-8 flex items-center gap-4">
+        <a href="/dashboard/routes" class="text-[var(--color-tc-blue)] hover:text-[var(--color-tc-red)] transition-colors inline-flex items-center gap-2 font-medium">
+          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+          </svg>
+          Retour aux routes
+        </a>
+      </div>
+
+      <div class="mb-8 bg-white p-6 rounded-3xl shadow-sm border border-[var(--color-tc-blue)]/10 flex flex-col md:flex-row items-center gap-6">
+        {route.image_url ? (
+          <img src={route.image_url} alt={route.title} class="w-24 h-24 rounded-2xl object-cover shadow-sm border border-gray-100" />
+        ) : (
+          <div class="w-24 h-24 rounded-2xl bg-gray-100 flex items-center justify-center">
+             <svg class="w-8 h-8 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+          </div>
+        )}
+        <div>
+          <h1 class="text-3xl font-display font-bold text-[var(--color-tc-blue)] mb-2">Carte : {route.title}</h1>
+          <p class="text-[var(--color-tc-blue)]/70">{route.description || "Aucune description"}</p>
+        </div>
+      </div>
+
+      {errorMessage && (
+        <div class="mb-8 p-4 bg-red-100 border border-red-300 text-red-800 rounded-xl font-medium">
+          {errorMessage}
+        </div>
+      )}
+
+      {successMessage && (
+        <div class="mb-8 p-4 bg-green-100 border border-green-300 text-green-800 rounded-xl font-medium">
+          {successMessage}
+        </div>
+      )}
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        <!-- Colonne de gauche : Formulaires -->
+        <div class="lg:col-span-1 space-y-6">
+          
+          <!-- Ajouter un point -->
+          <div class="bg-[var(--color-tc-card)] rounded-3xl shadow-lg border border-[var(--color-tc-blue)]/10 p-6">
+            <h2 class="text-lg font-bold text-[var(--color-tc-blue)] mb-4 flex items-center gap-2">
+              <svg class="w-5 h-5 text-[var(--color-tc-red)]" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
+              </svg>
+              Ajouter une étape
+            </h2>
+            <form method="POST" class="space-y-4">
+              <input type="hidden" name="action" value="add_point" />
+              
+              <div>
+                <label class="block text-sm font-medium text-[var(--color-tc-blue)] mb-1">Ville, Pays *</label>
+                <input type="text" name="location_name" required placeholder="Ex: Dakar, Sénégal" class="w-full rounded-xl border-0 py-2.5 px-4 bg-[var(--color-tc-cream)] ring-1 ring-[var(--color-tc-blue)]/20 focus:ring-2 focus:ring-[var(--color-tc-red)] text-sm" />
+                <p class="text-[10px] text-gray-500 mt-1 mt-1">Le placement GPS sera automatique.</p>
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-[var(--color-tc-blue)] mb-2">Collaborateurs présents</label>
+                <div class="max-h-40 overflow-y-auto bg-white rounded-xl border border-gray-200 p-2 space-y-1">
+                  {allProfiles.map(p => (
+                    <label class="flex items-center gap-2 p-1 hover:bg-gray-50 rounded cursor-pointer">
+                      <input type="checkbox" name="collaborators[]" value={p.id} class="rounded text-[var(--color-tc-olive)] focus:ring-[var(--color-tc-olive)]" />
+                      {p.avatar_url ? (
+                         <img src={p.avatar_url} class="w-5 h-5 rounded-full object-cover" />
+                      ) : (
+                         <div class="w-5 h-5 rounded-full bg-gray-200 flex items-center justify-center text-[8px] font-bold">{p.first_name?.charAt(0) || '?'}</div>
+                      )}
+                      <span class="text-sm font-medium text-gray-700">{p.first_name} {p.last_name}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              <button type="submit" class="w-full rounded-full bg-[var(--color-tc-blue)] px-4 py-2 text-sm font-bold text-white shadow-sm hover:bg-opacity-90 transition-all">
+                Placer sur la carte
+              </button>
+            </form>
+          </div>
+
+          <!-- Ajouter une liaison -->
+          <div class="bg-[var(--color-tc-card)] rounded-3xl shadow-lg border border-[var(--color-tc-blue)]/10 p-6">
+            <h2 class="text-lg font-bold text-[var(--color-tc-blue)] mb-4 flex items-center gap-2">
+              <svg class="w-5 h-5 text-[var(--color-tc-mustard)]" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
+              </svg>
+              Créer une action (Liaison)
+            </h2>
+            <form method="POST" class="space-y-4">
+              <input type="hidden" name="action" value="add_connection" />
+              
+              <div class="flex gap-2">
+                <div class="flex-1">
+                  <label class="block text-xs font-medium text-[var(--color-tc-blue)] mb-1">De *</label>
+                  <select name="start_point_id" required class="w-full rounded-xl border-0 py-2 px-2 bg-[var(--color-tc-cream)] ring-1 ring-[var(--color-tc-blue)]/20 text-xs">
+                    <option value="">Sélectionner</option>
+                    {routePoints.map(pt => <option value={pt.id}>{pt.location_name}</option>)}
+                  </select>
+                </div>
+                <div class="flex items-end pb-2">
+                  <svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
+                </div>
+                <div class="flex-1">
+                  <label class="block text-xs font-medium text-[var(--color-tc-blue)] mb-1">Vers *</label>
+                  <select name="end_point_id" required class="w-full rounded-xl border-0 py-2 px-2 bg-[var(--color-tc-cream)] ring-1 ring-[var(--color-tc-blue)]/20 text-xs">
+                    <option value="">Sélectionner</option>
+                    {routePoints.map(pt => <option value={pt.id}>{pt.location_name}</option>)}
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-[var(--color-tc-blue)] mb-1">Titre de l'action</label>
+                <input type="text" name="title" placeholder="Ex: Échange culturel" class="w-full rounded-xl border-0 py-2 px-4 bg-[var(--color-tc-cream)] ring-1 ring-[var(--color-tc-blue)]/20 text-sm" />
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-[var(--color-tc-blue)] mb-1">Description</label>
+                <textarea name="description" rows="2" class="w-full rounded-xl border-0 py-2 px-4 bg-[var(--color-tc-cream)] ring-1 ring-[var(--color-tc-blue)]/20 text-sm"></textarea>
+              </div>
+
+              <button type="submit" class="w-full rounded-full bg-[var(--color-tc-olive)] px-4 py-2 text-sm font-bold text-white shadow-sm hover:bg-opacity-90 transition-all" {routePoints.length < 2 ? 'disabled' : ''}>
+                Relier les points
+              </button>
+            </form>
+          </div>
+
+        </div>
+
+        <!-- Colonne de droite : La Carte -->
+        <div class="lg:col-span-2 flex flex-col gap-4">
+          <div class="bg-white rounded-3xl shadow-xl border-2 border-[var(--color-tc-blue)] overflow-hidden relative">
+            <div id="map" class="w-full h-[600px] z-0 relative"></div>
+            <!-- Overlay chargement -->
+            <div id="map-loading" class="absolute inset-0 bg-white/80 z-10 flex items-center justify-center backdrop-blur-sm">
+              <div class="text-[var(--color-tc-blue)] font-bold animate-pulse flex items-center gap-2">
+                <svg class="animate-spin h-5 w-5 text-[var(--color-tc-red)]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                Initialisation de la carte...
+              </div>
+            </div>
+          </div>
+
+          <!-- Liste textuelle pour supprimer si besoin -->
+          <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-6">
+             <h3 class="font-bold text-[var(--color-tc-blue)] mb-4">Gestion rapide</h3>
+             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <h4 class="text-sm font-bold text-gray-500 mb-2 uppercase tracking-wider">Points ({enrichedPoints.length})</h4>
+                  <ul class="space-y-2">
+                    {enrichedPoints.map(pt => (
+                      <li class="flex items-center justify-between text-sm py-1 border-b border-gray-50">
+                        <span class="font-medium">{pt.location_name}</span>
+                        <form method="POST" class="inline" onsubmit="return confirm('Supprimer ce point supprimera aussi les liaisons associées. Poursuivre ?');">
+                          <input type="hidden" name="action" value="delete_point" />
+                          <input type="hidden" name="point_id" value={pt.id} />
+                          <button type="submit" class="text-red-500 hover:text-red-700 p-1">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                          </button>
+                        </form>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <div>
+                  <h4 class="text-sm font-bold text-gray-500 mb-2 uppercase tracking-wider">Liaisons ({routeConnections.length})</h4>
+                  <ul class="space-y-2">
+                    {routeConnections.map(conn => {
+                      const start = routePoints.find(p => p.id === conn.start_point_id)?.location_name || 'Inconnu';
+                      const end = routePoints.find(p => p.id === conn.end_point_id)?.location_name || 'Inconnu';
+                      return (
+                      <li class="flex items-center justify-between text-sm py-1 border-b border-gray-50">
+                        <span class="text-gray-600"><span class="font-medium text-gray-900">{start}</span> → <span class="font-medium text-gray-900">{end}</span></span>
+                        <form method="POST" class="inline" onsubmit="return confirm('Supprimer cette liaison ?');">
+                          <input type="hidden" name="action" value="delete_connection" />
+                          <input type="hidden" name="connection_id" value={conn.id} />
+                          <button type="submit" class="text-red-500 hover:text-red-700 p-1">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                          </button>
+                        </form>
+                      </li>
+                    )})}
+                  </ul>
+                </div>
+             </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- Script Leaflet depuis CDN -->
+  <script is:inline src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  
+  <!-- Variables pour la carte -->
+  <script is:inline define:vars={{ enrichedPoints, routeConnections }}>
+    window.tcMapPoints = enrichedPoints;
+    window.tcMapConnections = routeConnections;
+  </script>
+
+  <!-- Logique de la carte -->
+  <script is:inline>
+    document.addEventListener("DOMContentLoaded", () => {
+      // 1. Initialiser la carte Leaflet
+      // On centre globalement sur l'Europe/Afrique par défaut
+      const map = L.map('map', {
+        zoomControl: false // On désactive pour le mettre ailleurs
+      }).setView([20, 0], 2); 
+      
+      // Contrôle de zoom en bas à droite
+      L.control.zoom({ position: 'bottomright' }).addTo(map);
+
+      // 2. Fond de carte CartoDB Positron (très clair et premium)
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
+        subdomains: 'abcd',
+        maxZoom: 20
+      }).addTo(map);
+
+      const points = window.tcMapPoints || [];
+      const connections = window.tcMapConnections || [];
+      const markers = {};
+
+      // Couleurs charte TC
+      const tcRed = '#9B2C2C';
+      const tcMustard = '#D69E2E';
+      const tcBlue = '#2A4365';
+
+      // 3. Dessiner les lignes (Liaisons)
+      connections.forEach(conn => {
+        const startPt = points.find(p => p.id === conn.start_point_id);
+        const endPt = points.find(p => p.id === conn.end_point_id);
+        
+        if (startPt && endPt) {
+          const latlngs = [
+            [startPt.latitude, startPt.longitude],
+            [endPt.latitude, endPt.longitude]
+          ];
+          
+          // Ligne courbe simulée mathématiquement (basique) ou ligne droite stylisée
+          // Pour faire premium, on utilise une ligne droite avec tirets animés si on ajoute du CSS, 
+          // ou une belle ligne colorée avec opacité
+          const polyline = L.polyline(latlngs, {
+            color: tcMustard,
+            weight: 3,
+            opacity: 0.8,
+            dashArray: '10, 10', // Pointillés
+            lineJoin: 'round'
+          }).addTo(map);
+
+          // Popup sur la ligne
+          if (conn.title || conn.description) {
+            polyline.bindPopup(`
+              <div class="p-2 min-w-[200px]">
+                <strong class="block text-[#2A4365] mb-1">${conn.title || 'Action'}</strong>
+                <p class="text-xs text-gray-600">${conn.description || ''}</p>
+              </div>
+            `);
+          }
+        }
+      });
+
+      // 4. Placer les points (Marqueurs personnalisés)
+      points.forEach(pt => {
+        // Construction du HTML pour le marqueur (un cercle coloré)
+        const markerHtml = `
+          <div style="
+            width: 24px; height: 24px; 
+            background-color: ${tcRed}; 
+            border: 3px solid white; 
+            border-radius: 50%; 
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            transition: transform 0.2s;
+          " class="tc-marker hover:scale-125"></div>
+        `;
+        
+        const customIcon = L.divIcon({
+          html: markerHtml,
+          className: '', // Évite les styles par défaut de Leaflet
+          iconSize: [24, 24],
+          iconAnchor: [12, 12],
+          popupAnchor: [0, -12]
+        });
+
+        const marker = L.marker([pt.latitude, pt.longitude], { icon: customIcon }).addTo(map);
+        markers[pt.id] = marker;
+
+        // Construction du Popup interactif
+        let collabsHtml = '';
+        if (pt.collabsData && pt.collabsData.length > 0) {
+          collabsHtml = `<div class="mt-3 border-t pt-2"><p class="text-[10px] font-bold text-gray-400 uppercase mb-1">Sur place</p><div class="flex -space-x-2 overflow-hidden">`;
+          pt.collabsData.forEach(c => {
+            if (c.avatar_url) {
+              collabsHtml += `<img src="${c.avatar_url}" title="${c.first_name}" class="inline-block h-6 w-6 rounded-full ring-2 ring-white object-cover" />`;
+            } else {
+              collabsHtml += `<div title="${c.first_name}" class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-gray-200 ring-2 ring-white text-[8px] font-bold">${c.first_name?.charAt(0) || '?'}</div>`;
+            }
+          });
+          collabsHtml += `</div></div>`;
+        }
+
+        marker.bindPopup(`
+          <div class="p-2 min-w-[150px]">
+            <h3 class="font-bold text-[#2A4365] text-sm">${pt.location_name}</h3>
+            ${collabsHtml}
+          </div>
+        `);
+      });
+
+      // Ajuster la vue pour voir tous les points si la carte n'est pas vide
+      if (points.length > 0) {
+        const group = new L.featureGroup(Object.values(markers));
+        map.fitBounds(group.getBounds(), { padding: [50, 50], maxZoom: 12 });
+      }
+
+      // Masquer le loader
+      document.getElementById('map-loading').style.display = 'none';
+    });
+  </script>
+</Layout>
