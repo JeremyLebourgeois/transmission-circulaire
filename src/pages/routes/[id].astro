@@ -42,6 +42,15 @@ const enrichedPoints = (routePoints || []).map(pt => {
 <Layout title={`${route.title} | Transmission Circulaire`}>
   <!-- Leaflet CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+  <style>
+    /* Rendre la carte OpenStreetMap élégante (nuances de gris et lumineuse) */
+    .leaflet-layer,
+    .leaflet-control-zoom-in,
+    .leaflet-control-zoom-out,
+    .leaflet-control-attribution {
+      filter: grayscale(100%) opacity(0.7) contrast(1.2);
+    }
+  </style>
   
   <main class="min-h-screen bg-[var(--color-tc-cream)] pb-16">
     
@@ -127,11 +136,11 @@ const enrichedPoints = (routePoints || []).map(pt => {
       
       L.control.zoom({ position: 'topright' }).addTo(map);
 
-      // 2. Fond de carte CartoDB Positron
-      L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-        attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
-        subdomains: 'abcd',
-        maxZoom: 20
+      // 2. Fond de carte OpenStreetMap (Totalement gratuit, sans API Key)
+      // Le style élégant (gris) est géré par le CSS au-dessus
+      L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors',
+        maxZoom: 19
       }).addTo(map);
 
       const markers = {};
