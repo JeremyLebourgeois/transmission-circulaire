@@ -35,11 +35,16 @@ if (Astro.request.method === 'POST') {
     if (action === 'add_point') {
       const locationName = formData.get('location_name')?.toString();
       const collabs = formData.getAll('collaborators[]');
-      const extCollabsRaw = formData.get('external_collaborators')?.toString();
       
+      const extFirstNames = formData.getAll('ext_first_name[]');
+      const extLastNames = formData.getAll('ext_last_name[]');
       let extCollabs = [];
-      if (extCollabsRaw) {
-         extCollabs = extCollabsRaw.split(',').map(s => s.trim()).filter(s => s.length > 0);
+      for (let i = 0; i < extFirstNames.length; i++) {
+        const first = extFirstNames[i]?.toString().trim() || '';
+        const last = extLastNames[i]?.toString().trim() || '';
+        if (first || last) {
+          extCollabs.push(`${first} ${last}`.trim());
+        }
       }
 
       if (!locationName) throw new Error("Le nom du lieu est requis.");
@@ -92,11 +97,16 @@ if (Astro.request.method === 'POST') {
     else if (action === 'edit_point') {
       const pointId = formData.get('point_id')?.toString();
       const collabs = formData.getAll('collaborators[]');
-      const extCollabsRaw = formData.get('external_collaborators')?.toString();
       
+      const extFirstNames = formData.getAll('ext_first_name[]');
+      const extLastNames = formData.getAll('ext_last_name[]');
       let extCollabs = [];
-      if (extCollabsRaw) {
-         extCollabs = extCollabsRaw.split(',').map(s => s.trim()).filter(s => s.length > 0);
+      for (let i = 0; i < extFirstNames.length; i++) {
+        const first = extFirstNames[i]?.toString().trim() || '';
+        const last = extLastNames[i]?.toString().trim() || '';
+        if (first || last) {
+          extCollabs.push(`${first} ${last}`.trim());
+        }
       }
 
       if (!pointId) throw new Error("ID du point manquant.");
@@ -290,9 +300,15 @@ const enrichedPoints = routePoints.map(pt => {
                 </div>
               </div>
 
-              <div>
-                <label class="block text-sm font-medium text-[var(--color-tc-blue)] mb-1">Autres personnes (sans compte)</label>
-                <input type="text" name="external_collaborators" placeholder="Prénom Nom, Prénom Nom (ex: Jean Dupont, Marie Martin)" class="w-full rounded-xl border-0 py-2.5 px-4 bg-[var(--color-tc-cream)] ring-1 ring-[var(--color-tc-blue)]/20 focus:ring-2 focus:ring-[var(--color-tc-red)] text-sm" />
+              <div class="mb-4">
+                <label class="block text-sm font-medium text-[var(--color-tc-blue)] mb-2">Autres personnes (sans compte)</label>
+                <div id="ext-collabs-add">
+                  <div class="flex gap-2 mb-2">
+                    <input type="text" name="ext_first_name[]" placeholder="Prénom" class="w-1/2 rounded-xl border-0 py-2.5 px-4 bg-[var(--color-tc-cream)] ring-1 ring-[var(--color-tc-blue)]/20 focus:ring-2 focus:ring-[var(--color-tc-red)] text-sm" />
+                    <input type="text" name="ext_last_name[]" placeholder="Nom" class="w-1/2 rounded-xl border-0 py-2.5 px-4 bg-[var(--color-tc-cream)] ring-1 ring-[var(--color-tc-blue)]/20 focus:ring-2 focus:ring-[var(--color-tc-red)] text-sm" />
+                  </div>
+                </div>
+                <button type="button" onclick="addExtCollabRow('ext-collabs-add')" class="text-xs text-[var(--color-tc-olive)] hover:underline font-bold">+ Ajouter une autre personne</button>
               </div>
 
               <div class="grid grid-cols-2 gap-4">
@@ -429,9 +445,27 @@ const enrichedPoints = routePoints.map(pt => {
                               </div>
                             </div>
 
-                            <div>
-                              <label class="block text-sm font-medium text-[var(--color-tc-blue)] mb-1">Autres personnes</label>
-                              <input type="text" name="external_collaborators" value={(pt.external_collaborators || []).join(', ')} placeholder="Prénom Nom, Prénom Nom (ex: Jean Dupont, Marie Martin)" class="w-full rounded-xl border-0 py-2.5 px-4 bg-gray-50 ring-1 ring-gray-200 focus:ring-2 focus:ring-[var(--color-tc-blue)] text-sm" />
+                            <div class="mb-4">
+                              <label class="block text-sm font-medium text-[var(--color-tc-blue)] mb-2">Autres personnes</label>
+                              <div id={`ext-collabs-edit-${pt.id}`}>
+                                {pt.external_collaborators && pt.external_collaborators.length > 0 ? pt.external_collaborators.map(ext => {
+                                  const parts = ext.split(' ');
+                                  const first = parts[0] || '';
+                                  const last = parts.slice(1).join(' ') || '';
+                                  return (
+                                    <div class="flex gap-2 mb-2">
+                                      <input type="text" name="ext_first_name[]" value={first} placeholder="Prénom" class="w-1/2 rounded-xl border-0 py-2.5 px-4 bg-gray-50 ring-1 ring-gray-200 focus:ring-2 focus:ring-[var(--color-tc-blue)] text-sm" />
+                                      <input type="text" name="ext_last_name[]" value={last} placeholder="Nom" class="w-1/2 rounded-xl border-0 py-2.5 px-4 bg-gray-50 ring-1 ring-gray-200 focus:ring-2 focus:ring-[var(--color-tc-blue)] text-sm" />
+                                    </div>
+                                  )
+                                }) : (
+                                  <div class="flex gap-2 mb-2">
+                                    <input type="text" name="ext_first_name[]" placeholder="Prénom" class="w-1/2 rounded-xl border-0 py-2.5 px-4 bg-gray-50 ring-1 ring-gray-200 focus:ring-2 focus:ring-[var(--color-tc-blue)] text-sm" />
+                                    <input type="text" name="ext_last_name[]" placeholder="Nom" class="w-1/2 rounded-xl border-0 py-2.5 px-4 bg-gray-50 ring-1 ring-gray-200 focus:ring-2 focus:ring-[var(--color-tc-blue)] text-sm" />
+                                  </div>
+                                )}
+                              </div>
+                              <button type="button" onclick={`addExtCollabRow('ext-collabs-edit-${pt.id}', true)`} class="text-xs text-[var(--color-tc-olive)] hover:underline font-bold">+ Ajouter une autre personne</button>
                             </div>
 
                             <div class="grid grid-cols-2 gap-4 mt-4">
@@ -753,6 +787,22 @@ const enrichedPoints = routePoints.map(pt => {
   </dialog>
 
   <script is:inline>
+    function addExtCollabRow(containerId, isEdit = false) {
+      const container = document.getElementById(containerId);
+      if (!container) return;
+      const div = document.createElement('div');
+      div.className = 'flex gap-2 mb-2';
+      const inputClass = isEdit 
+        ? 'w-1/2 rounded-xl border-0 py-2.5 px-4 bg-gray-50 ring-1 ring-gray-200 focus:ring-2 focus:ring-[var(--color-tc-blue)] text-sm'
+        : 'w-1/2 rounded-xl border-0 py-2.5 px-4 bg-[var(--color-tc-cream)] ring-1 ring-[var(--color-tc-blue)]/20 focus:ring-2 focus:ring-[var(--color-tc-red)] text-sm';
+        
+      div.innerHTML = `
+        <input type="text" name="ext_first_name[]" placeholder="Prénom" class="${inputClass}" />
+        <input type="text" name="ext_last_name[]" placeholder="Nom" class="${inputClass}" />
+      `;
+      container.appendChild(div);
+    }
+
     window.openCollabModal = function(encodedName, avatarUrl, encodedBio) {
       const name = encodedName ? decodeURIComponent(encodedName) : 'Membre';
       const bio = encodedBio && encodedBio !== 'null' && encodedBio !== 'undefined' ? decodeURIComponent(encodedBio) : '';
