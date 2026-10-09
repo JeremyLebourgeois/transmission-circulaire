@@ -387,7 +387,7 @@ const enrichedPoints = routePoints.map(pt => {
                         </div>
                         
                         <!-- Modal de modification -->
-                        <dialog id={`edit-collabs-${pt.id}`} class="p-6 rounded-3xl shadow-xl backdrop:bg-black/50 w-full max-w-md border-0">
+                        <dialog id={`edit-collabs-${pt.id}`} class="p-6 rounded-3xl shadow-xl backdrop:bg-black/50 w-full max-w-md border-0 m-auto">
                           <h3 class="text-lg font-bold text-[var(--color-tc-blue)] mb-4">Membres - {pt.location_name}</h3>
                           <form method="POST" class="space-y-4">
                             <input type="hidden" name="action" value="edit_point" />
@@ -448,7 +448,7 @@ const enrichedPoints = routePoints.map(pt => {
                         </div>
                         
                         <!-- Modal de modification de la liaison -->
-                        <dialog id={`edit-conn-${conn.id}`} class="p-6 rounded-3xl shadow-xl backdrop:bg-black/50 w-full max-w-md border-0">
+                        <dialog id={`edit-conn-${conn.id}`} class="p-6 rounded-3xl shadow-xl backdrop:bg-black/50 w-full max-w-md border-0 m-auto">
                           <h3 class="text-lg font-bold text-[var(--color-tc-blue)] mb-4">Modifier la liaison</h3>
                           <form method="POST" class="space-y-4">
                             <input type="hidden" name="action" value="edit_connection" />
