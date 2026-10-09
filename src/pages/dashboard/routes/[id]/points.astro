@@ -685,4 +685,11 @@ const enrichedPoints = routePoints.map(pt => {
       document.getElementById('map-loading').style.display = 'none';
     });
   </script>
+
+  <style is:global>
+    /* Supprime la bordure de focus par défaut sur les éléments interactifs SVG (lignes/flèches) */
+    .leaflet-interactive:focus {
+      outline: none !important;
+    }
+  </style>
 </Layout>
