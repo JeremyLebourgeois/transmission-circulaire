@@ -118,9 +118,9 @@ const enrichedPoints = (routePoints || []).map(pt => {
                           return '?';
                         };
                         return c.avatar_url ? (
-                        <img src={c.avatar_url} title={c.full_name} onclick={`openCollabModal('${c.full_name.replace(/'/g, "\\'")}', '${c.avatar_url}', '${(c.bio || '').replace(/'/g, "\\'")}')`} class="inline-block h-5 w-5 rounded-full ring-2 ring-white object-cover shadow-sm cursor-pointer hover:scale-110 transition-transform" />
+                        <img src={c.avatar_url} title={c.full_name} onclick={`openCollabModal('${encodeURIComponent(c.full_name || '')}', '${c.avatar_url}', '${encodeURIComponent(c.bio || '')}')`} class="inline-block h-5 w-5 rounded-full ring-2 ring-white object-cover shadow-sm cursor-pointer hover:scale-110 transition-transform" />
                       ) : (
-                        <div title={c.full_name} onclick={`openCollabModal('${c.full_name.replace(/'/g, "\\'")}', null, '${(c.bio || '').replace(/'/g, "\\'")}')`} class="inline-flex h-5 w-5 items-center justify-center rounded-full bg-gray-200 ring-2 ring-white text-[8px] font-bold text-gray-700 shadow-sm cursor-pointer hover:scale-110 transition-transform">{getInitials(c.full_name)}</div>
+                        <div title={c.full_name} onclick={`openCollabModal('${encodeURIComponent(c.full_name || '')}', null, '${encodeURIComponent(c.bio || '')}')`} class="inline-flex h-5 w-5 items-center justify-center rounded-full bg-gray-200 ring-2 ring-white text-[8px] font-bold text-gray-700 shadow-sm cursor-pointer hover:scale-110 transition-transform">{getInitials(c.full_name)}</div>
                       )})}
                     </div>
                   );
@@ -312,8 +312,8 @@ const enrichedPoints = (routePoints || []).map(pt => {
         if (pt.collabsData && pt.collabsData.length > 0) {
           collabsHtml = `<div class="mt-3 border-t pt-2"><div class="flex flex-wrap gap-1">`;
           pt.collabsData.forEach(c => {
-            const safeName = (c.full_name || '').replace(/'/g, "\\'");
-            const safeBio = (c.bio || '').replace(/'/g, "\\'");
+            const safeName = encodeURIComponent(c.full_name || '');
+            const safeBio = encodeURIComponent(c.bio || '');
             if (c.avatar_url) {
               collabsHtml += `<img src="${c.avatar_url}" title="${c.full_name}" onclick="openCollabModal('${safeName}', '${c.avatar_url}', '${safeBio}')" class="h-8 w-8 rounded-full ring-2 ring-white object-cover shadow-sm cursor-pointer hover:scale-110 transition-transform" />`;
             } else {
@@ -364,11 +364,14 @@ const enrichedPoints = (routePoints || []).map(pt => {
   </dialog>
 
   <script is:inline>
-    window.openCollabModal = function(name, avatarUrl, bio) {
-      document.getElementById('collab-modal-name').textContent = name || 'Membre';
+    window.openCollabModal = function(encodedName, avatarUrl, encodedBio) {
+      const name = encodedName ? decodeURIComponent(encodedName) : 'Membre';
+      const bio = encodedBio && encodedBio !== 'null' && encodedBio !== 'undefined' ? decodeURIComponent(encodedBio) : '';
+      
+      document.getElementById('collab-modal-name').textContent = name;
       
       const bioEl = document.getElementById('collab-modal-bio');
-      if (bio && bio !== 'undefined') {
+      if (bio) {
         bioEl.textContent = bio;
         bioEl.classList.remove('hidden');
       } else {
