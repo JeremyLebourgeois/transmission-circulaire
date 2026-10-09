@@ -167,9 +167,9 @@ const enrichedPoints = (routePoints || []).map(pt => {
       
       L.control.zoom({ position: 'topright' }).addTo(map);
 
-      // 2. Fond de carte Esri WorldTerrain
-      L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Terrain_Base/MapServer/tile/{z}/{y}/{x}', {
-        attribution: 'Tiles &copy; Esri &mdash; Source: USGS, Esri, TANA, DeLorme, and NPS',
+      // 2. Fond de carte Esri WorldShadedRelief
+      L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Shaded_Relief/MapServer/tile/{z}/{y}/{x}', {
+        attribution: 'Tiles &copy; Esri &mdash; Source: Esri',
         maxZoom: 13
       }).addTo(map);
 
