@@ -167,10 +167,10 @@ const enrichedPoints = (routePoints || []).map(pt => {
       
       L.control.zoom({ position: 'topright' }).addTo(map);
 
-      // 2. Fond de carte Thunderforest Neighbourhood
-      L.tileLayer('https://tile.thunderforest.com/neighbourhood/{z}/{x}/{y}.png', {
-        maxZoom: 22,
-        attribution: '&copy; <a href="http://www.thunderforest.com/">Thunderforest</a>, &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+      // 2. Fond de carte Esri WorldTerrain
+      L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Terrain_Base/MapServer/tile/{z}/{y}/{x}', {
+        attribution: 'Tiles &copy; Esri &mdash; Source: USGS, Esri, TANA, DeLorme, and NPS',
+        maxZoom: 13
       }).addTo(map);
 
       const markers = {};
