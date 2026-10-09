@@ -428,20 +428,20 @@ const enrichedPoints = routePoints.map(pt => {
               lineJoin: 'round'
             }).addTo(map);
 
-            // Flèche manuelle à 90% (index 18)
-            const ptA = map.project(curvePoints[17], 10);
-            const ptB = map.project(curvePoints[18], 10);
+            // Flèche placée exactement sur le point d'arrivée (index 20)
+            const ptA = map.project(curvePoints[19], 10);
+            const ptB = map.project(curvePoints[20], 10);
             const angle = Math.atan2(ptB.y - ptA.y, ptB.x - ptA.x) * (180 / Math.PI);
 
             const arrowIcon = L.divIcon({
-              html: `<svg viewBox="0 0 24 24" width="24" height="24" style="transform: rotate(${angle}deg); transform-origin: center; filter: drop-shadow(0px 2px 2px rgba(0,0,0,0.3));">
+              html: `<svg viewBox="0 0 24 24" width="24" height="24" style="transform: rotate(${angle}deg) translateX(-20px); transform-origin: center; filter: drop-shadow(0px 2px 2px rgba(0,0,0,0.3));">
                       <polygon points="4,4 20,12 4,20" fill="${tcOliveDark}" />
                      </svg>`,
               className: '',
               iconSize: [24, 24],
               iconAnchor: [12, 12]
             });
-            const arrow = L.marker(curvePoints[18], { icon: arrowIcon, interactive: false }).addTo(map);
+            const arrow = L.marker(curvePoints[20], { icon: arrowIcon, interactive: false, zIndexOffset: -100 }).addTo(map);
 
             // Popup sur la ligne
             if (conn.title || conn.description) {
