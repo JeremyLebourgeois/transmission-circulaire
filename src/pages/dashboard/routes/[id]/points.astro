@@ -134,6 +134,23 @@ if (Astro.request.method === 'POST') {
       if (error) throw error;
       successMessage = "Liaison créée avec succès !";
     }
+    else if (action === 'edit_connection') {
+      const connId = formData.get('connection_id')?.toString();
+      const title = formData.get('title')?.toString();
+      const desc = formData.get('description')?.toString();
+      const color = formData.get('color')?.toString() || '#556B2F';
+
+      if (!connId) throw new Error("ID de liaison manquant.");
+
+      const { error } = await supabase.from('route_connections').update({
+        title: title || '',
+        description: desc || '',
+        color: color
+      }).eq('id', connId);
+
+      if (error) throw error;
+      successMessage = "Liaison mise à jour !";
+    }
     else if (action === 'delete_connection') {
       const connId = formData.get('connection_id')?.toString();
       const { error } = await supabase.from('route_connections').delete().eq('id', connId);
@@ -417,13 +434,50 @@ const enrichedPoints = routePoints.map(pt => {
                       return (
                       <li class="flex items-center justify-between text-sm py-1 border-b border-gray-50">
                         <span class="text-gray-600"><span class="font-medium text-gray-900">{start}</span> → <span class="font-medium text-gray-900">{end}</span></span>
-                        <form method="POST" class="inline" onsubmit="return confirm('Supprimer cette liaison ?');">
-                          <input type="hidden" name="action" value="delete_connection" />
-                          <input type="hidden" name="connection_id" value={conn.id} />
-                          <button type="submit" class="text-red-500 hover:text-red-700 p-1">
-                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                        <div class="flex items-center gap-2">
+                          <button type="button" onclick={`document.getElementById('edit-conn-${conn.id}').showModal()`} class="text-blue-500 hover:text-blue-700 p-1" title="Modifier la liaison">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
                           </button>
-                        </form>
+                          <form method="POST" class="inline" onsubmit="return confirm('Supprimer cette liaison ?');">
+                            <input type="hidden" name="action" value="delete_connection" />
+                            <input type="hidden" name="connection_id" value={conn.id} />
+                            <button type="submit" class="text-red-500 hover:text-red-700 p-1">
+                              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                            </button>
+                          </form>
+                        </div>
+                        
+                        <!-- Modal de modification de la liaison -->
+                        <dialog id={`edit-conn-${conn.id}`} class="p-6 rounded-3xl shadow-xl backdrop:bg-black/50 w-full max-w-md border-0">
+                          <h3 class="text-lg font-bold text-[var(--color-tc-blue)] mb-4">Modifier la liaison</h3>
+                          <form method="POST" class="space-y-4">
+                            <input type="hidden" name="action" value="edit_connection" />
+                            <input type="hidden" name="connection_id" value={conn.id} />
+                            
+                            <div>
+                              <label class="block text-sm font-medium text-[var(--color-tc-blue)] mb-1">Titre de l'action</label>
+                              <input type="text" name="title" value={conn.title} class="w-full rounded-xl border-0 py-2 px-4 bg-gray-50 ring-1 ring-gray-200 focus:ring-2 focus:ring-[var(--color-tc-blue)] text-sm" />
+                            </div>
+
+                            <div>
+                              <label class="block text-sm font-medium text-[var(--color-tc-blue)] mb-1">Description</label>
+                              <textarea name="description" rows="2" class="w-full rounded-xl border-0 py-2 px-4 bg-gray-50 ring-1 ring-gray-200 focus:ring-2 focus:ring-[var(--color-tc-blue)] text-sm">{conn.description}</textarea>
+                            </div>
+
+                            <div>
+                              <label class="block text-sm font-medium text-[var(--color-tc-blue)] mb-1">Couleur du tracé</label>
+                              <div class="flex items-center gap-3">
+                                <input type="color" name="color" value={conn.color || '#556B2F'} class="w-10 h-10 cursor-pointer bg-gray-50 border-0 ring-1 ring-gray-200 p-1 rounded" />
+                                <span class="text-xs text-gray-500">Ligne et flèche directionnelle</span>
+                              </div>
+                            </div>
+
+                            <div class="flex justify-end gap-3 mt-6">
+                              <button type="button" onclick={`document.getElementById('edit-conn-${conn.id}').close()`} class="px-4 py-2 text-sm font-medium text-[var(--color-tc-blue)] bg-gray-100 rounded-full hover:bg-gray-200 transition-colors">Annuler</button>
+                              <button type="submit" class="px-4 py-2 text-sm font-bold text-white bg-[var(--color-tc-blue)] rounded-full hover:bg-opacity-90 transition-colors">Mettre à jour</button>
+                            </div>
+                          </form>
+                        </dialog>
                       </li>
                     )})}
                   </ul>
