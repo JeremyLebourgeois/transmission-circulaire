@@ -217,9 +217,9 @@ const enrichedPoints = (routePoints || []).map(pt => {
 
             if (conn.title || conn.description) {
               const htmlContent = `
-                <div class="p-1 max-w-[200px]">
+                <div class="p-1 w-[200px] whitespace-normal">
                   <strong class="block text-[#2A4365] text-sm">${conn.title || 'Action'}</strong>
-                  ${conn.description ? `<p class="text-xs text-gray-600 mt-1">${conn.description}</p>` : ''}
+                  ${conn.description ? `<p class="text-xs text-gray-600 mt-1 break-words">${conn.description}</p>` : ''}
                 </div>
               `;
               pl.bindTooltip(htmlContent, { sticky: true, className: 'bg-white rounded-xl shadow-lg border-0' });
