@@ -706,9 +706,9 @@ const enrichedPoints = routePoints.map(pt => {
         // Construction du HTML pour le marqueur (un cercle coloré)
         const markerHtml = `
           <div style="
-            width: 24px; height: 24px; 
+            width: 16px; height: 16px; 
             background-color: ${pt.bg_color || tcCream}; 
-            border: 4px solid ${pt.border_color || tcRed}; 
+            border: 3px solid ${pt.border_color || tcRed}; 
             border-radius: 50%; 
             box-shadow: 0 4px 6px rgba(0,0,0,0.3);
             transition: transform 0.2s;
@@ -718,9 +718,9 @@ const enrichedPoints = routePoints.map(pt => {
         const customIcon = L.divIcon({
           html: markerHtml,
           className: '', // Évite les styles par défaut de Leaflet
-          iconSize: [24, 24],
-          iconAnchor: [12, 12],
-          popupAnchor: [0, -12]
+          iconSize: [16, 16],
+          iconAnchor: [8, 8],
+          popupAnchor: [0, -8]
         });
 
         const marker = L.marker([pt.latitude, pt.longitude], { icon: customIcon }).addTo(map);
