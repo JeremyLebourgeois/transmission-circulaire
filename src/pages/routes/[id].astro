@@ -167,10 +167,10 @@ const enrichedPoints = (routePoints || []).map(pt => {
       
       L.control.zoom({ position: 'topright' }).addTo(map);
 
-      // 2. Fond de carte Aquarelle (Stamen Watercolor)
-      L.tileLayer('https://watercolormaps.collection.cooperhewitt.org/tile/watercolor/{z}/{x}/{y}.jpg', {
-        attribution: 'Map tiles by Stamen Design, CC BY 3.0 &mdash; Map data &copy; OpenStreetMap',
-        maxZoom: 16
+      // 2. Fond de carte OpenStreetMap Catalan/Breton
+      L.tileLayer('https://tile.openstreetmap.bzh/ca/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Tiles courtesy of <a href="https://www.openstreetmap.cat" target="_blank">Breton OpenStreetMap Team</a>'
       }).addTo(map);
 
       const markers = {};
