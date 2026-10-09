@@ -1,0 +1,64 @@
+---
+export const prerender = false;
+
+import Layout from '../../layouts/Layout.astro';
+import { getLangFromUrl, useTranslatedPath, useTranslations } from '../../i18n/utils';
+import { getSupabaseServerClient } from '../../lib/supabase-server';
+import RoutesDashboard from '../../components/dashboard/RoutesDashboard.astro';
+
+const lang = getLangFromUrl(Astro.url);
+const translatePath = useTranslatedPath(lang);
+const t = useTranslations(lang);
+
+const supabase = getSupabaseServerClient(Astro.cookies);
+const { data: { user }, error: userError } = await supabase.auth.getUser();
+
+if (!user || userError) {
+  return Astro.redirect(translatePath('/login'));
+}
+
+const { data: roleData } = await supabase
+  .from('user_roles')
+  .select('role')
+  .eq('id', user.id)
+  .single();
+
+const userRole = roleData?.role || 'Membre';
+
+if (userRole !== 'admin' && userRole !== 'super_admin') {
+  return Astro.redirect(translatePath('/dashboard'));
+}
+---
+
+<Layout title={`Administration des Routes | Transmission Circulaire`}>
+  <main class="min-h-screen bg-[var(--color-tc-cream)] py-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="mb-8 flex items-center gap-4">
+        <a href={translatePath('/dashboard')} class="text-[var(--color-tc-blue)] hover:text-[var(--color-tc-red)] transition-colors inline-flex items-center gap-2 font-medium">
+          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+          </svg>
+          Retour au tableau de bord
+        </a>
+      </div>
+      
+      <div class="bg-white rounded-3xl shadow-xl overflow-hidden border-2 border-[var(--color-tc-red)]/20">
+        <div class="bg-[var(--color-tc-red)]/5 px-8 py-6 border-b border-[var(--color-tc-red)]/10 flex items-center justify-between">
+          <div>
+            <h1 class="text-2xl font-display font-bold text-[var(--color-tc-blue)] flex items-center gap-3">
+              <svg class="w-7 h-7 text-[var(--color-tc-red)]" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 6.75V15m6-6v8.25m.503 3.498l4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 00-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0z" />
+              </svg>
+              Administration des Routes Circulaires
+            </h1>
+            <p class="mt-2 text-[var(--color-tc-blue)]/70">Gérez les routes, leurs points d'étape sur la carte du monde, et les liaisons (actions).</p>
+          </div>
+        </div>
+        
+        <div class="p-8">
+          <RoutesDashboard />
+        </div>
+      </div>
+    </div>
+  </main>
+</Layout>
