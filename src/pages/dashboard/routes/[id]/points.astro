@@ -284,7 +284,7 @@ const enrichedPoints = routePoints.map(pt => {
 
               <div>
                 <label class="block text-sm font-medium text-[var(--color-tc-blue)] mb-1">Autres personnes (sans compte)</label>
-                <input type="text" name="external_collaborators" placeholder="Séparer par des virgules (ex: Jean, Marie)" class="w-full rounded-xl border-0 py-2.5 px-4 bg-[var(--color-tc-cream)] ring-1 ring-[var(--color-tc-blue)]/20 focus:ring-2 focus:ring-[var(--color-tc-red)] text-sm" />
+                <input type="text" name="external_collaborators" placeholder="Prénom Nom, Prénom Nom (ex: Jean Dupont, Marie Martin)" class="w-full rounded-xl border-0 py-2.5 px-4 bg-[var(--color-tc-cream)] ring-1 ring-[var(--color-tc-blue)]/20 focus:ring-2 focus:ring-[var(--color-tc-red)] text-sm" />
               </div>
 
               <button type="submit" class="w-full rounded-full bg-[var(--color-tc-blue)] px-4 py-2 text-sm font-bold text-white shadow-sm hover:bg-opacity-90 transition-all">
@@ -412,7 +412,7 @@ const enrichedPoints = routePoints.map(pt => {
 
                             <div>
                               <label class="block text-sm font-medium text-[var(--color-tc-blue)] mb-1">Autres personnes</label>
-                              <input type="text" name="external_collaborators" value={(pt.external_collaborators || []).join(', ')} placeholder="Ex: Jean, Marie" class="w-full rounded-xl border-0 py-2.5 px-4 bg-gray-50 ring-1 ring-gray-200 focus:ring-2 focus:ring-[var(--color-tc-blue)] text-sm" />
+                              <input type="text" name="external_collaborators" value={(pt.external_collaborators || []).join(', ')} placeholder="Prénom Nom, Prénom Nom (ex: Jean Dupont, Marie Martin)" class="w-full rounded-xl border-0 py-2.5 px-4 bg-gray-50 ring-1 ring-gray-200 focus:ring-2 focus:ring-[var(--color-tc-blue)] text-sm" />
                             </div>
 
                             <div class="flex justify-end gap-3 mt-6">
@@ -551,6 +551,14 @@ const enrichedPoints = routePoints.map(pt => {
         return points;
       }
 
+      function getInitials(name) {
+        if (!name) return '?';
+        const parts = name.trim().split(' ').filter(p => p.length > 0);
+        if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+        if (parts.length === 1) return parts[0].substring(0, 2).toUpperCase();
+        return '?';
+      }
+
       connections.forEach(conn => {
         try {
           const startPt = points.find(p => p.id === conn.start_point_id);
@@ -663,7 +671,7 @@ const enrichedPoints = routePoints.map(pt => {
             if (c.avatar_url) {
               collabsHtml += `<img src="${c.avatar_url}" title="${c.full_name}" class="inline-block h-8 w-8 rounded-full ring-2 ring-white object-cover shadow-sm" />`;
             } else {
-              collabsHtml += `<div title="${c.full_name}" class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-gray-200 ring-2 ring-white text-[10px] font-bold text-gray-700 shadow-sm">${c.full_name?.charAt(0) || '?'}</div>`;
+              collabsHtml += `<div title="${c.full_name}" class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-gray-200 ring-2 ring-white text-[10px] font-bold text-gray-700 shadow-sm">${getInitials(c.full_name)}</div>`;
             }
           });
           collabsHtml += `</div></div>`;
