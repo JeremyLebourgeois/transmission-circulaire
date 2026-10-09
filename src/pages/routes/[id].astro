@@ -35,7 +35,12 @@ const enrichedPoints = (routePoints || []).map(pt => {
   const collabsData = (pt.collaborators || []).map((collabId: string) => {
     return allProfiles.find(p => p.id === collabId) || { id: collabId, first_name: 'Un membre', avatar_url: null };
   });
-  return { ...pt, collabsData };
+
+  const externalCollabsData = (pt.external_collaborators || []).map((name: string) => {
+    return { is_external: true, first_name: name };
+  });
+
+  return { ...pt, collabsData: [...collabsData, ...externalCollabsData] };
 });
 ---
 
