@@ -350,7 +350,6 @@ const enrichedPoints = routePoints.map(pt => {
 
   <!-- Script Leaflet depuis CDN -->
   <script is:inline src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-  <script is:inline src="https://unpkg.com/leaflet-polylinedecorator@1.6.4/dist/leaflet.polylineDecorator.js"></script>
   
   <!-- Variables pour la carte -->
   <script is:inline define:vars={{ enrichedPoints, routeConnections }}>
@@ -408,41 +407,54 @@ const enrichedPoints = routePoints.map(pt => {
         return points;
       }
 
-      // 3. Dessiner les lignes (Liaisons)
       connections.forEach(conn => {
-        const startPt = points.find(p => p.id === conn.start_point_id);
-        const endPt = points.find(p => p.id === conn.end_point_id);
-        
-        if (startPt && endPt) {
-          const curvePoints = getBezierCurve(
-            [startPt.latitude, startPt.longitude], 
-            [endPt.latitude, endPt.longitude]
-          );
+        try {
+          const startPt = points.find(p => p.id === conn.start_point_id);
+          const endPt = points.find(p => p.id === conn.end_point_id);
+          
+          if (startPt && endPt) {
+            const curvePoints = getBezierCurve(
+              [startPt.latitude, startPt.longitude], 
+              [endPt.latitude, endPt.longitude]
+            );
 
-          // Ligne continue
-          const polyline = L.polyline(curvePoints, {
-            color: tcMustard,
-            weight: 3,
-            opacity: 0.9,
-            lineJoin: 'round'
-          }).addTo(map);
+            // Ligne continue (Olive)
+            const tcOliveDark = '#556B2F';
 
-          // Flèche
-          L.polylineDecorator(polyline, {
-            patterns: [
-              { offset: '100%', repeat: 0, symbol: L.Symbol.arrowHead({pixelSize: 15, polygon: false, pathOptions: {stroke: true, color: tcMustard, weight: 3}}) }
-            ]
-          }).addTo(map);
+            const polyline = L.polyline(curvePoints, {
+              color: tcOliveDark,
+              weight: 5,
+              opacity: 0.9,
+              lineJoin: 'round'
+            }).addTo(map);
 
-          // Popup sur la ligne
-          if (conn.title || conn.description) {
-            polyline.bindPopup(`
-              <div class="p-2 min-w-[200px]">
-                <strong class="block text-[#2A4365] mb-1">${conn.title || 'Action'}</strong>
-                <p class="text-xs text-gray-600">${conn.description || ''}</p>
-              </div>
-            `);
+            // Flèche manuelle à 90% (index 18)
+            const ptA = map.project(curvePoints[17], 10);
+            const ptB = map.project(curvePoints[18], 10);
+            const angle = Math.atan2(ptB.y - ptA.y, ptB.x - ptA.x) * (180 / Math.PI);
+
+            const arrowIcon = L.divIcon({
+              html: `<svg viewBox="0 0 24 24" width="24" height="24" style="transform: rotate(${angle}deg); transform-origin: center; filter: drop-shadow(0px 2px 2px rgba(0,0,0,0.3));">
+                      <polygon points="4,4 20,12 4,20" fill="${tcOliveDark}" />
+                     </svg>`,
+              className: '',
+              iconSize: [24, 24],
+              iconAnchor: [12, 12]
+            });
+            const arrow = L.marker(curvePoints[18], { icon: arrowIcon, interactive: false }).addTo(map);
+
+            // Popup sur la ligne
+            if (conn.title || conn.description) {
+              polyline.bindPopup(`
+                <div class="p-2 min-w-[200px]">
+                  <strong class="block text-[#2A4365] mb-1">${conn.title || 'Action'}</strong>
+                  <p class="text-xs text-gray-600">${conn.description || ''}</p>
+                </div>
+              `);
+            }
           }
+        } catch(e) {
+          console.error("Erreur avec la connexion: ", e);
         }
       });
 
