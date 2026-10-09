@@ -735,9 +735,9 @@ const enrichedPoints = routePoints.map(pt => {
             const safeName = encodeURIComponent(c.full_name || '');
             const safeBio = encodeURIComponent(c.description || '');
             if (c.avatar_url) {
-              collabsHtml += `<img src="${c.avatar_url}" title="${c.full_name}" onclick="openCollabModal('${safeName}', '${c.avatar_url}', '${safeBio}')" class="inline-block h-8 w-8 rounded-full ring-2 ring-white object-cover shadow-sm cursor-pointer hover:scale-110 transition-transform" />`;
+              collabsHtml += `<img src="${c.avatar_url}" title="${c.full_name}" onclick="openCollabModal('${safeName}', '${c.avatar_url}', '${safeBio}')" class="inline-block h-12 w-12 rounded-full ring-2 ring-white object-cover shadow-sm cursor-pointer hover:scale-110 transition-transform" />`;
             } else {
-              collabsHtml += `<div title="${c.full_name}" onclick="openCollabModal('${safeName}', null, '${safeBio}')" class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-gray-200 ring-2 ring-white text-[10px] font-bold text-gray-700 shadow-sm cursor-pointer hover:scale-110 transition-transform">${getInitials(c.full_name)}</div>`;
+              collabsHtml += `<div title="${c.full_name}" onclick="openCollabModal('${safeName}', null, '${safeBio}')" class="inline-flex h-12 w-12 items-center justify-center rounded-full bg-gray-200 ring-2 ring-white text-xs font-bold text-gray-700 shadow-sm cursor-pointer hover:scale-110 transition-transform">${getInitials(c.full_name)}</div>`;
             }
           });
           collabsHtml += `</div></div>`;
