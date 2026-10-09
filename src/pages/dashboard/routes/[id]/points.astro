@@ -423,6 +423,23 @@ const enrichedPoints = routePoints.map(pt => {
             // Ligne continue (Olive)
             const tcOliveDark = '#556B2F';
 
+            // Raccourcir le point final géographiquement (calculé au zoom 3)
+            const ptA = map.project(curvePoints[19], 3);
+            const ptB = map.project(curvePoints[20], 3);
+            const angle = Math.atan2(ptB.y - ptA.y, ptB.x - ptA.x);
+            const angleDeg = angle * (180 / Math.PI);
+
+            // On recule le point de 25 pixels (au zoom 3)
+            const offsetPx = 25;
+            const newPtB = L.point(
+              ptB.x - Math.cos(angle) * offsetPx,
+              ptB.y - Math.sin(angle) * offsetPx
+            );
+            const arrowLatLng = map.unproject(newPtB, 3);
+            
+            // On remplace la fin de la courbe par ce point raccourci
+            curvePoints[20] = arrowLatLng;
+
             const polyline = L.polyline(curvePoints, {
               color: tcOliveDark,
               weight: 5,
@@ -430,20 +447,15 @@ const enrichedPoints = routePoints.map(pt => {
               lineJoin: 'round'
             }).addTo(map);
 
-            // Flèche placée exactement sur le point d'arrivée (index 20)
-            const ptA = map.project(curvePoints[19], 10);
-            const ptB = map.project(curvePoints[20], 10);
-            const angle = Math.atan2(ptB.y - ptA.y, ptB.x - ptA.x) * (180 / Math.PI);
-
             const arrowIcon = L.divIcon({
-              html: `<svg viewBox="0 0 24 24" width="24" height="24" style="transform: rotate(${angle}deg) translateX(-20px); transform-origin: center; filter: drop-shadow(0px 2px 2px rgba(0,0,0,0.3));">
+              html: `<svg viewBox="0 0 24 24" width="24" height="24" style="transform: rotate(${angleDeg}deg); transform-origin: center; filter: drop-shadow(0px 2px 2px rgba(0,0,0,0.3));">
                       <polygon points="4,4 20,12 4,20" fill="${tcOliveDark}" />
                      </svg>`,
               className: '',
               iconSize: [24, 24],
               iconAnchor: [12, 12]
             });
-            const arrow = L.marker(curvePoints[20], { icon: arrowIcon, interactive: false, zIndexOffset: -100 }).addTo(map);
+            const arrow = L.marker(arrowLatLng, { icon: arrowIcon, interactive: false, zIndexOffset: 100 }).addTo(map);
 
             // Popup sur la ligne
             if (conn.title || conn.description) {

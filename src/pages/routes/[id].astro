@@ -184,6 +184,25 @@ const enrichedPoints = (routePoints || []).map(pt => {
             // Ligne continue Olive
             const tcOliveDark = '#556B2F';
             
+            // Pour que la ligne s'arrête exactement à la flèche (et pas dans le point d'arrivée),
+            // on raccourcit géographiquement le dernier point de la courbe.
+            // On calcule l'angle au zoom 3 (zoom de base)
+            const ptA = map.project(curvePoints[19], 3);
+            const ptB = map.project(curvePoints[20], 3);
+            const angle = Math.atan2(ptB.y - ptA.y, ptB.x - ptA.x);
+            const angleDeg = angle * (180 / Math.PI);
+
+            // On recule le point de 25 pixels (au zoom 3)
+            const offsetPx = 25;
+            const newPtB = L.point(
+              ptB.x - Math.cos(angle) * offsetPx,
+              ptB.y - Math.sin(angle) * offsetPx
+            );
+            const arrowLatLng = map.unproject(newPtB, 3);
+            
+            // On remplace la fin de la courbe par ce point raccourci
+            curvePoints[20] = arrowLatLng;
+
             const pl = L.polyline(curvePoints, {
               color: tcOliveDark,
               weight: 5,
@@ -191,14 +210,9 @@ const enrichedPoints = (routePoints || []).map(pt => {
               lineJoin: 'round'
             }).addTo(map);
 
-            // Flèche placée exactement sur le point d'arrivée (index 20)
-            const ptA = map.project(curvePoints[19], 10);
-            const ptB = map.project(curvePoints[20], 10);
-            const angle = Math.atan2(ptB.y - ptA.y, ptB.x - ptA.x) * (180 / Math.PI);
-
-            // translateX(-20px) recule la flèche pour que sa pointe touche exactement le bord du cercle rouge de 12px de rayon.
+            // L'icone de flèche centrée sur le nouveau point de fin
             const arrowIcon = L.divIcon({
-              html: `<svg viewBox="0 0 24 24" width="24" height="24" style="transform: rotate(${angle}deg) translateX(-20px); transform-origin: center; filter: drop-shadow(0px 2px 2px rgba(0,0,0,0.3));">
+              html: `<svg viewBox="0 0 24 24" width="24" height="24" style="transform: rotate(${angleDeg}deg); transform-origin: center; filter: drop-shadow(0px 2px 2px rgba(0,0,0,0.3));">
                       <polygon points="4,4 20,12 4,20" fill="${tcOliveDark}" />
                      </svg>`,
               className: '',
@@ -206,8 +220,8 @@ const enrichedPoints = (routePoints || []).map(pt => {
               iconAnchor: [12, 12]
             });
             
-            // On ajoute la flèche avec zIndexOffset pour qu'elle passe sous le point rouge si ça déborde
-            L.marker(curvePoints[20], { icon: arrowIcon, interactive: false, zIndexOffset: -100 }).addTo(map);
+            // Flèche interactive=false pour ne pas bloquer les clics, zIndex = 100 pour être au-dessus de la ligne
+            L.marker(arrowLatLng, { icon: arrowIcon, interactive: false, zIndexOffset: 100 }).addTo(map);
           }
         } catch(e) {
           console.error("Erreur de rendu de la ligne: ", e);
