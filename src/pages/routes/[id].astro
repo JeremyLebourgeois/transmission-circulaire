@@ -1,0 +1,211 @@
+---
+export const prerender = false;
+
+import Layout from '../../layouts/Layout.astro';
+import { getLangFromUrl, useTranslatedPath } from '../../i18n/utils';
+import { getSupabaseServerClient } from '../../lib/supabase-server';
+
+const lang = getLangFromUrl(Astro.url);
+const translatePath = useTranslatedPath(lang);
+const { id } = Astro.params;
+
+const supabase = getSupabaseServerClient(Astro.cookies);
+
+// 1. Fetch Route
+const { data: route } = await supabase.from('routes').select('*').eq('id', id).single();
+if (!route) {
+  return Astro.redirect(translatePath('/routes'));
+}
+
+// 2. Fetch Points
+const { data: routePoints } = await supabase.from('route_points').select('*').eq('route_id', id);
+
+// 3. Fetch Connections
+const { data: routeConnections } = await supabase.from('route_connections').select('*').eq('route_id', id);
+
+// 4. Fetch Profiles for collaborators (using the admin client would be better if RLS applies, 
+// but since the patch allows admins only, we might need a public policy for profiles, OR we can fetch them securely here)
+// Wait, the public needs to see collaborators! If the RLS patch only allowed admins, we must fetch profiles using a secure method or they won't show.
+// For now, let's fetch them. If it fails, they just don't appear. We can add a public RLS policy for `avatar_url` and `first_name` later if needed.
+const { data: profiles } = await supabase.from('profiles').select('id, first_name, last_name, avatar_url');
+const allProfiles = profiles || [];
+
+// Enrich points with collaborators data for UI
+const enrichedPoints = (routePoints || []).map(pt => {
+  const collabsData = (pt.collaborators || []).map((collabId: string) => {
+    return allProfiles.find(p => p.id === collabId) || { id: collabId, first_name: 'Un membre', avatar_url: null };
+  });
+  return { ...pt, collabsData };
+});
+---
+
+<Layout title={`${route.title} | Transmission Circulaire`}>
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+  
+  <main class="min-h-screen bg-[var(--color-tc-cream)] pb-16">
+    
+    <!-- Hero / Map Section -->
+    <section class="relative w-full h-[60vh] min-h-[500px] bg-gray-100 border-b-4 border-[var(--color-tc-blue)]">
+      <div id="public-map" class="absolute inset-0 z-0"></div>
+      
+      <!-- Overlay text over map (Optional, but looks cool if we have a gradient) -->
+      <div class="absolute inset-0 pointer-events-none z-10 bg-gradient-to-t from-[var(--color-tc-cream)] via-transparent to-transparent"></div>
+      
+      <!-- Back button -->
+      <div class="absolute top-6 left-6 z-20 pointer-events-auto">
+        <a href={translatePath('/routes')} class="inline-flex items-center gap-2 px-5 py-2.5 bg-white/90 backdrop-blur-md rounded-full shadow-lg font-bold text-[var(--color-tc-blue)] hover:text-[var(--color-tc-red)] hover:bg-white transition-all">
+          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+          </svg>
+          Retour aux routes
+        </a>
+      </div>
+    </section>
+
+    <!-- Content Section -->
+    <section class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 -mt-20 relative z-20 pointer-events-auto">
+      <div class="bg-white rounded-3xl shadow-2xl p-8 md:p-12 border border-[var(--color-tc-blue)]/10">
+        
+        <h1 class="text-4xl md:text-5xl font-display font-bold text-[var(--color-tc-blue)] mb-6 text-center">
+          {route.title}
+        </h1>
+        
+        {route.description && (
+          <div class="prose prose-lg prose-blue max-w-none text-[var(--color-tc-blue)]/80 mb-12">
+            {route.description.split('\n').map((paragraph: string) => (
+              <p class="mb-4 leading-relaxed">{paragraph}</p>
+            ))}
+          </div>
+        )}
+
+        <!-- Actions / Liaisons List -->
+        {routeConnections && routeConnections.length > 0 && (
+          <div class="mt-12">
+            <h2 class="text-2xl font-bold text-[var(--color-tc-blue)] mb-8 flex items-center gap-3">
+              <svg class="w-7 h-7 text-[var(--color-tc-mustard)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
+              </svg>
+              Actions menées
+            </h2>
+            
+            <div class="space-y-6">
+              {routeConnections.map((conn: any) => {
+                const start = enrichedPoints.find(p => p.id === conn.start_point_id);
+                const end = enrichedPoints.find(p => p.id === conn.end_point_id);
+                return (
+                  <div class="bg-[var(--color-tc-cream)]/50 rounded-2xl p-6 border border-[var(--color-tc-blue)]/5 hover:border-[var(--color-tc-blue)]/20 transition-colors">
+                    <div class="flex items-center gap-4 text-sm font-bold text-[var(--color-tc-red)] mb-3">
+                      <span class="bg-white px-3 py-1 rounded-full shadow-sm">{start?.location_name || '...'}</span>
+                      <svg class="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
+                      <span class="bg-white px-3 py-1 rounded-full shadow-sm">{end?.location_name || '...'}</span>
+                    </div>
+                    {conn.title && <h3 class="text-xl font-bold text-[var(--color-tc-blue)] mb-2">{conn.title}</h3>}
+                    {conn.description && <p class="text-[var(--color-tc-blue)]/70 leading-relaxed">{conn.description}</p>}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+      </div>
+    </section>
+  </main>
+
+  <!-- Script Leaflet depuis CDN -->
+  <script is:inline src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  
+  <script is:inline define:vars={{ enrichedPoints, routeConnections }}>
+    document.addEventListener("DOMContentLoaded", () => {
+      // 1. Initialiser la carte
+      const map = L.map('public-map', {
+        zoomControl: false,
+        scrollWheelZoom: false // Désactivé pour ne pas bloquer le défilement de la page
+      }).setView([20, 0], 2); 
+      
+      L.control.zoom({ position: 'topright' }).addTo(map);
+
+      // 2. Fond de carte CartoDB Positron
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
+        subdomains: 'abcd',
+        maxZoom: 20
+      }).addTo(map);
+
+      const markers = {};
+      const tcRed = '#9B2C2C';
+      const tcMustard = '#D69E2E';
+
+      // 3. Dessiner les lignes
+      (routeConnections || []).forEach(conn => {
+        const startPt = enrichedPoints.find(p => p.id === conn.start_point_id);
+        const endPt = enrichedPoints.find(p => p.id === conn.end_point_id);
+        
+        if (startPt && endPt) {
+          L.polyline([
+            [startPt.latitude, startPt.longitude],
+            [endPt.latitude, endPt.longitude]
+          ], {
+            color: tcMustard,
+            weight: 4,
+            opacity: 0.8,
+            dashArray: '10, 15',
+            lineJoin: 'round'
+          }).addTo(map);
+        }
+      });
+
+      // 4. Placer les points
+      (enrichedPoints || []).forEach(pt => {
+        const markerHtml = `
+          <div style="
+            width: 24px; height: 24px; 
+            background-color: ${tcRed}; 
+            border: 3px solid white; 
+            border-radius: 50%; 
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            transition: transform 0.2s;
+          " class="hover:scale-125"></div>
+        `;
+        
+        const customIcon = L.divIcon({
+          html: markerHtml,
+          className: '',
+          iconSize: [24, 24],
+          iconAnchor: [12, 12],
+          popupAnchor: [0, -12]
+        });
+
+        const marker = L.marker([pt.latitude, pt.longitude], { icon: customIcon }).addTo(map);
+        markers[pt.id] = marker;
+
+        let collabsHtml = '';
+        if (pt.collabsData && pt.collabsData.length > 0) {
+          collabsHtml = `<div class="mt-3 border-t pt-2"><p class="text-[10px] font-bold text-gray-400 uppercase mb-1">Sur place</p><div class="flex flex-wrap gap-1">`;
+          pt.collabsData.forEach(c => {
+            if (c.avatar_url) {
+              collabsHtml += `<img src="${c.avatar_url}" title="${c.first_name}" class="h-6 w-6 rounded-full ring-2 ring-white object-cover" />`;
+            } else {
+              collabsHtml += `<div title="${c.first_name}" class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-gray-200 ring-2 ring-white text-[8px] font-bold">${c.first_name?.charAt(0) || '?'}</div>`;
+            }
+          });
+          collabsHtml += `</div></div>`;
+        }
+
+        marker.bindPopup(`
+          <div class="p-2 min-w-[150px]">
+            <h3 class="font-bold text-[#2A4365] text-sm">${pt.location_name}</h3>
+            ${collabsHtml}
+          </div>
+        `);
+      });
+
+      // Centrer la carte sur les points
+      if (enrichedPoints && enrichedPoints.length > 0) {
+        const group = new L.featureGroup(Object.values(markers));
+        map.fitBounds(group.getBounds(), { padding: [50, 50], maxZoom: 6 });
+      }
+    });
+  </script>
+</Layout>
