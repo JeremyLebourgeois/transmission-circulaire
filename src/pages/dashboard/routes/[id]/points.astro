@@ -526,9 +526,9 @@ const enrichedPoints = routePoints.map(pt => {
       const connections = window.tcMapConnections || [];
       const markers = {};
 
-      // Couleurs charte TC
       const tcRed = '#9B2C2C';
       const tcMustard = '#D69E2E';
+      const tcCream = '#FAF9F6';
       const tcBlue = '#2A4365';
 
       // Fonction pour générer une courbe douce (Bézier quadratique)
@@ -647,8 +647,8 @@ const enrichedPoints = routePoints.map(pt => {
         const markerHtml = `
           <div style="
             width: 24px; height: 24px; 
-            background-color: ${tcRed}; 
-            border: 3px solid white; 
+            background-color: ${tcCream}; 
+            border: 4px solid ${tcRed}; 
             border-radius: 50%; 
             box-shadow: 0 4px 6px rgba(0,0,0,0.3);
             transition: transform 0.2s;
