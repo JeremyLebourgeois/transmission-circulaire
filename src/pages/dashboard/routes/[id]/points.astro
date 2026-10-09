@@ -596,8 +596,12 @@ const enrichedPoints = routePoints.map(pt => {
                   ${conn.description ? `<p class="text-xs text-gray-600 mt-1 break-words">${conn.description}</p>` : ''}
                 </div>
               `;
-              polyline.bindTooltip(htmlContent, { sticky: true, className: 'bg-white rounded-xl shadow-lg border-0' });
+              const tooltipOptions = { sticky: true, className: 'bg-white rounded-xl shadow-lg border-0' };
+              polyline.bindTooltip(htmlContent, tooltipOptions);
               polyline.bindPopup(htmlContent);
+
+              polyline.on('popupopen', function() { this.unbindTooltip(); });
+              polyline.on('popupclose', function() { this.bindTooltip(htmlContent, tooltipOptions); });
             }
 
             const arrowIcon = L.divIcon({
@@ -671,8 +675,12 @@ const enrichedPoints = routePoints.map(pt => {
             ${collabsHtml}
           </div>
         `;
-        marker.bindTooltip(popupHtml, { direction: 'top', offset: [0, -12], className: 'bg-white rounded-xl shadow-lg border-0' });
+        const tooltipOptions = { direction: 'top', offset: [0, -12], className: 'bg-white rounded-xl shadow-lg border-0' };
+        marker.bindTooltip(popupHtml, tooltipOptions);
         marker.bindPopup(popupHtml, { offset: [0, -12] });
+
+        marker.on('popupopen', function() { this.unbindTooltip(); });
+        marker.on('popupclose', function() { this.bindTooltip(popupHtml, tooltipOptions); });
       });
 
       // Ajuster la vue pour voir tous les points si la carte n'est pas vide

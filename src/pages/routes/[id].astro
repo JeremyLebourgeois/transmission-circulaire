@@ -241,8 +241,12 @@ const enrichedPoints = (routePoints || []).map(pt => {
                   ${conn.description ? `<p class="text-xs text-gray-600 mt-1 break-words">${conn.description}</p>` : ''}
                 </div>
               `;
-              pl.bindTooltip(htmlContent, { sticky: true, className: 'bg-white rounded-xl shadow-lg border-0' });
+              const tooltipOptions = { sticky: true, className: 'bg-white rounded-xl shadow-lg border-0' };
+              pl.bindTooltip(htmlContent, tooltipOptions);
               pl.bindPopup(htmlContent);
+
+              pl.on('popupopen', function() { this.unbindTooltip(); });
+              pl.on('popupclose', function() { this.bindTooltip(htmlContent, tooltipOptions); });
             }
 
             // L'icone de flèche centrée sur le nouveau point de fin
@@ -306,8 +310,12 @@ const enrichedPoints = (routePoints || []).map(pt => {
             ${collabsHtml}
           </div>
         `;
-        marker.bindTooltip(popupHtml, { direction: 'top', offset: [0, -12], className: 'bg-white rounded-xl shadow-lg border-0' });
+        const tooltipOptions = { direction: 'top', offset: [0, -12], className: 'bg-white rounded-xl shadow-lg border-0' };
+        marker.bindTooltip(popupHtml, tooltipOptions);
         marker.bindPopup(popupHtml, { offset: [0, -12] });
+
+        marker.on('popupopen', function() { this.unbindTooltip(); });
+        marker.on('popupclose', function() { this.bindTooltip(popupHtml, tooltipOptions); });
       });
 
       // Centrer la carte sur les points
