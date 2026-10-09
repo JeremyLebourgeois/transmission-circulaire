@@ -43,12 +43,9 @@ const enrichedPoints = (routePoints || []).map(pt => {
   <!-- Leaflet CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
   <style>
-    /* Rendre la carte OpenStreetMap élégante (nuances de gris et lumineuse) */
-    .leaflet-layer,
-    .leaflet-control-zoom-in,
-    .leaflet-control-zoom-out,
-    .leaflet-control-attribution {
-      filter: grayscale(100%) opacity(0.7) contrast(1.2);
+    /* Option 2: Carte Aquarelle */
+    .leaflet-layer {
+      filter: contrast(1.1) brightness(1.05) saturate(0.8);
     }
   </style>
   
@@ -136,9 +133,9 @@ const enrichedPoints = (routePoints || []).map(pt => {
       
       L.control.zoom({ position: 'topright' }).addTo(map);
 
-      // 2. Fond de carte Esri (Sans labels, très épuré, gratuit)
-      L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
-        attribution: 'Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ',
+      // 2. Fond de carte Aquarelle (Stamen Watercolor)
+      L.tileLayer('https://watercolormaps.collection.cooperhewitt.org/tile/watercolor/{z}/{x}/{y}.jpg', {
+        attribution: 'Map tiles by Stamen Design, CC BY 3.0 &mdash; Map data &copy; OpenStreetMap',
         maxZoom: 16
       }).addTo(map);
 
