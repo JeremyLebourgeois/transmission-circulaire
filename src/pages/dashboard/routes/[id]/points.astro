@@ -350,6 +350,7 @@ const enrichedPoints = routePoints.map(pt => {
 
   <!-- Script Leaflet depuis CDN -->
   <script is:inline src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script is:inline src="https://unpkg.com/leaflet-polylinedecorator@1.6.4/dist/leaflet.polylineDecorator.js"></script>
   
   <!-- Variables pour la carte -->
   <script is:inline define:vars={{ enrichedPoints, routeConnections }}>
@@ -363,7 +364,8 @@ const enrichedPoints = routePoints.map(pt => {
       // 1. Initialiser la carte Leaflet
       // On centre globalement sur l'Europe/Afrique par défaut
       const map = L.map('map', {
-        zoomControl: false // On désactive pour le mettre ailleurs
+        zoomControl: false, // On désactive pour le mettre ailleurs
+        attributionControl: false // Cacher l'attribution
       }).setView([20, 0], 2); 
       
       // Contrôle de zoom en bas à droite
@@ -384,26 +386,52 @@ const enrichedPoints = routePoints.map(pt => {
       const tcMustard = '#D69E2E';
       const tcBlue = '#2A4365';
 
+      // Fonction pour générer une courbe douce (Bézier quadratique)
+      function getBezierCurve(latlng1, latlng2, offsetFactor = 0.2) {
+        const p1 = map.project(latlng1, 10);
+        const p2 = map.project(latlng2, 10);
+        
+        const dx = p2.x - p1.x;
+        const dy = p2.y - p1.y;
+        const ctrlP = L.point(
+          (p1.x + p2.x) / 2 - dy * offsetFactor,
+          (p1.y + p2.y) / 2 + dx * offsetFactor
+        );
+
+        const points = [];
+        for (let t = 0; t <= 1; t += 0.05) {
+          const u = 1 - t;
+          const x = u * u * p1.x + 2 * u * t * ctrlP.x + t * t * p2.x;
+          const y = u * u * p1.y + 2 * u * t * ctrlP.y + t * t * p2.y;
+          points.push(map.unproject(L.point(x, y), 10));
+        }
+        return points;
+      }
+
       // 3. Dessiner les lignes (Liaisons)
       connections.forEach(conn => {
         const startPt = points.find(p => p.id === conn.start_point_id);
         const endPt = points.find(p => p.id === conn.end_point_id);
         
         if (startPt && endPt) {
-          const latlngs = [
-            [startPt.latitude, startPt.longitude],
+          const curvePoints = getBezierCurve(
+            [startPt.latitude, startPt.longitude], 
             [endPt.latitude, endPt.longitude]
-          ];
-          
-          // Ligne courbe simulée mathématiquement (basique) ou ligne droite stylisée
-          // Pour faire premium, on utilise une ligne droite avec tirets animés si on ajoute du CSS, 
-          // ou une belle ligne colorée avec opacité
-          const polyline = L.polyline(latlngs, {
+          );
+
+          // Ligne continue
+          const polyline = L.polyline(curvePoints, {
             color: tcMustard,
             weight: 3,
-            opacity: 0.8,
-            dashArray: '10, 10', // Pointillés
+            opacity: 0.9,
             lineJoin: 'round'
+          }).addTo(map);
+
+          // Flèche
+          L.polylineDecorator(polyline, {
+            patterns: [
+              { offset: '100%', repeat: 0, symbol: L.Symbol.arrowHead({pixelSize: 15, polygon: false, pathOptions: {stroke: true, color: tcMustard, weight: 3}}) }
+            ]
           }).addTo(map);
 
           // Popup sur la ligne
