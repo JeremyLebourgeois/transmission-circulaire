@@ -177,7 +177,7 @@ const { data: conns } = await supabase.from('route_connections').select('*').eq(
 const routeConnections = conns || [];
 
 // Fetch Profiles (for collaborators selection)
-let { data: profiles, error: profError } = await supabase.from('profiles').select('id, full_name, avatar_url, bio').order('full_name');
+let { data: profiles, error: profError } = await supabase.from('profiles').select('id, full_name, avatar_url, description').order('full_name');
 if (profError) {
   const fallback = await supabase.from('profiles').select('id, full_name, avatar_url').order('full_name');
   profiles = fallback.data;
@@ -673,7 +673,7 @@ const enrichedPoints = routePoints.map(pt => {
           collabsHtml = `<div class="mt-3 border-t pt-2"><div class="flex -space-x-2 overflow-hidden">`;
           pt.collabsData.forEach(c => {
             const safeName = encodeURIComponent(c.full_name || '');
-            const safeBio = encodeURIComponent(c.bio || '');
+            const safeBio = encodeURIComponent(c.description || '');
             if (c.avatar_url) {
               collabsHtml += `<img src="${c.avatar_url}" title="${c.full_name}" onclick="openCollabModal('${safeName}', '${c.avatar_url}', '${safeBio}')" class="inline-block h-8 w-8 rounded-full ring-2 ring-white object-cover shadow-sm cursor-pointer hover:scale-110 transition-transform" />`;
             } else {
