@@ -27,17 +27,17 @@ const { data: routeConnections } = await supabase.from('route_connections').sele
 // but since the patch allows admins only, we might need a public policy for profiles, OR we can fetch them securely here)
 // Wait, the public needs to see collaborators! If the RLS patch only allowed admins, we must fetch profiles using a secure method or they won't show.
 // For now, let's fetch them. If it fails, they just don't appear. We can add a public RLS policy for `avatar_url` and `first_name` later if needed.
-const { data: profiles } = await supabase.from('profiles').select('id, first_name, last_name, avatar_url');
+const { data: profiles } = await supabase.from('profiles').select('id, full_name, avatar_url');
 const allProfiles = profiles || [];
 
 // Enrich points with collaborators data for UI
 const enrichedPoints = (routePoints || []).map(pt => {
   const collabsData = (pt.collaborators || []).map((collabId: string) => {
-    return allProfiles.find(p => p.id === collabId) || { id: collabId, first_name: 'Un membre', avatar_url: null };
+    return allProfiles.find(p => p.id === collabId) || { id: collabId, full_name: 'Un membre', avatar_url: null };
   });
 
   const externalCollabsData = (pt.external_collaborators || []).map((name: string) => {
-    return { is_external: true, first_name: name };
+    return { is_external: true, full_name: name };
   });
 
   return { ...pt, collabsData: [...collabsData, ...externalCollabsData] };

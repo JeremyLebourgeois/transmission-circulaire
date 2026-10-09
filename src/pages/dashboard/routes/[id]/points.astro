@@ -138,17 +138,17 @@ const { data: conns } = await supabase.from('route_connections').select('*').eq(
 const routeConnections = conns || [];
 
 // Fetch Profiles (for collaborators selection)
-const { data: profiles } = await supabase.from('profiles').select('id, first_name, last_name, avatar_url').order('first_name');
+const { data: profiles } = await supabase.from('profiles').select('id, full_name, avatar_url').order('full_name');
 const allProfiles = profiles || [];
 
 // Enrich points with collaborators data for UI
 const enrichedPoints = routePoints.map(pt => {
   const collabsData = (pt.collaborators || []).map((collabId: string) => {
-    return allProfiles.find(p => p.id === collabId) || { id: collabId, first_name: 'Inconnu' };
+    return allProfiles.find(p => p.id === collabId) || { id: collabId, full_name: 'Inconnu' };
   });
 
   const externalCollabsData = (pt.external_collaborators || []).map((name: string) => {
-    return { is_external: true, first_name: name };
+    return { is_external: true, full_name: name };
   });
 
   return { ...pt, collabsData: [...collabsData, ...externalCollabsData] };
@@ -235,9 +235,9 @@ const enrichedPoints = routePoints.map(pt => {
                       {p.avatar_url ? (
                          <img src={p.avatar_url} class="w-5 h-5 rounded-full object-cover" />
                       ) : (
-                         <div class="w-5 h-5 rounded-full bg-gray-200 flex items-center justify-center text-[8px] font-bold">{p.first_name?.charAt(0) || '?'}</div>
+                         <div class="w-5 h-5 rounded-full bg-gray-200 flex items-center justify-center text-[8px] font-bold">{p.full_name?.charAt(0) || '?'}</div>
                       )}
-                      <span class="text-sm font-medium text-gray-700">{p.first_name} {p.last_name}</span>
+                      <span class="text-sm font-medium text-gray-700">{p.full_name}</span>
                     </label>
                   ))}
                 </div>
