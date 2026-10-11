@@ -11,6 +11,8 @@
   --color-tc-olive: #556B2F; /* Vert olive */
   --color-tc-red: #991B1B; /* Rouge terre */
   --color-tc-mustard: #D97706; /* Jaune moutarde */
+  --color-tc-gold: #C5A059; /* Or noble */
+  --color-tc-gold-hover: #B38E46; /* Or au survol */
   --font-sans: 'Inter', sans-serif;
   --font-display: 'Outfit', sans-serif;
 }
