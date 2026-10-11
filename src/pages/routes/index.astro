@@ -17,12 +17,15 @@ const { data: routes } = await supabase
   .select('*')
   .order('created_at', { ascending: false });
 
+// Check if current user is admin
 const { data: { user } } = await supabase.auth.getUser();
-let isAdmin = false;
+let userRole = '';
 if (user) {
-  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
-  if (profile && profile.role === 'admin') {
-    isAdmin = true;
+  const { data: roleData } = await supabase.from('user_roles').select('role').eq('id', user.id).single();
+  userRole = roleData?.role || '';
+  if (!userRole) {
+    const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
+    userRole = profile?.role || '';
   }
 }
 
@@ -41,12 +44,12 @@ if (user) {
           Découvrez nos actions à travers le monde. Chaque route relie nos collaborateurs et met en lumière les projets culturels et solidaires que nous menons au quotidien.
         </p>
 
-        {isAdmin && (
-          <a href={translatePath('/dashboard/routes')} class="inline-flex items-center gap-2 bg-[var(--color-tc-red)] text-white px-6 py-3 rounded-full font-bold shadow-md hover:scale-105 transition-transform">
-            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+        {(userRole === 'admin' || userRole === 'super_admin') && (
+          <a href={translatePath('/dashboard/routes')} class="mt-6 inline-flex items-center gap-2 rounded-full bg-[var(--color-tc-red)] px-5 py-2.5 text-sm font-semibold text-white shadow-md hover:bg-opacity-90 transition-all transform hover:-translate-y-0.5">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 6.75V15m6-6v8.25m.503 3.498l4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 00-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0z" />
             </svg>
-            Gérer les routes (Admin)
+            {t('routes.manage')}
           </a>
         )}
       </div>
