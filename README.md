@@ -1,46 +1,167 @@
-# Astro Starter Kit: Basics
+<p align="center">
+  <img src="public/logo.jpeg" alt="Transmission Circulaire" width="120" style="border-radius: 50%;" />
+</p>
 
-```sh
-npm create astro@latest -- --template basics
-```
+<h1 align="center">Transmission Circulaire</h1>
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+<p align="center">
+  <strong>Relier les générations, faire circuler les savoirs et valoriser les patrimoines culturels.</strong>
+</p>
 
-## 🚀 Project Structure
+<p align="center">
+  <img src="https://img.shields.io/badge/Astro-5.x-BC52EE?style=flat-square&logo=astro&logoColor=white" alt="Astro" />
+  <img src="https://img.shields.io/badge/Cloudflare-Pages%20%2F%20Workers-F38020?style=flat-square&logo=cloudflare&logoColor=white" alt="Cloudflare" />
+  <img src="https://img.shields.io/badge/Supabase-Database%20%26%20Auth-3ECF8E?style=flat-square&logo=supabase&logoColor=white" alt="Supabase" />
+  <img src="https://img.shields.io/badge/TailwindCSS-v4-38B2AC?style=flat-square&logo=tailwindcss&logoColor=white" alt="Tailwind CSS" />
+  <img src="https://img.shields.io/badge/TypeScript-5.x-3178C6?style=flat-square&logo=typescript&logoColor=white" alt="TypeScript" />
+  <img src="https://img.shields.io/badge/Node->=22.12.0-339933?style=flat-square&logo=node.js&logoColor=white" alt="Node" />
+</p>
 
-Inside of your Astro project, you'll see the following folders and files:
+---
+
+## 📖 À propos
+
+**Transmission Circulaire** est une association loi 1901 fondée en juin 2026. Elle œuvre pour créer des passerelles durables entre générations, cultures et territoires à travers des projets artistiques, éditoriaux et humains.
+
+Ce dépôt héberge le site web officiel et la plateforme collaborative de l'association, comprenant une vitrine publique multilingue, une cartographie interactive mondiale de nos parcours, ainsi qu'un tableau de bord de gestion pour les membres, guides et administrateurs.
+
+---
+
+## ✨ Fonctionnalités clés
+
+### 🗺️ Les Routes Circulaires
+- **Cartographie interactive (Leaflet)** : visualisation mondiale des parcours, étapes et actions menées.
+- **Tracés géodésiques fluides** : courbes de Bézier quadratiques et pointes de flèches dynamiques adaptées au niveau de zoom.
+- **Détails des étapes** : affichage des collaborateurs (membres et intervenants externes), biographies et descriptions d'actions.
+- **Espace Guide dédié** : gestion simplifiée des points et connexions pour les référents d'itinéraires.
+
+### 📚 Édition & Livres
+- Catalogue complet des publications et ouvrages édités par l'association.
+- Fiches de présentation détaillées (auteur, description, galerie d'images, liens).
+
+### 📅 Événements & Billetterie
+- Calendrier des rencontres, ateliers et conférences.
+- Gestion des inscriptions et intégration de la billetterie / dons via webhooks HelloAsso.
+
+### ✍️ Livre d'or & Adhésions
+- Formulaire d'adhésion et de don en ligne pour soutenir l'association.
+- Mur des messages et témoignages laissé par la communauté.
+
+### 🛡️ Dashboard d'administration & Contrôle d'accès (RBAC)
+- **Super Admin / Admin** : gestion complète des utilisateurs, attribution des rôles, modération, publication d'événements et de livres.
+- **Guide** : administration autonome des routes circulaires et de leurs étapes.
+- **Membre** : profil public, biographie, avatar et historique de participation.
+
+### 🌍 Multilingue (i18n)
+- Support natif de 4 langues : **Français** (`fr`), **Anglais** (`en`), **Espagnol** (`es`) et **Allemand** (`de`).
+- Routage préfixé automatique avec détection de la langue et redirection fluide.
+
+---
+
+## 🛠️ Stack Technique
+
+| Domaine | Technologies |
+| :--- | :--- |
+| **Framework Web** | [Astro](https://astro.build/) (v5) en mode SSR (`output: 'server'`) |
+| **Hébergement / Runtime** | [Cloudflare Pages / Workers](https://pages.cloudflare.com/) via `@astrojs/cloudflare` |
+| **Styles & UI** | [Tailwind CSS](https://tailwindcss.com/) (v4 via `@tailwindcss/vite`) & SCSS variables |
+| **Base de données & Auth** | [Supabase](https://supabase.com/) (PostgreSQL, Row Level Security, Storage, Auth SSR) |
+| **Cartographie** | [Leaflet](https://leafletjs.com/) (tiles ArcGIS World Gray Canvas) |
+| **Gestionnaire de paquets** | [pnpm](https://pnpm.io/) |
+
+---
+
+## 📁 Architecture du projet
 
 ```text
-/
-├── public/
-│   └── favicon.svg
-├── src
-│   ├── assets
-│   │   └── astro.svg
-│   ├── components
-│   │   └── Welcome.astro
-│   ├── layouts
-│   │   └── Layout.astro
-│   └── pages
-│       └── index.astro
-└── package.json
+Transmission-Circulaire/
+├── public/                 # Assets statiques (logos, illustrations, cartes)
+├── src/
+│   ├── components/         # Composants Astro réutilisables (Navbar, Footer, Hero, etc.)
+│   │   ├── dashboard/      # Vues de gestion (Routes, Livres, Rôles, Événements)
+│   │   └── pages/          # Composants de pages dédiés
+│   ├── i18n/               # Dictionnaires de traduction et helpers (ui.ts, utils.ts)
+│   ├── layouts/            # Layouts globaux (HTML, méta-tags SEO, en-têtes)
+│   ├── lib/                # Clients Supabase (côté serveur et côté client)
+│   ├── pages/              # Routes Astro & API endpoints
+│   │   ├── [lang]/         # Routes localisées (/en, /es, /de)
+│   │   ├── api/            # Webhooks (HelloAsso, etc.)
+│   │   ├── dashboard/      # Tableau de bord d'administration
+│   │   └── routes/         # Pages publiques des Routes Circulaires
+│   └── styles/             # Feuilles de styles globales (Tailwind, palettes couleurs)
+├── supabase_*.sql          # Scripts SQL de migration et patches (schémas, RLS, rôles)
+└── astro.config.mjs        # Configuration Astro & intégrations (Cloudflare, i18n, Tailwind)
 ```
 
-To learn more about the folder structure of an Astro project, refer to [our guide on project structure](https://docs.astro.build/en/basics/project-structure/).
+---
 
-## 🧞 Commands
+## 🚀 Démarrage local
 
-All commands are run from the root of the project, from a terminal:
+### 1. Prérequis
+- [Node.js](https://nodejs.org/) `>= 22.12.0`
+- [pnpm](https://pnpm.io/) `>= 9.0.0`
 
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
+### 2. Cloner le dépôt
+```bash
+git clone https://github.com/JeremyLebourgeois/transmission-circulaire.git
+cd transmission-circulaire
+```
 
-## 👀 Want to learn more?
+### 3. Installer les dépendances
+```bash
+pnpm install
+```
 
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+### 4. Configurer les variables d'environnement
+Créez un fichier `.env` à la racine en copiant l'exemple :
+```bash
+cp .env.example .env
+```
+
+Renseignez vos clés de projet Supabase :
+```env
+PUBLIC_SUPABASE_URL=https://your-project-id.supabase.co
+PUBLIC_SUPABASE_ANON_KEY=your-anon-key-here
+```
+
+### 5. Initialiser la base de données (Supabase)
+Exécutez les scripts SQL situés à la racine dans l'éditeur SQL de votre tableau de bord Supabase :
+- Schéma des routes et étapes : `supabase_routes.sql`, `supabase_route_points_colors.sql`
+- Gestion des rôles et permissions : `supabase_role_guide.sql`, `supabase_profiles_admin_patch.sql`
+- Politiques de sécurité (RLS) : `supabase_routes_rls_patch.sql`
+- Stockage d'images (Buckets) : `supabase_routes_storage_patch.sql`
+
+### 6. Lancer le serveur de développement
+```bash
+pnpm dev
+```
+L'application est accessible sur [http://localhost:4321](http://localhost:4321).
+
+---
+
+## 📦 Scripts disponibles
+
+| Commande | Action |
+| :--- | :--- |
+| `pnpm dev` | Démarre le serveur de développement local avec rechargement à chaud (HMR) |
+| `pnpm build` | Compile l'application pour la production (build SSR adapté Cloudflare) |
+| `pnpm preview` | Prévisualise localement le build de production via Wrangler |
+| `pnpm astro` | Exécute les commandes de la CLI Astro (`check`, `sync`, etc.) |
+
+---
+
+## 🚢 Déploiement
+
+Le projet est configuré pour un déploiement continu sur **Cloudflare Pages** :
+- **Build command :** `pnpm build`
+- **Output directory :** `.wrangler/` ou `dist/` (géré par `@astrojs/cloudflare`)
+- **Variables d'environnement Cloudflare :** Définir `PUBLIC_SUPABASE_URL` et `PUBLIC_SUPABASE_ANON_KEY` dans les paramètres du projet Cloudflare Pages.
+- **KV Binding :** Assurer la liaison du namespace KV `SESSION` pour la gestion des sessions SSR.
+
+---
+
+## 📬 Contact & Liens
+
+- **Association :** Transmission Circulaire (Loi 1901)
+- **Email :** [transmission.circulaire@gmail.com](mailto:transmission.circulaire@gmail.com)
+- **LinkedIn :** [Transmission Circulaire](https://www.linkedin.com/company/transmission-circulaire/home/)
