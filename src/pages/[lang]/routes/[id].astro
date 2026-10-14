@@ -179,11 +179,13 @@ const enrichedPoints = (routePoints || []).map(pt => {
       const tcCream = '#FAF9F6';
 
       // Fonction pour générer une courbe douce (Bézier quadratique)
-      function getBezierCurve(latlng1, latlng2, offsetFactor = 0.2) {
+      // Fonction pour générer une courbe douce (Bézier quadratique) se terminant exactement à la flèche
+      function getBezierCurveWithArrow(latlng1, latlng2, offsetFactor = 0.2, targetOffsetPx = 16) {
+        const zoom = map.getZoom();
         const p1 = map.project(latlng1, 10);
         const p2 = map.project(latlng2, 10);
         
-        // Point de contrôle perpendiculaire
+        // Point de contrôle perpendiculaire à zoom 10
         const dx = p2.x - p1.x;
         const dy = p2.y - p1.y;
         const ctrlP = L.point(
@@ -191,16 +193,43 @@ const enrichedPoints = (routePoints || []).map(pt => {
           (p1.y + p2.y) / 2 + dx * offsetFactor
         );
 
+        // Vecteur tangent d'arrivée à p2
+        const vx = p2.x - ctrlP.x;
+        const vy = p2.y - ctrlP.y;
+        const ctrlDist = Math.hypot(vx, vy);
+        const angle = Math.atan2(vy, vx);
+        const angleDeg = angle * (180 / Math.PI);
+
+        // Conversion des pixels écran (au zoom actuel) vers l'espace de calcul à zoom 10
+        const zoomScale = Math.pow(2, 10 - zoom);
+        let offsetInZoom10 = targetOffsetPx * zoomScale;
+        // On ne dépasse jamais 35% du segment d'arrivée pour ne pas casser les routes courtes
+        offsetInZoom10 = Math.min(offsetInZoom10, ctrlDist * 0.35);
+
+        // Position exacte de l'icône de flèche
+        const arrowPt = L.point(
+          p2.x - Math.cos(angle) * offsetInZoom10,
+          p2.y - Math.sin(angle) * offsetInZoom10
+        );
+        const arrowLatLng = map.unproject(arrowPt, 10);
+
+        // tEnd le long de la courbe de Bézier correspondant à l'arrivée à la flèche
+        const tEnd = Math.max(0.1, Math.min(0.999, 1 - (offsetInZoom10 / (2 * ctrlDist))));
+
+        // Échantillonnage de la courbe de t=0 jusqu'à tEnd
         const points = [];
         const numSteps = 20;
-        for (let i = 0; i <= numSteps; i++) {
-          const t = i / numSteps;
+        for (let i = 0; i < numSteps; i++) {
+          const t = (i / numSteps) * tEnd;
           const u = 1 - t;
           const x = u * u * p1.x + 2 * u * t * ctrlP.x + t * t * p2.x;
           const y = u * u * p1.y + 2 * u * t * ctrlP.y + t * t * p2.y;
           points.push(map.unproject(L.point(x, y), 10));
         }
-        return points;
+        // Le dernier point est EXACTEMENT la position de la flèche
+        points.push(arrowLatLng);
+
+        return { points, arrowLatLng, angleDeg };
       }
 
       function getInitials(name) {
@@ -211,81 +240,7 @@ const enrichedPoints = (routePoints || []).map(pt => {
         return '?';
       }
 
-      // 3. Dessiner les lignes
-      (routeConnections || []).forEach(conn => {
-        try {
-          const startPt = enrichedPoints.find(p => p.id === conn.start_point_id);
-          const endPt = enrichedPoints.find(p => p.id === conn.end_point_id);
-          
-          if (startPt && endPt) {
-            const curvePoints = getBezierCurve(
-              [startPt.latitude, startPt.longitude], 
-              [endPt.latitude, endPt.longitude]
-            );
-
-            // Couleur personnalisée
-            const lineColor = conn.color || '#556B2F';
-            
-            // Pour que la ligne s'arrête exactement à la flèche (et pas dans le point d'arrivée),
-            // on raccourcit géographiquement le dernier point de la courbe.
-            // On calcule l'angle au zoom 3 (zoom de base)
-            const ptA = map.project(curvePoints[19], 3);
-            const ptB = map.project(curvePoints[20], 3);
-            const angle = Math.atan2(ptB.y - ptA.y, ptB.x - ptA.x);
-            const angleDeg = angle * (180 / Math.PI);
-
-            // On recule le point de 25 pixels (au zoom 3)
-            const offsetPx = 25;
-            const newPtB = L.point(
-              ptB.x - Math.cos(angle) * offsetPx,
-              ptB.y - Math.sin(angle) * offsetPx
-            );
-            const arrowLatLng = map.unproject(newPtB, 3);
-            
-            // On remplace la fin de la courbe par ce point raccourci
-            curvePoints[20] = arrowLatLng;
-
-            const pl = L.polyline(curvePoints, {
-              color: lineColor,
-              weight: 5,
-              opacity: 0.9,
-              lineJoin: 'round'
-            }).addTo(map);
-
-            if (conn.title || conn.description) {
-              const htmlContent = `
-                <div class="p-1 w-[200px] whitespace-normal">
-                  <strong class="block text-[#2A4365] text-sm">${conn.title || 'Action'}</strong>
-                  ${conn.description ? `<p class="text-xs text-gray-600 mt-1 break-words">${conn.description}</p>` : ''}
-                </div>
-              `;
-              const tooltipOptions = { sticky: true, className: 'bg-white rounded-xl shadow-lg border-0' };
-              pl.bindTooltip(htmlContent, tooltipOptions);
-              pl.bindPopup(htmlContent);
-
-              pl.on('popupopen', function() { this.unbindTooltip(); });
-              pl.on('popupclose', function() { this.bindTooltip(htmlContent, tooltipOptions); });
-            }
-
-            // L'icone de flèche centrée sur le nouveau point de fin
-            const arrowIcon = L.divIcon({
-              html: `<svg viewBox="0 0 24 24" width="24" height="24" style="transform: rotate(${angleDeg}deg); transform-origin: center; filter: drop-shadow(0px 2px 2px rgba(0,0,0,0.3));">
-                      <polygon points="4,4 20,12 4,20" fill="${lineColor}" />
-                     </svg>`,
-              className: '',
-              iconSize: [24, 24],
-              iconAnchor: [12, 12]
-            });
-            
-            // Flèche interactive=false pour ne pas bloquer les clics, zIndex = 100 pour être au-dessus de la ligne
-            L.marker(arrowLatLng, { icon: arrowIcon, interactive: false, zIndexOffset: 100 }).addTo(map);
-          }
-        } catch(e) {
-          console.error("Erreur de rendu de la ligne: ", e);
-        }
-      });
-
-      // 4. Placer les points
+      // 3. Placer les points
       (enrichedPoints || []).forEach(pt => {
         const markerHtml = `
           <div style="
@@ -338,11 +293,72 @@ const enrichedPoints = (routePoints || []).map(pt => {
         marker.on('popupclose', function() { this.bindTooltip(popupHtml, tooltipOptions); });
       });
 
-      // Centrer la carte sur les points
+      // 4. Centrer la carte sur les points AVANT de dessiner les connexions
       if (enrichedPoints && enrichedPoints.length > 0) {
         const group = new L.featureGroup(Object.values(markers));
         map.fitBounds(group.getBounds(), { padding: [50, 50], maxZoom: 6 });
       }
+
+      // 5. Dessiner les lignes au zoom réel et recalculer dynamiquement au zoom
+      const connectionsLayer = L.layerGroup().addTo(map);
+
+      function renderConnections() {
+        connectionsLayer.clearLayers();
+
+        (routeConnections || []).forEach(conn => {
+          try {
+            const startPt = enrichedPoints.find(p => p.id === conn.start_point_id);
+            const endPt = enrichedPoints.find(p => p.id === conn.end_point_id);
+            
+            if (startPt && endPt) {
+              const { points: curvePoints, arrowLatLng, angleDeg } = getBezierCurveWithArrow(
+                [startPt.latitude, startPt.longitude], 
+                [endPt.latitude, endPt.longitude]
+              );
+
+              const lineColor = conn.color || '#556B2F';
+
+              const pl = L.polyline(curvePoints, {
+                color: lineColor,
+                weight: 5,
+                opacity: 0.9,
+                lineJoin: 'round'
+              }).addTo(connectionsLayer);
+
+              if (conn.title || conn.description) {
+                const htmlContent = `
+                  <div class="p-1 w-[200px] whitespace-normal">
+                    <strong class="block text-[#2A4365] text-sm">${conn.title || 'Action'}</strong>
+                    ${conn.description ? `<p class="text-xs text-gray-600 mt-1 break-words">${conn.description}</p>` : ''}
+                  </div>
+                `;
+                const tooltipOptions = { sticky: true, className: 'bg-white rounded-xl shadow-lg border-0' };
+                pl.bindTooltip(htmlContent, tooltipOptions);
+                pl.bindPopup(htmlContent);
+
+                pl.on('popupopen', function() { this.unbindTooltip(); });
+                pl.on('popupclose', function() { this.bindTooltip(htmlContent, tooltipOptions); });
+              }
+
+              const arrowIcon = L.divIcon({
+                html: `<svg viewBox="0 0 24 24" width="24" height="24" style="transform: rotate(${angleDeg}deg); transform-origin: center; filter: drop-shadow(0px 2px 2px rgba(0,0,0,0.3));">
+                        <polygon points="4,4 20,12 4,20" fill="${lineColor}" />
+                       </svg>`,
+                className: '',
+                iconSize: [24, 24],
+                iconAnchor: [12, 12]
+              });
+              
+              L.marker(arrowLatLng, { icon: arrowIcon, interactive: false, zIndexOffset: 100 }).addTo(connectionsLayer);
+            }
+          } catch(e) {
+            console.error("Erreur de rendu de la ligne: ", e);
+          }
+        });
+      }
+
+      renderConnections();
+      map.on('zoomend', renderConnections);
     }, 100);
   </script>
 
