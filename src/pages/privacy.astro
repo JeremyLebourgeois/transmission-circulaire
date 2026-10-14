@@ -1,55 +1,138 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import { getLangFromUrl, useTranslations } from '../i18n/utils';
-import Navbar from '../components/Navbar.astro';
-import Footer from '../components/Footer.astro';
 
 const lang = getLangFromUrl(Astro.url);
 const t = useTranslations(lang);
 ---
 
 <Layout title={`${t('privacy.title')} | Transmission Circulaire`}>
- 
- <main class="min-h-screen bg-[var(--color-tc-cream)] py-16">
- <div class="max-w-3xl mx-auto px-6 lg:px-8 text-[var(--color-tc-blue)]/80 ">
- <h1 class="text-4xl font-display font-bold text-[var(--color-tc-blue)] mb-8">{t('privacy.title')}</h1>
- 
- <div class="space-y-6">
- <h2 class="text-2xl font-bold text-[var(--color-tc-blue)] mt-8 mb-4">{t('legal.editor')}</h2>
- <p>{t('legal.editor.text')}</p>
+  <main class="min-h-screen bg-[var(--color-tc-cream)] py-12 sm:py-20">
+    <div class="max-w-4xl mx-auto px-6 lg:px-8">
+      
+      <!-- En-tête -->
+      <div class="text-center mb-12 sm:mb-16">
+        <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[var(--color-tc-blue)]/10 text-[var(--color-tc-blue)] text-xs font-bold tracking-wide uppercase mb-4">
+          <svg class="w-4 h-4 text-[var(--color-tc-olive)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+          </svg>
+          Cadre Juridique & RGPD
+        </div>
+        <h1 class="text-3xl sm:text-5xl font-display font-bold text-[var(--color-tc-blue)] tracking-tight mb-4">
+          {t('privacy.title')}
+        </h1>
+        <p class="text-base sm:text-lg text-[var(--color-tc-blue)]/70 max-w-2xl mx-auto leading-relaxed">
+          {t('privacy.subtitle')}
+        </p>
+      </div>
 
- <h2 class="text-2xl font-bold text-[var(--color-tc-blue)] mt-8 mb-4">{t('legal.director')}</h2>
- <p>{t('legal.director.text')}</p>
+      <!-- Navigation d'ancrage rapide -->
+      <div class="flex flex-wrap items-center justify-center gap-3 mb-12">
+        <a href="#mentions-legales" class="px-5 py-2.5 rounded-full bg-white shadow-sm border border-[var(--color-tc-blue)]/10 text-sm font-semibold text-[var(--color-tc-blue)] hover:border-[var(--color-tc-olive)] hover:text-[var(--color-tc-olive)] transition-all">
+          ⚖️ {t('privacy.tab.legal')}
+        </a>
+        <a href="#confidentialite" class="px-5 py-2.5 rounded-full bg-white shadow-sm border border-[var(--color-tc-blue)]/10 text-sm font-semibold text-[var(--color-tc-blue)] hover:border-[var(--color-tc-olive)] hover:text-[var(--color-tc-olive)] transition-all">
+          🔒 {t('privacy.tab.privacy')}
+        </a>
+      </div>
 
- <h2 class="text-2xl font-bold text-[var(--color-tc-blue)] mt-8 mb-4">{t('legal.host')}</h2>
- <p>{t('legal.host.text')}</p>
+      <!-- PARTIE 1 : MENTIONS LÉGALES -->
+      <section id="mentions-legales" class="bg-white rounded-3xl p-8 sm:p-12 shadow-sm border border-[var(--color-tc-blue)]/10 mb-10">
+        <div class="flex items-center gap-3 mb-8 pb-4 border-b border-[var(--color-tc-blue)]/10">
+          <div class="w-10 h-10 rounded-2xl bg-[var(--color-tc-olive)]/10 flex items-center justify-center text-[var(--color-tc-olive)]">
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+            </svg>
+          </div>
+          <h2 class="text-2xl sm:text-3xl font-display font-bold text-[var(--color-tc-blue)]">
+            {t('privacy.tab.legal')}
+          </h2>
+        </div>
 
- <hr class="border-[var(--color-tc-blue)]/20 my-10" />
+        <div class="space-y-8 text-sm sm:text-base leading-relaxed text-[var(--color-tc-blue)]/80">
+          <div>
+            <h3 class="text-lg font-bold text-[var(--color-tc-blue)] mb-2">{t('legal.editor.title')}</h3>
+            <p class="whitespace-pre-line">{t('legal.editor.desc')}</p>
+          </div>
 
- <p>{t('privacy.intro')}</p>
- 
- <h2 class="text-2xl font-bold text-[var(--color-tc-blue)] mt-8 mb-4">{t('privacy.h1')}</h2>
- <p>{t('privacy.p1')}</p>
- 
- <h2 class="text-2xl font-bold text-[var(--color-tc-blue)] mt-8 mb-4">{t('privacy.h2')}</h2>
- <p>{t('privacy.p2')}</p>
- <ul class="list-disc pl-6 space-y-2">
- <li>{t('privacy.l1')}</li>
- <li>{t('privacy.l2')}</li>
- <li>{t('privacy.l3')}</li>
- </ul>
- 
- <h2 class="text-2xl font-bold text-[var(--color-tc-blue)] mt-8 mb-4">{t('privacy.h3')}</h2>
- <p>{t('privacy.p3')}</p>
- 
- <h2 class="text-2xl font-bold text-[var(--color-tc-blue)] mt-8 mb-4">{t('privacy.h4')}</h2>
- <p>{t('privacy.p4')}</p>
+          <div>
+            <h3 class="text-lg font-bold text-[var(--color-tc-blue)] mb-2">{t('legal.director.title')}</h3>
+            <p class="whitespace-pre-line">{t('legal.director.desc')}</p>
+          </div>
 
- <h2 class="text-2xl font-bold text-[var(--color-tc-blue)] mt-8 mb-4">{t('privacy.h5')}</h2>
- <p>{t('privacy.p5')}</p>
- </div>
- </div>
- </main>
- 
+          <div>
+            <h3 class="text-lg font-bold text-[var(--color-tc-blue)] mb-2">{t('legal.host.title')}</h3>
+            <p class="whitespace-pre-line">{t('legal.host.desc')}</p>
+          </div>
 
+          <div>
+            <h3 class="text-lg font-bold text-[var(--color-tc-blue)] mb-2">{t('legal.ip.title')}</h3>
+            <p class="whitespace-pre-line">{t('legal.ip.desc')}</p>
+          </div>
+
+          <div>
+            <h3 class="text-lg font-bold text-[var(--color-tc-blue)] mb-2">{t('legal.credits.title')}</h3>
+            <p class="whitespace-pre-line">{t('legal.credits.desc')}</p>
+          </div>
+
+          <div>
+            <h3 class="text-lg font-bold text-[var(--color-tc-blue)] mb-2">{t('legal.liability.title')}</h3>
+            <p class="whitespace-pre-line">{t('legal.liability.desc')}</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- PARTIE 2 : CONFIDENTIALITÉ & RGPD -->
+      <section id="confidentialite" class="bg-white rounded-3xl p-8 sm:p-12 shadow-sm border border-[var(--color-tc-blue)]/10">
+        <div class="flex items-center gap-3 mb-8 pb-4 border-b border-[var(--color-tc-blue)]/10">
+          <div class="w-10 h-10 rounded-2xl bg-[var(--color-tc-red)]/10 flex items-center justify-center text-[var(--color-tc-red)]">
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            </svg>
+          </div>
+          <h2 class="text-2xl sm:text-3xl font-display font-bold text-[var(--color-tc-blue)]">
+            {t('privacy.tab.privacy')}
+          </h2>
+        </div>
+
+        <div class="space-y-8 text-sm sm:text-base leading-relaxed text-[var(--color-tc-blue)]/80">
+          <div>
+            <h3 class="text-lg font-bold text-[var(--color-tc-blue)] mb-2">{t('privacy.dpo.title')}</h3>
+            <p class="whitespace-pre-line">{t('privacy.dpo.desc')}</p>
+          </div>
+
+          <div>
+            <h3 class="text-lg font-bold text-[var(--color-tc-blue)] mb-2">{t('privacy.data.title')}</h3>
+            <p class="whitespace-pre-line">{t('privacy.data.desc')}</p>
+          </div>
+
+          <div>
+            <h3 class="text-lg font-bold text-[var(--color-tc-blue)] mb-2">{t('privacy.partners.title')}</h3>
+            <p class="whitespace-pre-line">{t('privacy.partners.desc')}</p>
+          </div>
+
+          <div>
+            <h3 class="text-lg font-bold text-[var(--color-tc-blue)] mb-2">{t('privacy.security.title')}</h3>
+            <p class="whitespace-pre-line">{t('privacy.security.desc')}</p>
+          </div>
+
+          <div>
+            <h3 class="text-lg font-bold text-[var(--color-tc-blue)] mb-2">{t('privacy.retention.title')}</h3>
+            <p class="whitespace-pre-line">{t('privacy.retention.desc')}</p>
+          </div>
+
+          <div>
+            <h3 class="text-lg font-bold text-[var(--color-tc-blue)] mb-2">{t('privacy.rights.title')}</h3>
+            <p class="whitespace-pre-line">{t('privacy.rights.desc')}</p>
+          </div>
+
+          <div>
+            <h3 class="text-lg font-bold text-[var(--color-tc-blue)] mb-2">{t('privacy.cookies.title')}</h3>
+            <p class="whitespace-pre-line">{t('privacy.cookies.desc')}</p>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
 </Layout>

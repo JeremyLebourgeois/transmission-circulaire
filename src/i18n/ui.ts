@@ -33,27 +33,51 @@ export const ui = {
     'auth.has_account': 'Déjà un compte ?',
     'auth.login.link': 'Se connecter',
 
-    'privacy.title': 'Mentions Légales & Confidentialité',
-    'legal.editor': 'Éditeur du site',
-    'legal.editor.text': 'Association Transmission Circulaire, régie par la loi du 1er juillet 1901. Siège social : Rueil-Malmaison (92500). RNA : W922023435. Email : transmission.circulaire@gmail.com',
-    'legal.director': 'Directeur de la publication',
-    'legal.director.text': 'Les co-présidentes de l\'association, Éloïne Ramon-Burgada et Meltem Etcheberry.',
-    'legal.host': 'Hébergement',
-    'legal.host.text': 'Cloudflare, Inc., 101 Townsend St, San Francisco, CA 94107, États-Unis (https://www.cloudflare.com).',
-    'privacy.intro': 'L\'association Transmission Circulaire s\'engage à protéger la vie privée de ses membres et des visiteurs de son site web. Cette politique décrit la manière dont nous collectons, utilisons et protégeons vos données personnelles.',
-    'privacy.h1': '1. Données collectées',
-    'privacy.p1': 'Lors de la création d\'un compte sur notre site, nous collectons obligatoirement votre adresse email et un mot de passe sécurisé. Si vous choisissez de remplir votre profil, nous pouvons également stocker d\'autres informations telles que votre nom ou prénom.',
-    'privacy.h2': '2. Utilisation des données',
-    'privacy.p2': 'Vos données sont utilisées exclusivement pour :',
-    'privacy.l1': 'Sécuriser l\'accès à votre espace membre.',
-    'privacy.l2': 'Vous permettre de publier ou modifier des contenus si vous en avez l\'autorisation.',
-    'privacy.l3': 'Communiquer avec vous dans le cadre des activités de l\'association.',
-    'privacy.h3': '3. Sécurité',
-    'privacy.p3': 'Les mots de passe sont hachés de manière asymétrique via les protocoles de sécurité de notre partenaire Supabase. Les membres de l\'association n\'ont en aucun cas accès à vos mots de passe en clair.',
-    'privacy.h4': '4. Vos droits (RGPD)',
-    'privacy.p4': 'Conformément au Règlement Général sur la Protection des Données (RGPD), vous disposez d\'un droit d\'accès, de rectification et d\'effacement de vos données. Vous pouvez supprimer votre compte à tout moment depuis votre tableau de bord ou en nous contactant à : transmission.circulaire@gmail.com.',
-    'privacy.h5': '5. Cookies',
-    'privacy.p5': 'Ce site utilise uniquement des cookies techniques strictement nécessaires à son fonctionnement (maintien de votre session de connexion à l\'espace membre). Aucun cookie de suivi publicitaire ou analytique intrusif n\'est utilisé. Par conséquent, ils sont exemptés du recueil de consentement préalable.',
+        'privacy.title': 'Mentions Légales & Confidentialité',
+    'privacy.subtitle': 'Informations juridiques, propriété intellectuelle et protection de vos données personnelles (RGPD).',
+    'privacy.tab.legal': 'Mentions Légales',
+    'privacy.tab.privacy': 'Protection des Données (RGPD)',
+
+    // Mentions légales
+    'legal.editor.title': '1. Éditeur du site',
+    'legal.editor.desc': 'Association Transmission Circulaire, régie par la loi du 1er juillet 1901 et son décret d\'application du 16 août 1901.\nSiège social : Rueil-Malmaison (92500), France.\nNuméro RNA : W922023435.\nContact : transmission.circulaire@gmail.com',
+
+    'legal.director.title': '2. Direction de la publication',
+    'legal.director.desc': 'Les co-présidentes de l\'association : Éloïne Ramon-Burgada et Meltem Etcheberry.',
+
+    'legal.host.title': '3. Hébergement & Infrastructure technique',
+    'legal.host.desc': '• Hébergement web & distribution (CDN/SSR) : Cloudflare, Inc., 101 Townsend St, San Francisco, CA 94107, États-Unis (https://www.cloudflare.com).\n• Base de données & Authentification : Supabase Inc., 970 Toa Payoh North #07-04, Singapour 318992 (données hébergées au sein de l\'Union Européenne - région AWS Francfort).',
+
+    'legal.ip.title': '4. Propriété intellectuelle & Droits d\'auteur',
+    'legal.ip.desc': 'L\'ensemble des éléments figurant sur le site (textes, récits de parcours, photographies, illustrations, logos, chartes graphiques, ainsi que la présentation des ouvrages édités) sont protégés par les dispositions du Code de la propriété intellectuelle (article L.122-4).\nSauf mention contraire, ils sont la propriété exclusive de l\'association Transmission Circulaire ou font l\'objet d\'une autorisation expresse d\'utilisation accordée par leurs auteurs ou créateurs respectifs. Toute reproduction, représentation, adaptation ou diffusion, totale ou partielle, est strictement interdite sans accord écrit préalable.',
+
+    'legal.credits.title': '5. Crédits & Cartographie',
+    'legal.credits.desc': 'La cartographie interactive des Routes Circulaires est propulsée par la bibliothèque open-source Leaflet. Les tuiles cartographiques sont fournies par Esri (ArcGIS World Light Gray Canvas — Tiles © Esri, DeLorme, NAVTEQ).\nPhotographies et illustrations : Association Transmission Circulaire et contributeurs partenaires.',
+
+    'legal.liability.title': '6. Limitation de responsabilité & Liens externes',
+    'legal.liability.desc': 'L\'association met tout en œuvre pour assurer l\'exactitude des informations diffusées sur son site. Toutefois, elle ne saurait être tenue responsable des omissions, inexactitudes ou des interruptions temporaires de service.\nLe site contient des liens vers des plateformes tierces (notamment HelloAsso, LinkedIn et sites de partenaires). L\'association n\'exerce aucun contrôle sur ces sites et décline toute responsabilité quant à leurs contenus ou pratiques.',
+
+    // Confidentialité & RGPD
+    'privacy.dpo.title': '1. Responsable du traitement',
+    'privacy.dpo.desc': 'L\'association Transmission Circulaire s\'engage à protéger la vie privée des membres et des visiteurs de son site web, conformément au Règlement Général sur la Protection des Données (RGPD - Règlement UE 2016/679) et à la loi Informatique et Libertés.\nResponsable du traitement : Association Transmission Circulaire — Contact : transmission.circulaire@gmail.com',
+
+    'privacy.data.title': '2. Données collectées & Finalités',
+    'privacy.data.desc': '• Données de compte : adresse email obligatoire et mot de passe sécurisé.\n• Profil membre : nom, prénom, biographie et photo de profil (facultatifs).\nCes données sont collectées exclusivement pour sécuriser l\'accès à votre espace membre, vous permettre de gérer vos contributions (routes, étapes) selon vos permissions, et échanger avec vous sur les activités de l\'association. Aucune donnée n\'est cédée ou commercialisée à des tiers.',
+
+    'privacy.partners.title': '3. Sous-traitants & Paiements sécurisés',
+    'privacy.partners.desc': '• Supabase : hébergement chiffré des données de compte et profils dans l\'Union Européenne.\n• HelloAsso : gestion intégrale et sécurisée des adhésions, dons et billetteries.\nImportant : Aucune coordonnée bancaire (numéro de carte, cryptogramme) n\'est collectée, traitée ou stockée par Transmission Circulaire. Les transactions financières sont opérées directement par HelloAsso sous agrément bancaire sécurisé (PCI-DSS, 3D-Secure).',
+
+    'privacy.security.title': '4. Sécurité des mots de passe',
+    'privacy.security.desc': 'Les mots de passe sont hachés de manière asymétrique via les protocoles cryptographiques stricts de Supabase. Les membres ou administrateurs de l\'association n\'ont en aucun cas accès à vos mots de passe en clair. Les communications avec le site sont intégralement chiffrées en HTTPS/TLS.',
+
+    'privacy.retention.title': '5. Durée de conservation des données',
+    'privacy.retention.desc': '• Données de compte utilisateur : conservées tant que votre compte est actif. En cas de suppression de compte (effectuable en 1 clic depuis votre profil), vos données d\'authentification et de profil sont immédiatement et définitivement purgées.\n• Données comptables (justificatifs de dons ou d\'adhésions) : conservées pour la durée légale requise par les obligations fiscales et administratives (10 ans).',
+
+    'privacy.rights.title': '6. Vos droits & Recours (CNIL)',
+    'privacy.rights.desc': 'Vous disposez d\'un droit d\'accès, de rectification, de portabilité, de limitation et d\'effacement de vos données personnelles. Vous pouvez exercer ces droits à tout moment depuis votre tableau de bord ou par email à : transmission.circulaire@gmail.com.\nSi vous estimez, après nous avoir contactés, que vos droits ne sont pas respectés, vous avez le droit d\'introduire une réclamation auprès de la CNIL (Commission Nationale de l\'Informatique et des Libertés — www.cnil.fr).',
+
+    'privacy.cookies.title': '7. Cookies techniques',
+    'privacy.cookies.desc': 'Ce site utilise exclusivement des cookies techniques strictement nécessaires au maintien de votre session de connexion sécurisée. Aucun traceur publicitaire, cookie de profilage ou outil d\'analyse intrusif n\'est déposé. Conformément aux directives de la CNIL, ces cookies indispensables sont exemptés de consentement préalable.',
 
     'dashboard.title': 'Tableau de bord',
     'dashboard.welcome': 'Bienvenue, ',
@@ -116,27 +140,51 @@ export const ui = {
     'auth.has_account': 'Already have an account?',
     'auth.login.link': 'Log in',
 
-    'privacy.title': 'Legal Notice & Privacy Policy',
-    'legal.editor': 'Website Publisher',
-    'legal.editor.text': 'Transmission Circulaire Association, governed by the French law of 1901. Registered Office: Rueil-Malmaison (92500), France. RNA: W922023435. Email: transmission.circulaire@gmail.com',
-    'legal.director': 'Publication Director',
-    'legal.director.text': 'The co-presidents of the association, Éloïne Ramon-Burgada and Meltem Etcheberry.',
-    'legal.host': 'Hosting',
-    'legal.host.text': 'Cloudflare, Inc., 101 Townsend St, San Francisco, CA 94107, United States (https://www.cloudflare.com).',
-    'privacy.intro': 'The Circular Transmission association is committed to protecting the privacy of its members and visitors to its website. This policy describes how we collect, use, and protect your personal data.',
-    'privacy.h1': '1. Data Collected',
-    'privacy.p1': 'When creating an account on our site, we strictly collect your email address and a secure password. If you choose to fill out your profile, we may also store other information such as your first or last name.',
-    'privacy.h2': '2. Use of Data',
-    'privacy.p2': 'Your data is used exclusively to:',
-    'privacy.l1': 'Secure access to your member area.',
-    'privacy.l2': 'Allow you to publish or edit content if you are authorized.',
-    'privacy.l3': 'Communicate with you regarding the association\'s activities.',
-    'privacy.h3': '3. Security',
-    'privacy.p3': 'Passwords are asymmetrically hashed via the security protocols of our partner Supabase. Members of the association never have access to your plain-text passwords.',
-    'privacy.h4': '4. Your Rights (GDPR)',
-    'privacy.p4': 'In accordance with the General Data Protection Regulation (GDPR), you have the right to access, rectify, and delete your data. You can delete your account at any time from your dashboard or by contacting us at: transmission.circulaire@gmail.com.',
-    'privacy.h5': '5. Cookies',
-    'privacy.p5': 'This site uses only technical cookies strictly necessary for its operation (maintaining your login session to the member area). No intrusive advertising or analytical tracking cookies are used. Therefore, they are exempt from prior consent collection.',
+        'privacy.title': 'Legal Notice & Privacy Policy',
+    'privacy.subtitle': 'Legal information, intellectual property, and protection of your personal data (GDPR).',
+    'privacy.tab.legal': 'Legal Notice',
+    'privacy.tab.privacy': 'Data Protection (GDPR)',
+
+    // Legal notice
+    'legal.editor.title': '1. Website Publisher',
+    'legal.editor.desc': 'Transmission Circulaire Association, governed by the French law of July 1, 1901.\nRegistered Office: Rueil-Malmaison (92500), France.\nRNA Number: W922023435.\nContact: transmission.circulaire@gmail.com',
+
+    'legal.director.title': '2. Publication Direction',
+    'legal.director.desc': 'The co-presidents of the association: Éloïne Ramon-Burgada and Meltem Etcheberry.',
+
+    'legal.host.title': '3. Hosting & Technical Infrastructure',
+    'legal.host.desc': '• Web hosting & distribution (CDN/SSR): Cloudflare, Inc., 101 Townsend St, San Francisco, CA 94107, USA (https://www.cloudflare.com).\n• Database & Authentication: Supabase Inc., 970 Toa Payoh North #07-04, Singapore 318992 (data hosted in the European Union - AWS Frankfurt region).',
+
+    'legal.ip.title': '4. Intellectual Property & Copyright',
+    'legal.ip.desc': 'All elements on this website (texts, journey logs, photographs, illustrations, logos, visual identity, and presentation of published books) are protected under the French Intellectual Property Code (Article L.122-4).\nUnless stated otherwise, they are the exclusive property of Transmission Circulaire or are used with express authorization from their respective authors or creators. Any reproduction, adaptation, or distribution without prior written consent is strictly prohibited.',
+
+    'legal.credits.title': '5. Credits & Mapping',
+    'legal.credits.desc': 'The interactive Circular Routes map is powered by the open-source Leaflet library. Map tiles are provided by Esri (ArcGIS World Light Gray Canvas — Tiles © Esri, DeLorme, NAVTEQ).\nPhotographs and illustrations: Transmission Circulaire and contributing partners.',
+
+    'legal.liability.title': '6. Limitation of Liability & External Links',
+    'legal.liability.desc': 'The association makes every effort to ensure the accuracy of the information published on its site. However, it cannot be held responsible for omissions, inaccuracies, or temporary service interruptions.\nThe site contains links to third-party platforms (including HelloAsso, LinkedIn, and partner sites). The association has no control over these sites and disclaims all responsibility for their content or practices.',
+
+    // Privacy & GDPR
+    'privacy.dpo.title': '1. Data Controller',
+    'privacy.dpo.desc': 'Transmission Circulaire is committed to protecting the privacy of members and website visitors in accordance with the General Data Protection Regulation (GDPR - EU Regulation 2016/679).\nData Controller: Transmission Circulaire Association — Contact: transmission.circulaire@gmail.com',
+
+    'privacy.data.title': '2. Data Collected & Purposes',
+    'privacy.data.desc': '• Account data: mandatory email address and secure password.\n• Member profile: optional name, bio, and avatar.\nThis data is collected solely to secure access to your member area, manage your route contributions, and communicate about association activities. No data is ever sold or shared for commercial purposes.',
+
+    'privacy.partners.title': '3. Subprocessors & Secure Payments',
+    'privacy.partners.desc': '• Supabase: encrypted data storage within the European Union.\n• HelloAsso: end-to-end secure handling of memberships, donations, and event ticketing.\nImportant: No banking details (card numbers, CVV) are collected or stored by Transmission Circulaire. Financial transactions are processed directly by HelloAsso under strict banking standards (PCI-DSS, 3D-Secure).',
+
+    'privacy.security.title': '4. Password Security',
+    'privacy.security.desc': 'Passwords are encrypted and asymmetrically hashed via Supabase security protocols. Association members and administrators cannot access passwords in clear text. Communications are encrypted end-to-end with HTTPS/TLS.',
+
+    'privacy.retention.title': '5. Data Retention Period',
+    'privacy.retention.desc': '• User account data: kept as long as your account is active. If you delete your account (available in 1 click from your profile), your personal data is immediately and permanently erased.\n• Accounting data (donation/membership receipts): retained for the legally required duration (10 years).',
+
+    'privacy.rights.title': '6. Your Rights & Recourse (CNIL)',
+    'privacy.rights.desc': 'You have the right to access, rectify, port, limit, and delete your personal data. You can exercise these rights at any time from your dashboard or by emailing: transmission.circulaire@gmail.com.\nYou also have the right to lodge a complaint with the French supervisory authority (CNIL — www.cnil.fr).',
+
+    'privacy.cookies.title': '7. Technical Cookies',
+    'privacy.cookies.desc': 'This website only uses technical cookies strictly necessary to maintain your secure logged-in session. No advertising trackers or profiling cookies are used. In accordance with CNIL guidelines, these essential cookies are exempt from prior consent.',
 
     'dashboard.title': 'Dashboard',
     'dashboard.welcome': 'Welcome, ',
@@ -198,27 +246,51 @@ export const ui = {
     'auth.has_account': '¿Ya tienes una cuenta?',
     'auth.login.link': 'Iniciar sesión',
 
-    'privacy.title': 'Aviso Legal y Política de Privacidad',
-    'legal.editor': 'Editor del sitio',
-    'legal.editor.text': 'Asociación Transmission Circulaire, regida por la ley francesa de 1901. Sede: Rueil-Malmaison (92500), Francia. RNA: W922023435. Correo electrónico: transmission.circulaire@gmail.com',
-    'legal.director': 'Director de publicación',
-    'legal.director.text': 'Las copresidentas de la asociación, Éloïne Ramon-Burgada y Meltem Etcheberry.',
-    'legal.host': 'Alojamiento',
-    'legal.host.text': 'Cloudflare, Inc., 101 Townsend St, San Francisco, CA 94107, Estados Unidos (https://www.cloudflare.com).',
-    'privacy.intro': 'La asociación Transmisión Circular se compromete a proteger la privacidad de sus miembros y de los visitantes de su sitio web. Esta política describe cómo recopilamos, utilizamos y protegemos sus datos personales.',
-    'privacy.h1': '1. Datos recopilados',
-    'privacy.p1': 'Al crear una cuenta en nuestro sitio, recopilamos obligatoriamente su dirección de correo electrónico y una contraseña segura. Si elige completar su perfil, también podemos almacenar otra información, como su nombre o apellido.',
-    'privacy.h2': '2. Uso de los datos',
-    'privacy.p2': 'Sus datos se utilizan exclusivamente para:',
-    'privacy.l1': 'Asegurar el acceso a su área de miembro.',
-    'privacy.l2': 'Permitirle publicar o editar contenido si está autorizado.',
-    'privacy.l3': 'Comunicarnos con usted en el contexto de las actividades de la asociación.',
-    'privacy.h3': '3. Seguridad',
-    'privacy.p3': 'Las contraseñas son codificadas asimétricamente a través de los protocolos de seguridad de nuestro socio Supabase. Los miembros de la asociación no tienen acceso en ningún caso a sus contraseñas en texto claro.',
-    'privacy.h4': '4. Sus derechos (RGPD)',
-    'privacy.p4': 'De acuerdo con el Reglamento General de Protección de Datos (RGPD), tiene derecho a acceder, rectificar y eliminar sus datos. Puede eliminar su cuenta en cualquier momento desde su panel de control o contactándonos en: transmission.circulaire@gmail.com.',
-    'privacy.h5': '5. Cookies',
-    'privacy.p5': 'Este sitio utiliza únicamente cookies técnicas estrictamente necesarias para su funcionamiento (mantener su sesión de inicio de sesión en el área de miembros). No se utilizan cookies publicitarias intrusivas ni de seguimiento analítico. Por tanto, están exentos de recogida de consentimiento previo.',
+        'privacy.title': 'Aviso Legal y Política de Privacidad',
+    'privacy.subtitle': 'Información legal, propiedad intelectual y protección de sus datos personales (RGPD).',
+    'privacy.tab.legal': 'Aviso Legal',
+    'privacy.tab.privacy': 'Protección de Datos (RGPD)',
+
+    // Aviso legal
+    'legal.editor.title': '1. Editor del sitio',
+    'legal.editor.desc': 'Asociación Transmission Circulaire, regida por la ley francesa del 1 de julio de 1901.\nSede: Rueil-Malmaison (92500), Francia.\nNúmero RNA: W922023435.\nContacto: transmission.circulaire@gmail.com',
+
+    'legal.director.title': '2. Dirección de la publicación',
+    'legal.director.desc': 'Las copresidentas de la asociación: Éloïne Ramon-Burgada y Meltem Etcheberry.',
+
+    'legal.host.title': '3. Alojamiento e infraestructura técnica',
+    'legal.host.desc': '• Alojamiento web y distribución (CDN/SSR): Cloudflare, Inc., 101 Townsend St, San Francisco, CA 94107, EE. UU. (https://www.cloudflare.com).\n• Base de datos y autenticación: Supabase Inc., 970 Toa Payoh North #07-04, Singapur 318992 (datos alojados en la Unión Europea - región AWS Fráncfort).',
+
+    'legal.ip.title': '4. Propiedad intelectual y derechos de autor',
+    'legal.ip.desc': 'Todos los elementos presentes en el sitio web (textos, relatos, fotografías, ilustraciones, logotipos y libros presentados) están protegidos por el Código de Propiedad Intelectual.\nSalvo indicación en contrario, son propiedad exclusiva de Transmission Circulaire o cuentan con autorización expresa de sus respectivos autores. Queda prohibida toda reproducción sin consentimiento previo por escrito.',
+
+    'legal.credits.title': '5. Créditos y cartografía',
+    'legal.credits.desc': 'El mapa interactivo de Rutas Circulares utiliza la biblioteca de código abierto Leaflet. Las capas de mapas son suministradas por Esri (ArcGIS World Light Gray Canvas — Tiles © Esri, DeLorme, NAVTEQ).\nFotografías e ilustraciones: Transmission Circulaire y colaboradores.',
+
+    'legal.liability.title': '6. Limitación de responsabilidad y enlaces externos',
+    'legal.liability.desc': 'La asociación se esfuerza por garantizar la exactitud de la información publicada. No se responsabiliza de posibles omisiones o interrupciones del servicio.\nEl sitio contiene enlaces a plataformas de terceros (como HelloAsso o LinkedIn), sobre las cuales no ejerce control.',
+
+    // Privacidad & RGPD
+    'privacy.dpo.title': '1. Responsable del tratamiento',
+    'privacy.dpo.desc': 'Transmission Circulaire se compromete a proteger la privacidad de sus usuarios de conformidad con el RGPD (Reglamento UE 2016/679).\nResponsable: Asociación Transmission Circulaire — Contacto: transmission.circulaire@gmail.com',
+
+    'privacy.data.title': '2. Datos recopilados y finalidades',
+    'privacy.data.desc': '• Cuenta: correo electrónico obligatorio y contraseña segura.\n• Perfil: nombre, biografía y foto opcionales.\nEstos datos se utilizan únicamente para asegurar el acceso a su cuenta de miembro y gestionar sus aportaciones. No se comercializan a terceros.',
+
+    'privacy.partners.title': '3. Proveedores y pagos seguros',
+    'privacy.partners.desc': '• Supabase: alojamiento seguro en la Unión Europea.\n• HelloAsso: gestión integral de membresías, donaciones y eventos.\nImportante: Transmission Circulaire no almacena datos bancarios. Las transacciones son gestionadas de forma segura por HelloAsso (PCI-DSS, 3D-Secure).',
+
+    'privacy.security.title': '4. Seguridad de las contraseñas',
+    'privacy.security.desc': 'Las contraseñas se almacenan cifradas asimétricamente mediante los protocolos de seguridad de Supabase. Nadie puede acceder a ellas en texto claro. La conexión es cifrada mediante HTTPS/TLS.',
+
+    'privacy.retention.title': '5. Plazo de conservación de los datos',
+    'privacy.retention.desc': '• Datos de cuenta: conservados mientras la cuenta esté activa y eliminados de forma inmediata si solicita su supresión.\n• Justificantes contables de donaciones: conservados según los plazos legales obligatorios (10 años).',
+
+    'privacy.rights.title': '6. Sus derechos y reclamaciones (CNIL)',
+    'privacy.rights.desc': 'Tiene derecho de acceso, rectificación, portabilidad y supresión de sus datos personales. Puede ejercerlos desde su panel o escribiendo a: transmission.circulaire@gmail.com.\nTambién tiene derecho a presentar una reclamación ante la autoridad de protección de datos (CNIL — www.cnil.fr).',
+
+    'privacy.cookies.title': '7. Cookies técnicas',
+    'privacy.cookies.desc': 'Este sitio web utiliza exclusivamente cookies técnicas necesarias para mantener su sesión activa. No se emplean cookies de seguimiento publicitario, por lo que están exentas de consentimiento previo.',
 
     'dashboard.title': 'Panel de control',
     'dashboard.welcome': 'Bienvenido/a, ',
@@ -274,27 +346,51 @@ export const ui = {
     'auth.has_account': 'Haben Sie bereits ein Konto?',
     'auth.login.link': 'Anmelden',
 
-    'privacy.title': 'Impressum & Datenschutz',
-    'legal.editor': 'Herausgeber der Website',
-    'legal.editor.text': 'Verein Transmission Circulaire, nach dem französischen Gesetz von 1901. Sitz: Rueil-Malmaison (92500), Frankreich. RNA: W922023435. E-Mail: transmission.circulaire@gmail.com',
-    'legal.director': 'Publikationsleiter',
-    'legal.director.text': 'Die Co-Präsidentinnen des Vereins, Éloïne Ramon-Burgada und Meltem Etcheberry.',
-    'legal.host': 'Hosting',
-    'legal.host.text': 'Cloudflare, Inc., 101 Townsend St, San Francisco, CA 94107, USA (https://www.cloudflare.com).',
-    'privacy.intro': 'Der Verein Zirkuläre Weitergabe verpflichtet sich, die Privatsphäre seiner Mitglieder und der Besucher seiner Website zu schützen. Diese Richtlinie beschreibt, wie wir Ihre persönlichen Daten sammeln, verwenden und schützen.',
-    'privacy.h1': '1. Gesammelte Daten',
-    'privacy.p1': 'Bei der Erstellung eines Kontos auf unserer Website erfassen wir zwingend Ihre E-Mail-Adresse und ein sicheres Passwort. Wenn Sie Ihr Profil ausfüllen möchten, können wir auch andere Informationen wie Ihren Vor- oder Nachnamen speichern.',
-    'privacy.h2': '2. Datennutzung',
-    'privacy.p2': 'Ihre Daten werden ausschließlich verwendet, um:',
-    'privacy.l1': 'Den Zugang zu Ihrem Mitgliederbereich zu sichern.',
-    'privacy.l2': 'Ihnen die Veröffentlichung oder Bearbeitung von Inhalten zu ermöglichen, falls Sie dazu berechtigt sind.',
-    'privacy.l3': 'Im Rahmen der Vereinsaktivitäten mit Ihnen zu kommunizieren.',
-    'privacy.h3': '3. Sicherheit',
-    'privacy.p3': 'Passwörter werden durch die Sicherheitsprotokolle unseres Partners Supabase asymmetrisch gehasht. Mitglieder des Vereins haben unter keinen Umständen Zugriff auf Ihre Passwörter im Klartext.',
-    'privacy.h4': '4. Ihre Rechte (DSGVO)',
-    'privacy.p4': 'Gemäß der Datenschutz-Grundverordnung (DSGVO) haben Sie das Recht auf Zugang, Berichtigung und Löschung Ihrer Daten. Sie können Ihr Konto jederzeit in Ihrem Dashboard löschen oder uns kontaktieren unter: transmission.circulaire@gmail.com.',
-    'privacy.h5': '5. Cookies',
-    'privacy.p5': 'Diese Website verwendet ausschließlich technische Cookies, die für ihren Betrieb unbedingt erforderlich sind (Aufrechterhaltung Ihrer Anmeldesitzung im Mitgliederbereich). Es werden keine aufdringlichen Werbe- oder analytischen Tracking-Cookies verwendet. Daher sind sie von der vorherigen Einholung einer Einwilligung befreit.',
+        'privacy.title': 'Impressum & Datenschutz',
+    'privacy.subtitle': 'Rechtliche Hinweise, Urheberrecht und Schutz Ihrer personenbezogenen Daten (DSGVO).',
+    'privacy.tab.legal': 'Impressum',
+    'privacy.tab.privacy': 'Datenschutz (DSGVO)',
+
+    // Impressum
+    'legal.editor.title': '1. Herausgeber der Website',
+    'legal.editor.desc': 'Verein Transmission Circulaire nach dem französischen Gesetz von 1901.\nSitz: Rueil-Malmaison (92500), Frankreich.\nRNA-Nummer: W922023435.\nKontakt: transmission.circulaire@gmail.com',
+
+    'legal.director.title': '2. Verantw. für den Inhalt',
+    'legal.director.desc': 'Die Co-Präsidentinnen des Vereins: Éloïne Ramon-Burgada und Meltem Etcheberry.',
+
+    'legal.host.title': '3. Hosting & technische Infrastruktur',
+    'legal.host.desc': '• Webhosting & CDN: Cloudflare, Inc., 101 Townsend St, San Francisco, CA 94107, USA (https://www.cloudflare.com).\n• Datenbank & Authentifizierung: Supabase Inc., 970 Toa Payoh North #07-04, Singapur 318992 (Serverstandort Europäische Union - AWS Frankfurt).',
+
+    'legal.ip.title': '4. Urheberrecht & geistiges Eigentum',
+    'legal.ip.desc': 'Alle Inhalte dieser Website (Texte, Routenbeschreibungen, Fotos, Logos und vorgestellte Bücher) sind urheberrechtlich geschützt.\nOhne vorherige schriftliche Zustimmung ist jede Vervielfältigung oder Verbreitung strengstens untersagt.',
+
+    'legal.credits.title': '5. Bild- & Kartennachweise',
+    'legal.credits.desc': 'Die interaktive Routenkarte basiert auf der Open-Source-Bibliothek Leaflet. Kartenkacheln werden von Esri bereitgestellt (ArcGIS World Light Gray Canvas — Tiles © Esri, DeLorme, NAVTEQ).\nFotos: Transmission Circulaire und Projektpartner.',
+
+    'legal.liability.title': '6. Haftungsausschluss & externe Links',
+    'legal.liability.desc': 'Der Verein übernimmt keine Gewähr für die Richtigkeit oder Verfügbarkeit der Inhalte. Für die Inhalte verlinkter externer Seiten (z.B. HelloAsso, LinkedIn) sind ausschließlich deren Betreiber verantwortlich.',
+
+    // Datenschutz & DSGVO
+    'privacy.dpo.title': '1. Verantwortlicher',
+    'privacy.dpo.desc': 'Transmission Circulaire schützt Ihre Privatsphäre gemäß der Datenschutz-Grundverordnung (DSGVO - EU-Verordnung 2016/679).\nVerantwortlicher: Verein Transmission Circulaire — Kontakt: transmission.circulaire@gmail.com',
+
+    'privacy.data.title': '2. Erhobene Daten & Zwecke',
+    'privacy.data.desc': '• Kontodaten: E-Mail-Adresse und sicheres Passwort.\n• Profil: Name, Biografie und Bild (optional).\nDie Daten dienen ausschließlich der Bereitstellung Ihres Mitgliederbereichs. Es erfolgt keine Weitergabe zu Werbezwecken.',
+
+    'privacy.partners.title': '3. Auftragsverarbeiter & Zahlungen',
+    'privacy.partners.desc': '• Supabase: Verschlüsseltes Datenhosting in der Europäischen Union.\n• HelloAsso: Sichere Abwicklung von Mitgliedschaften, Spenden und Veranstaltungen.\nWichtig: Transmission Circulaire speichert keinerlei Bankdaten. Finanztransaktionen erfolgen direkt über HelloAsso (PCI-DSS, 3D-Secure).',
+
+    'privacy.security.title': '4. Passwortsicherheit',
+    'privacy.security.desc': 'Passwörter werden durch asymmetrische Verschlüsselungsprotokolle von Supabase geschützt. Die Kommunikation erfolgt durchgehend über HTTPS/TLS.',
+
+    'privacy.retention.title': '5. Speicherdauer',
+    'privacy.retention.desc': '• Kontodaten: Gespeichert solange das Konto aktiv ist. Bei Kontolöschung werden diese Daten sofort gelöscht.\n• Buchhaltungsbelege für Spenden: Gesetzliche Aufbewahrungsfrist von 10 Jahren.',
+
+    'privacy.rights.title': '6. Ihre Rechte & Beschwerderecht (CNIL)',
+    'privacy.rights.desc': 'Sie haben das Recht auf Auskunft, Berichtigung und Löschung Ihrer Daten. Kontakt: transmission.circulaire@gmail.com.\nSie haben zudem das Recht auf Beschwerde bei der Datenschutzbehörde (CNIL — www.cnil.fr).',
+
+    'privacy.cookies.title': '7. Technische Cookies',
+    'privacy.cookies.desc': 'Diese Website verwendet ausschließlich technisch notwendige Sitzungscookies. Es werden keine Tracking- oder Werbecookies eingesetzt.',
 
     'dashboard.title': 'Dashboard',
     'dashboard.welcome': 'Willkommen, ',
