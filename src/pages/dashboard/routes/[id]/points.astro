@@ -19,7 +19,7 @@ if (!user || userError) {
 const { data: roleData } = await supabase.from('user_roles').select('role').eq('id', user.id).single();
 const userRole = roleData?.role || 'Membre';
 
-if (userRole !== 'admin' && userRole !== 'super_admin') {
+if (userRole !== 'admin' && userRole !== 'super_admin' && userRole !== 'guide') {
   return Astro.redirect(translatePath('/dashboard'));
 }
 
