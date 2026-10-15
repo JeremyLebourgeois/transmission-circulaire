@@ -2,8 +2,9 @@ export const prerender = false;
 
 import type { APIRoute } from 'astro';
 import { getSupabaseServerClient } from '../../lib/supabase-server';
+import { env } from 'cloudflare:workers';
 
-export const POST: APIRoute = async ({ request, cookies, locals }) => {
+export const POST: APIRoute = async ({ request, cookies }) => {
   try {
     // 1. Vérification de l'authentification (seuls les membres connectés avec rôle peuvent traduire)
     const supabase = getSupabaseServerClient(cookies);
@@ -17,10 +18,16 @@ export const POST: APIRoute = async ({ request, cookies, locals }) => {
     }
 
     // 2. Récupération de la clé API DeepL
-    const apiKey = 
-      (locals as any)?.runtime?.env?.DEEPL_API_KEY || 
-      import.meta.env.DEEPL_API_KEY || 
-      process.env.DEEPL_API_KEY;
+    let apiKey = '';
+    try {
+      if (typeof env !== 'undefined' && env?.DEEPL_API_KEY) {
+        apiKey = env.DEEPL_API_KEY;
+      }
+    } catch (e) {}
+
+    if (!apiKey) {
+      apiKey = import.meta.env.DEEPL_API_KEY || process.env.DEEPL_API_KEY || '';
+    }
 
     if (!apiKey || !apiKey.trim()) {
       return new Response(JSON.stringify({ 
@@ -92,8 +99,10 @@ export const POST: APIRoute = async ({ request, cookies, locals }) => {
       status: 200,
       headers: { 'Content-Type': 'application/json' }
     });
-  } catch (err: any) {
-    return new Response(JSON.stringify({ error: "Erreur serveur interne : " + (err?.message || err) }), {
+
+  } catch (error: any) {
+    console.error("Erreur serveur API /api/translate:", error);
+    return new Response(JSON.stringify({ error: `Erreur serveur interne : ${error?.message || error}` }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' }
     });
