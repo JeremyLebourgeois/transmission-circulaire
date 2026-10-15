@@ -131,7 +131,9 @@ if (Astro.request.method === 'POST') {
       const startPoint = formData.get('start_point_id')?.toString();
       const endPoint = formData.get('end_point_id')?.toString();
       const title = formData.get('title')?.toString();
+      const titleEn = formData.get('title_en')?.toString();
       const desc = formData.get('description')?.toString();
+      const descEn = formData.get('description_en')?.toString();
       const color = formData.get('color')?.toString() || '#556B2F';
 
       if (startPoint === endPoint) throw new Error("Le point de départ et d'arrivée doivent être différents.");
@@ -141,7 +143,9 @@ if (Astro.request.method === 'POST') {
         start_point_id: startPoint,
         end_point_id: endPoint,
         title: title || '',
+        title_en: titleEn || null,
         description: desc || '',
+        description_en: descEn || null,
         color: color
       });
 
@@ -151,14 +155,18 @@ if (Astro.request.method === 'POST') {
     else if (action === 'edit_connection') {
       const connId = formData.get('connection_id')?.toString();
       const title = formData.get('title')?.toString();
+      const titleEn = formData.get('title_en')?.toString();
       const desc = formData.get('description')?.toString();
+      const descEn = formData.get('description_en')?.toString();
       const color = formData.get('color')?.toString() || '#556B2F';
 
       if (!connId) throw new Error("ID de liaison manquant.");
 
       const { error } = await supabase.from('route_connections').update({
         title: title || '',
+        title_en: titleEn || null,
         description: desc || '',
+        description_en: descEn || null,
         color: color
       }).eq('id', connId);
 
@@ -360,13 +368,22 @@ const enrichedPoints = routePoints.map(pt => {
               </div>
 
               <div>
-                <label class="block text-sm font-medium text-[var(--color-tc-blue)] mb-1">Titre de l'action</label>
-                <input type="text" name="title" placeholder="Ex: Échange culturel" class="w-full rounded-xl border-0 py-2 px-4 bg-[var(--color-tc-cream)] ring-1 ring-[var(--color-tc-blue)]/20 text-sm" />
+                <div class="flex items-center justify-between mb-1">
+                  <label class="block text-sm font-medium text-[var(--color-tc-blue)]">Titre de l'action (FR)</label>
+                  <button type="button" id="translate-add-conn-btn" class="text-xs text-[var(--color-tc-blue)] hover:text-[var(--color-tc-red)] font-semibold flex items-center gap-1 transition-colors">
+                    ✨ Traduire
+                  </button>
+                </div>
+                <input type="text" id="add-conn-title" name="title" placeholder="Ex: Échange culturel" class="w-full rounded-xl border-0 py-2 px-4 bg-[var(--color-tc-cream)] ring-1 ring-[var(--color-tc-blue)]/20 text-sm mb-2" />
+                <label class="block text-xs font-medium text-gray-500 mb-1">Titre de l'action (EN - Optionnel)</label>
+                <input type="text" id="add-conn-title-en" name="title_en" placeholder="Ex: Cultural exchange" class="w-full rounded-xl border-0 py-2 px-4 bg-[var(--color-tc-cream)] ring-1 ring-[var(--color-tc-blue)]/20 text-sm" />
               </div>
 
               <div>
-                <label class="block text-sm font-medium text-[var(--color-tc-blue)] mb-1">Description</label>
-                <textarea name="description" rows="2" class="w-full rounded-xl border-0 py-2 px-4 bg-[var(--color-tc-cream)] ring-1 ring-[var(--color-tc-blue)]/20 text-sm"></textarea>
+                <label class="block text-sm font-medium text-[var(--color-tc-blue)] mb-1">Description (FR)</label>
+                <textarea id="add-conn-desc" name="description" rows="2" class="w-full rounded-xl border-0 py-2 px-4 bg-[var(--color-tc-cream)] ring-1 ring-[var(--color-tc-blue)]/20 text-sm mb-2"></textarea>
+                <label class="block text-xs font-medium text-gray-500 mb-1">Description (EN - Optionnel)</label>
+                <textarea id="add-conn-desc-en" name="description_en" rows="2" class="w-full rounded-xl border-0 py-2 px-4 bg-[var(--color-tc-cream)] ring-1 ring-[var(--color-tc-blue)]/20 text-sm"></textarea>
               </div>
 
               <div>
@@ -519,13 +536,22 @@ const enrichedPoints = routePoints.map(pt => {
                             <input type="hidden" name="connection_id" value={conn.id} />
                             
                             <div>
-                              <label class="block text-sm font-medium text-[var(--color-tc-blue)] mb-1">Titre de l'action</label>
-                              <input type="text" name="title" value={conn.title} class="w-full rounded-xl border-0 py-2 px-4 bg-gray-50 ring-1 ring-gray-200 focus:ring-2 focus:ring-[var(--color-tc-blue)] text-sm" />
+                              <div class="flex items-center justify-between mb-1">
+                                <label class="block text-sm font-medium text-[var(--color-tc-blue)]">Titre de l'action (FR)</label>
+                                <button type="button" onclick={`translateConnEdit('${conn.id}')`} class="text-xs text-[var(--color-tc-blue)] hover:text-[var(--color-tc-red)] font-semibold flex items-center gap-1 transition-colors">
+                                  ✨ Traduire
+                                </button>
+                              </div>
+                              <input type="text" id={`edit-conn-title-${conn.id}`} name="title" value={conn.title} class="w-full rounded-xl border-0 py-2 px-4 bg-gray-50 ring-1 ring-gray-200 focus:ring-2 focus:ring-[var(--color-tc-blue)] text-sm mb-2" />
+                              <label class="block text-xs font-medium text-gray-500 mb-1">Titre de l'action (EN - Optionnel)</label>
+                              <input type="text" id={`edit-conn-title-en-${conn.id}`} name="title_en" value={conn.title_en || ''} class="w-full rounded-xl border-0 py-2 px-4 bg-gray-50 ring-1 ring-gray-200 focus:ring-2 focus:ring-[var(--color-tc-blue)] text-sm" />
                             </div>
 
                             <div>
-                              <label class="block text-sm font-medium text-[var(--color-tc-blue)] mb-1">Description</label>
-                              <textarea name="description" rows="2" class="w-full rounded-xl border-0 py-2 px-4 bg-gray-50 ring-1 ring-gray-200 focus:ring-2 focus:ring-[var(--color-tc-blue)] text-sm">{conn.description}</textarea>
+                              <label class="block text-sm font-medium text-[var(--color-tc-blue)] mb-1">Description (FR)</label>
+                              <textarea id={`edit-conn-desc-${conn.id}`} name="description" rows="2" class="w-full rounded-xl border-0 py-2 px-4 bg-gray-50 ring-1 ring-gray-200 focus:ring-2 focus:ring-[var(--color-tc-blue)] text-sm mb-2">{conn.description}</textarea>
+                              <label class="block text-xs font-medium text-gray-500 mb-1">Description (EN - Optionnel)</label>
+                              <textarea id={`edit-conn-desc-en-${conn.id}`} name="description_en" rows="2" class="w-full rounded-xl border-0 py-2 px-4 bg-gray-50 ring-1 ring-gray-200 focus:ring-2 focus:ring-[var(--color-tc-blue)] text-sm">{conn.description_en || ''}</textarea>
                             </div>
 
                             <div>
@@ -843,4 +869,57 @@ const enrichedPoints = routePoints.map(pt => {
       outline: none !important;
     }
   </style>
+
+  <script is:inline>
+    // Traduction automatique pour add_connection
+    const transAddConnBtn = document.getElementById('translate-add-conn-btn');
+    if (transAddConnBtn) {
+      transAddConnBtn.addEventListener('click', async () => {
+        const titleFr = document.getElementById('add-conn-title')?.value;
+        const descFr = document.getElementById('add-conn-desc')?.value;
+        if (!titleFr && !descFr) return;
+        const origText = transAddConnBtn.innerHTML;
+        transAddConnBtn.innerHTML = '⏳...';
+        transAddConnBtn.disabled = true;
+        try {
+          const res = await fetch('/api/translate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ texts: [titleFr || '', descFr || ''] })
+          });
+          const data = await res.json();
+          if (data.translations) {
+            if (titleFr) document.getElementById('add-conn-title-en').value = data.translations[0];
+            if (descFr) document.getElementById('add-conn-desc-en').value = data.translations[1];
+          }
+        } catch(e) {
+          console.error(e);
+        } finally {
+          transAddConnBtn.innerHTML = origText;
+          transAddConnBtn.disabled = false;
+        }
+      });
+    }
+
+    // Traduction automatique pour edit_connection
+    window.translateConnEdit = async function(connId) {
+      const titleFr = document.getElementById(`edit-conn-title-${connId}`)?.value;
+      const descFr = document.getElementById(`edit-conn-desc-${connId}`)?.value;
+      if (!titleFr && !descFr) return;
+      try {
+        const res = await fetch('/api/translate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ texts: [titleFr || '', descFr || ''] })
+        });
+        const data = await res.json();
+        if (data.translations) {
+          if (titleFr) document.getElementById(`edit-conn-title-en-${connId}`).value = data.translations[0];
+          if (descFr) document.getElementById(`edit-conn-desc-en-${connId}`).value = data.translations[1];
+        }
+      } catch(e) {
+        console.error(e);
+      }
+    };
+  </script>
 </Layout>

@@ -101,7 +101,10 @@ if (Astro.request.method === 'POST') {
       updateData.audience = audience;
       const priceRaw = formData.get('price')?.toString();
       updateData.price = priceRaw ? parseFloat(priceRaw) : 0;
-      updateData.ticket_url = formData.get('ticket_url')?.toString() || null;
+      const titleEn = formData.get('title_en')?.toString() || null;
+      const descriptionEn = formData.get('description_en')?.toString() || null;
+      updateData.title_en = titleEn;
+      updateData.description_en = descriptionEn;
 
       const { error: eventError } = await supabase.from('events').update(updateData).eq('id', eventId);
       if (eventError) throw eventError;
@@ -115,6 +118,8 @@ if (Astro.request.method === 'POST') {
       const endDate = formData.get('end_date')?.toString() || null;
       const location = formData.get('location')?.toString() || '';
       const description = formData.get('description')?.toString() || '';
+      const titleEn = formData.get('title_en')?.toString() || null;
+      const descriptionEn = formData.get('description_en')?.toString() || null;
       const mainImageFile = formData.get('image') as File;
 
       let imageUrl = '';
@@ -142,7 +147,20 @@ if (Astro.request.method === 'POST') {
 
       const { data: newEvent, error: eventError } = await supabase
         .from('events')
-        .insert({ title, date, end_date: endDate, location, description, image_url: imageUrl, max_spots: maxSpots, audience, price, ticket_url: ticketUrl })
+        .insert({ 
+          title, 
+          date, 
+          end_date: endDate, 
+          location, 
+          description, 
+          image_url: imageUrl, 
+          max_spots: maxSpots, 
+          audience, 
+          price, 
+          ticket_url: ticketUrl,
+          title_en: titleEn,
+          description_en: descriptionEn
+        })
         .select()
         .single();
         
@@ -203,7 +221,7 @@ if (fetchError && fetchError.code === '42P01') { // table does not exist
             <!-- Titre -->
             <div>
               <label class="block text-sm font-medium text-[var(--color-tc-blue)] mb-2">Nom de l'événement *</label>
-              <input type="text" name="title" required value={eventToEdit?.title || ''} placeholder="Ex: Vernissage exposition" class="w-full rounded-xl border-0 py-3 px-4 bg-[var(--color-tc-cream)] ring-1 ring-[var(--color-tc-blue)]/20 focus:ring-2 focus:ring-[var(--color-tc-mustard)] text-[var(--color-tc-blue)] text-sm" />
+              <input type="text" id="event-title" name="title" required value={eventToEdit?.title || ''} placeholder="Ex: Vernissage exposition" class="w-full rounded-xl border-0 py-3 px-4 bg-[var(--color-tc-cream)] ring-1 ring-[var(--color-tc-blue)]/20 focus:ring-2 focus:ring-[var(--color-tc-mustard)] text-[var(--color-tc-blue)] text-sm" />
             </div>
 
             <!-- Dates -->
@@ -234,7 +252,42 @@ if (fetchError && fetchError.code === '42P01') { // table does not exist
             <!-- Description -->
             <div>
               <label class="block text-sm font-medium text-[var(--color-tc-blue)] mb-2">Description / Informations additionnelles</label>
-              <textarea name="description" rows="4" placeholder="Détails de l'événement, lien de réservation..." class="w-full rounded-xl border-0 py-3 px-4 bg-[var(--color-tc-cream)] ring-1 ring-[var(--color-tc-blue)]/20 focus:ring-2 focus:ring-[var(--color-tc-mustard)] text-[var(--color-tc-blue)] text-sm">{eventToEdit?.description || ''}</textarea>
+              <textarea id="event-description" name="description" rows="4" placeholder="Détails de l'événement, lien de réservation..." class="w-full rounded-xl border-0 py-3 px-4 bg-[var(--color-tc-cream)] ring-1 ring-[var(--color-tc-blue)]/20 focus:ring-2 focus:ring-[var(--color-tc-mustard)] text-[var(--color-tc-blue)] text-sm">{eventToEdit?.description || ''}</textarea>
+            </div>
+
+            <!-- Section Traduction Anglaise (Optionnelle avec DeepL) -->
+            <div class="bg-[var(--color-tc-cream)]/60 rounded-2xl p-5 border border-[var(--color-tc-blue)]/15">
+              <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+                <div>
+                  <h3 class="text-sm font-bold text-[var(--color-tc-blue)] flex items-center gap-2">
+                    <span>🇬🇧</span> Traduction en anglais (Optionnelle)
+                  </h3>
+                  <p class="text-xs text-[var(--color-tc-blue)]/60">
+                    Si non renseigné, le texte français sera affiché par défaut aux visiteurs anglophones.
+                  </p>
+                </div>
+                <button 
+                  type="button" 
+                  id="btn-translate-event"
+                  class="inline-flex items-center gap-2 bg-white hover:bg-[var(--color-tc-mustard)]/10 text-[var(--color-tc-mustard)] font-bold text-xs py-2 px-4 rounded-full border border-[var(--color-tc-mustard)]/40 transition-all shadow-sm flex-shrink-0 cursor-pointer"
+                >
+                  <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
+                  </svg>
+                  <span id="btn-translate-event-text">✨ Traduire avec DeepL</span>
+                </button>
+              </div>
+
+              <div class="space-y-4">
+                <div>
+                  <label class="block text-xs font-semibold text-[var(--color-tc-blue)] mb-1">Nom de l'événement en anglais</label>
+                  <input type="text" id="event-title-en" name="title_en" value={eventToEdit?.title_en || ''} placeholder="Event name in English..." class="w-full rounded-xl border-0 py-2.5 px-3 bg-white ring-1 ring-[var(--color-tc-blue)]/20 focus:ring-2 focus:ring-[var(--color-tc-mustard)] text-[var(--color-tc-blue)] text-sm" />
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-[var(--color-tc-blue)] mb-1">Description en anglais</label>
+                  <textarea id="event-description-en" name="description_en" rows="3" placeholder="Description in English..." class="w-full rounded-xl border-0 py-2.5 px-3 bg-white ring-1 ring-[var(--color-tc-blue)]/20 focus:ring-2 focus:ring-[var(--color-tc-mustard)] text-[var(--color-tc-blue)] text-sm">{eventToEdit?.description_en || ''}</textarea>
+                </div>
+              </div>
             </div>
 
             <!-- Infos Additionnelles: Places et Audience -->
@@ -343,3 +396,56 @@ if (fetchError && fetchError.code === '42P01') { // table does not exist
     </div>
   </main>
 </Layout>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const btnTranslate = document.getElementById('btn-translate-event');
+  const btnTranslateText = document.getElementById('btn-translate-event-text');
+
+  if (btnTranslate) {
+    btnTranslate.addEventListener('click', async () => {
+      const title = (document.getElementById('event-title') as HTMLInputElement)?.value.trim() || '';
+      const description = (document.getElementById('event-description') as HTMLTextAreaElement)?.value.trim() || '';
+
+      if (!title && !description) {
+        alert("Veuillez d'abord remplir au moins un champ en français (titre ou description).");
+        return;
+      }
+
+      const originalText = btnTranslateText ? btnTranslateText.textContent : '';
+      btnTranslate.setAttribute('disabled', 'true');
+      if (btnTranslateText) btnTranslateText.textContent = "Traduction en cours...";
+
+      try {
+        const response = await fetch('/api/translate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            texts: [title, description],
+            target_lang: 'EN-US',
+            source_lang: 'FR'
+          })
+        });
+
+        const data = await response.json();
+        if (!response.ok) {
+          throw new Error(data.error || "Erreur lors de la traduction.");
+        }
+
+        if (data.translations) {
+          const titleEn = document.getElementById('event-title-en') as HTMLInputElement;
+          const descEn = document.getElementById('event-description-en') as HTMLTextAreaElement;
+
+          if (titleEn && data.translations[0]) titleEn.value = data.translations[0];
+          if (descEn && data.translations[1]) descEn.value = data.translations[1];
+        }
+      } catch (err: any) {
+        alert(err.message);
+      } finally {
+        btnTranslate.removeAttribute('disabled');
+        if (btnTranslateText) btnTranslateText.textContent = originalText;
+      }
+    });
+  }
+});
+</script>

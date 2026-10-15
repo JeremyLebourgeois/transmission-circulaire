@@ -46,12 +46,27 @@ if (Astro.request.method === 'POST') {
         imageUrl = publicUrl;
       }
 
+      const titleEn = formData.get('title_en')?.toString() || null;
+      const descriptionEn = formData.get('description_en')?.toString() || null;
+
       if (action === 'create') {
-        const { error } = await supabase.from('routes').insert({ title, description, image_url: imageUrl });
+        const { error } = await supabase.from('routes').insert({ 
+          title, 
+          description, 
+          image_url: imageUrl,
+          title_en: titleEn,
+          description_en: descriptionEn
+        });
         if (error) throw error;
         successMessage = 'Route créée avec succès.';
       } else {
-        const { error } = await supabase.from('routes').update({ title, description, image_url: imageUrl }).eq('id', id);
+        const { error } = await supabase.from('routes').update({ 
+          title, 
+          description, 
+          image_url: imageUrl,
+          title_en: titleEn,
+          description_en: descriptionEn
+        }).eq('id', id);
         if (error) throw error;
         successMessage = 'Route mise à jour avec succès.';
       }
@@ -112,12 +127,47 @@ const routeToEdit = editId && routes ? routes.find(r => r.id === editId) : null;
 
             <div>
               <label class="block text-sm font-medium text-[var(--color-tc-blue)] mb-2">Nom de la route *</label>
-              <input type="text" name="title" required value={routeToEdit?.title || ''} placeholder="Nom de la route ..." class="w-full rounded-xl border-0 py-3 px-4 bg-[var(--color-tc-cream)] ring-1 ring-[var(--color-tc-blue)]/20 focus:ring-2 focus:ring-[var(--color-tc-red)] text-[var(--color-tc-blue)]" />
+              <input type="text" id="route-title" name="title" required value={routeToEdit?.title || ''} placeholder="Nom de la route ..." class="w-full rounded-xl border-0 py-3 px-4 bg-[var(--color-tc-cream)] ring-1 ring-[var(--color-tc-blue)]/20 focus:ring-2 focus:ring-[var(--color-tc-red)] text-[var(--color-tc-blue)]" />
             </div>
 
             <div>
               <label class="block text-sm font-medium text-[var(--color-tc-blue)] mb-2">Description</label>
-              <textarea name="description" rows="4" placeholder="Description de la route ..." class="w-full rounded-xl border-0 py-3 px-4 bg-[var(--color-tc-cream)] ring-1 ring-[var(--color-tc-blue)]/20 focus:ring-2 focus:ring-[var(--color-tc-red)] text-[var(--color-tc-blue)]">{routeToEdit?.description || ''}</textarea>
+              <textarea id="route-description" name="description" rows="4" placeholder="Description de la route ..." class="w-full rounded-xl border-0 py-3 px-4 bg-[var(--color-tc-cream)] ring-1 ring-[var(--color-tc-blue)]/20 focus:ring-2 focus:ring-[var(--color-tc-red)] text-[var(--color-tc-blue)]">{routeToEdit?.description || ''}</textarea>
+            </div>
+
+            <!-- Section Traduction Anglaise (Optionnelle avec DeepL) -->
+            <div class="bg-[var(--color-tc-cream)]/60 rounded-2xl p-4 border border-[var(--color-tc-blue)]/15">
+              <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3">
+                <div>
+                  <h3 class="text-xs font-bold text-[var(--color-tc-blue)] flex items-center gap-1.5">
+                    <span>🇬🇧</span> Version anglaise (Optionnelle)
+                  </h3>
+                  <p class="text-[10px] text-[var(--color-tc-blue)]/60">
+                    Fallback automatique sur le français si laissé vide.
+                  </p>
+                </div>
+                <button 
+                  type="button" 
+                  id="btn-translate-route"
+                  class="inline-flex items-center gap-1.5 bg-white hover:bg-[var(--color-tc-red)]/10 text-[var(--color-tc-red)] font-bold text-xs py-1.5 px-3 rounded-full border border-[var(--color-tc-red)]/30 transition-all shadow-sm flex-shrink-0 cursor-pointer"
+                >
+                  <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
+                  </svg>
+                  <span id="btn-translate-route-text">✨ Traduire</span>
+                </button>
+              </div>
+
+              <div class="space-y-3">
+                <div>
+                  <label class="block text-[11px] font-semibold text-[var(--color-tc-blue)] mb-1">Nom de la route en anglais</label>
+                  <input type="text" id="route-title-en" name="title_en" value={routeToEdit?.title_en || ''} placeholder="Route name in English..." class="w-full rounded-xl border-0 py-2 px-3 bg-white ring-1 ring-[var(--color-tc-blue)]/20 focus:ring-2 focus:ring-[var(--color-tc-red)] text-[var(--color-tc-blue)] text-xs" />
+                </div>
+                <div>
+                  <label class="block text-[11px] font-semibold text-[var(--color-tc-blue)] mb-1">Description en anglais</label>
+                  <textarea id="route-description-en" name="description_en" rows="3" placeholder="Description in English..." class="w-full rounded-xl border-0 py-2 px-3 bg-white ring-1 ring-[var(--color-tc-blue)]/20 focus:ring-2 focus:ring-[var(--color-tc-red)] text-[var(--color-tc-blue)] text-xs">{routeToEdit?.description_en || ''}</textarea>
+                </div>
+              </div>
             </div>
 
             <div>
@@ -206,3 +256,56 @@ const routeToEdit = editId && routes ? routes.find(r => r.id === editId) : null;
     </div>
   )}
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const btnTranslate = document.getElementById('btn-translate-route');
+  const btnTranslateText = document.getElementById('btn-translate-route-text');
+
+  if (btnTranslate) {
+    btnTranslate.addEventListener('click', async () => {
+      const title = (document.getElementById('route-title') as HTMLInputElement)?.value.trim() || '';
+      const description = (document.getElementById('route-description') as HTMLTextAreaElement)?.value.trim() || '';
+
+      if (!title && !description) {
+        alert("Veuillez d'abord remplir au moins un champ en français (titre ou description).");
+        return;
+      }
+
+      const originalText = btnTranslateText ? btnTranslateText.textContent : '';
+      btnTranslate.setAttribute('disabled', 'true');
+      if (btnTranslateText) btnTranslateText.textContent = "Traduction...";
+
+      try {
+        const response = await fetch('/api/translate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            texts: [title, description],
+            target_lang: 'EN-US',
+            source_lang: 'FR'
+          })
+        });
+
+        const data = await response.json();
+        if (!response.ok) {
+          throw new Error(data.error || "Erreur lors de la traduction.");
+        }
+
+        if (data.translations) {
+          const titleEn = document.getElementById('route-title-en') as HTMLInputElement;
+          const descEn = document.getElementById('route-description-en') as HTMLTextAreaElement;
+
+          if (titleEn && data.translations[0]) titleEn.value = data.translations[0];
+          if (descEn && data.translations[1]) descEn.value = data.translations[1];
+        }
+      } catch (err: any) {
+        alert(err.message);
+      } finally {
+        btnTranslate.removeAttribute('disabled');
+        if (btnTranslateText) btnTranslateText.textContent = originalText;
+      }
+    });
+  }
+});
+</script>

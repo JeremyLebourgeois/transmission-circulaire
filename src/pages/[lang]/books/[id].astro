@@ -36,9 +36,13 @@ if (userIds.length > 0) {
     .in('id', userIds);
   profiles?.forEach((p: any) => { profileMap[p.id] = p; });
 }
+
+const displayTitle = (lang === 'en' && book.title_en) ? book.title_en : book.title;
+const displayShortDesc = (lang === 'en' && book.short_description_en) ? book.short_description_en : book.short_description;
+const displayLongDesc = (lang === 'en' && book.long_description_en) ? book.long_description_en : book.long_description;
 ---
 
-<Layout title={`${book.title} | Livres`} description={book.short_description} image={book.main_image_url}>
+<Layout title={`${displayTitle} | Livres`} description={displayShortDesc} image={book.main_image_url}>
   <main class="min-h-screen bg-[var(--color-tc-cream)]">
 
     <!-- Hero Section -->
@@ -46,7 +50,7 @@ if (userIds.length > 0) {
       <div class="max-w-5xl mx-auto flex flex-col lg:flex-row gap-10 items-center">
         {book.main_image_url && (
           <div class="flex-shrink-0 w-48 sm:w-64">
-            <img src={book.main_image_url} alt={book.title} class="w-full rounded-2xl shadow-2xl object-cover aspect-[3/4]" />
+            <img src={book.main_image_url} alt={displayTitle} class="w-full rounded-2xl shadow-2xl object-cover aspect-[3/4]" />
           </div>
         )}
         <div class="flex-1 text-center lg:text-left">
@@ -56,7 +60,7 @@ if (userIds.length > 0) {
             </svg>
             Retour aux livres
           </a>
-          <h1 class="text-4xl sm:text-5xl font-display font-bold leading-tight">{book.title}</h1>
+          <h1 class="text-4xl sm:text-5xl font-display font-bold leading-tight">{displayTitle}</h1>
           {mainCollabs.length > 0 && (
             <p class="mt-4 text-white/70 text-lg">
               Par {mainCollabs.map((c: any) => {
@@ -65,7 +69,7 @@ if (userIds.length > 0) {
               }).join(', ')}
             </p>
           )}
-          <p class="mt-6 text-white/90 text-lg leading-relaxed">{book.short_description}</p>
+          <p class="mt-6 text-white/90 text-lg leading-relaxed">{displayShortDesc}</p>
         </div>
       </div>
     </div>
@@ -74,10 +78,10 @@ if (userIds.length > 0) {
     <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16 space-y-16">
 
       <!-- Long description -->
-      {book.long_description && (
+      {displayLongDesc && (
         <section>
           <h2 class="text-2xl font-display font-bold text-[var(--color-tc-blue)] mb-6">À propos de ce livre</h2>
-          <div class="prose prose-lg max-w-none text-[var(--color-tc-blue)]/80 leading-relaxed whitespace-pre-wrap">{book.long_description}</div>
+          <div class="prose prose-lg max-w-none text-[var(--color-tc-blue)]/80 leading-relaxed whitespace-pre-wrap">{displayLongDesc}</div>
         </section>
       )}
 

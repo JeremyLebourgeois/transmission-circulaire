@@ -31,6 +31,17 @@ if (profError) {
 }
 const allProfiles = profiles || [];
 
+// Fallbacks for EN translation
+const displayTitle = (lang === 'en' && route.title_en) ? route.title_en : route.title;
+const displayDesc = (lang === 'en' && route.description_en) ? route.description_en : route.description;
+
+// Enrich connections with EN translation
+const enrichedConnections = (routeConnections || []).map((conn: any) => ({
+  ...conn,
+  display_title: (lang === 'en' && conn.title_en) ? conn.title_en : conn.title,
+  display_description: (lang === 'en' && conn.description_en) ? conn.description_en : conn.description
+}));
+
 // Enrich points with collaborators data for UI
 const enrichedPoints = (routePoints || []).map(pt => {
   const collabsData = (pt.collaborators || []).map((collabId: string) => {
@@ -45,7 +56,7 @@ const enrichedPoints = (routePoints || []).map(pt => {
 });
 ---
 
-<Layout title={`${route.title} | Transmission Circulaire`}>
+<Layout title={`${displayTitle} | Transmission Circulaire`}>
   <!-- Leaflet CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
   <style>
@@ -69,7 +80,7 @@ const enrichedPoints = (routePoints || []).map(pt => {
             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
             </svg>
-            Retour aux routes
+            {lang === 'en' ? 'Back to routes' : 'Retour aux routes'}
           </a>
         </div>
       </section>
@@ -80,29 +91,29 @@ const enrichedPoints = (routePoints || []).map(pt => {
       <div class="bg-white rounded-3xl shadow-lg p-8 md:p-12 border border-[var(--color-tc-blue)]/10">
         
         <h1 class="text-4xl md:text-5xl font-display font-bold text-[var(--color-tc-blue)] mb-6 text-center">
-          {route.title}
+          {displayTitle}
         </h1>
         
-        {route.description && (
+        {displayDesc && (
           <div class="prose prose-lg prose-blue max-w-none text-[var(--color-tc-blue)]/80 mb-12">
-            {route.description.split('\n').map((paragraph: string) => (
+            {displayDesc.split('\n').map((paragraph: string) => (
               <p class="mb-4 leading-relaxed">{paragraph}</p>
             ))}
           </div>
         )}
 
         <!-- Actions / Liaisons List -->
-        {routeConnections && routeConnections.length > 0 && (
+        {enrichedConnections && enrichedConnections.length > 0 && (
           <div class="mt-12">
             <h2 class="text-2xl font-bold text-[var(--color-tc-blue)] mb-8 flex items-center gap-3">
               <svg class="w-7 h-7 text-[var(--color-tc-mustard)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
               </svg>
-              Actions menées
+              {lang === 'en' ? 'Actions carried out' : 'Actions menées'}
             </h2>
             
             <div class="space-y-6">
-              {routeConnections.map((conn: any) => {
+              {enrichedConnections.map((conn: any) => {
                 const start = enrichedPoints.find(p => p.id === conn.start_point_id);
                 const end = enrichedPoints.find(p => p.id === conn.end_point_id);
                 const renderCollabs = (pt: any) => {
@@ -139,8 +150,8 @@ const enrichedPoints = (routePoints || []).map(pt => {
                         {renderCollabs(end)}
                       </div>
                     </div>
-                    {conn.title && <h3 class="text-xl font-bold text-[var(--color-tc-blue)] mb-2">{conn.title}</h3>}
-                    {conn.description && <p class="text-[var(--color-tc-blue)]/70 leading-relaxed">{conn.description}</p>}
+                    {conn.display_title && <h3 class="text-xl font-bold text-[var(--color-tc-blue)] mb-2">{conn.display_title}</h3>}
+                    {conn.display_description && <p class="text-[var(--color-tc-blue)]/70 leading-relaxed">{conn.display_description}</p>}
                   </div>
                 );
               })}
@@ -155,7 +166,7 @@ const enrichedPoints = (routePoints || []).map(pt => {
   <!-- Script Leaflet depuis CDN -->
   <script is:inline src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
   
-  <script is:inline define:vars={{ enrichedPoints, routeConnections }}>
+  <script is:inline define:vars={{ enrichedPoints, routeConnections: enrichedConnections }}>
     // On exécute directement car le script est en bas de page
     setTimeout(() => {
       // 1. Initialiser la carte
@@ -178,7 +189,6 @@ const enrichedPoints = (routePoints || []).map(pt => {
       const tcMustard = '#D69E2E';
       const tcCream = '#FAF9F6';
 
-      // Fonction pour générer une courbe douce (Bézier quadratique)
       // Fonction pour générer une courbe douce (Bézier quadratique) se terminant exactement à la flèche
       function getBezierCurveWithArrow(latlng1, latlng2, offsetFactor = 0.2, targetOffsetPx = 16) {
         const zoom = map.getZoom();
@@ -325,11 +335,11 @@ const enrichedPoints = (routePoints || []).map(pt => {
                 lineJoin: 'round'
               }).addTo(connectionsLayer);
 
-              if (conn.title || conn.description) {
+              if (conn.display_title || conn.display_description) {
                 const htmlContent = `
                   <div class="p-1 w-[200px] whitespace-normal">
-                    <strong class="block text-[#2A4365] text-sm">${conn.title || 'Action'}</strong>
-                    ${conn.description ? `<p class="text-xs text-gray-600 mt-1 break-words">${conn.description}</p>` : ''}
+                    <strong class="block text-[#2A4365] text-sm">${conn.display_title || 'Action'}</strong>
+                    ${conn.display_description ? `<p class="text-xs text-gray-600 mt-1 break-words">${conn.display_description}</p>` : ''}
                   </div>
                 `;
                 const tooltipOptions = { sticky: true, className: 'bg-white rounded-xl shadow-lg border-0' };

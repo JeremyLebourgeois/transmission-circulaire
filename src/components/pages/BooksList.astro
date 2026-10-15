@@ -43,9 +43,9 @@ if (user) {
   <div class="mx-auto mt-16 grid max-w-2xl grid-cols-1 gap-x-8 gap-y-12 sm:mt-20 lg:mx-0 lg:max-w-none lg:grid-cols-3">
   {books?.map(book => (
   <BookCard 
-    title={book.title}
+    title={(lang === 'en' && book.title_en) ? book.title_en : book.title}
     coverImage={book.main_image_url || '/logo.jpeg'}
-    description={book.short_description}
+    description={(lang === 'en' && book.short_description_en) ? book.short_description_en : book.short_description}
     link={translatePath(`/books/${book.id}`)}
   />
   ))}

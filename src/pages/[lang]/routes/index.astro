@@ -88,10 +88,10 @@ if (user) {
 
               <div class="p-8 flex flex-col flex-1">
                 <h2 class="text-2xl font-bold text-[var(--color-tc-blue)] mb-3 group-hover:text-[var(--color-tc-red)] transition-colors">
-                  {route.title}
+                  {(lang === 'en' && route.title_en) ? route.title_en : route.title}
                 </h2>
                 <p class="text-[var(--color-tc-blue)]/70 line-clamp-3 mb-6 flex-1">
-                  {route.description || "Découvrez cette route sur notre carte interactive."}
+                  {(lang === 'en' && route.description_en) ? route.description_en : (route.description || "Découvrez cette route sur notre carte interactive.")}
                 </p>
                 
                 <div class="pt-4 border-t border-[var(--color-tc-blue)]/10 text-sm font-medium text-[var(--color-tc-olive)] flex items-center gap-2">
