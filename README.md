@@ -53,7 +53,7 @@ Ce dépôt héberge le site web officiel et la plateforme collaborative de l'ass
 - **Membre** : profil public, biographie, avatar et historique de participation.
 
 ### 🌍 Multilingue (i18n)
-- Support natif de 4 langues : **Français** (`fr`), **Anglais** (`en`), **Espagnol** (`es`) et **Allemand** (`de`).
+- Support natif bilingue : **Français** (`fr`, langue par défaut) et **Anglais** (`en`).
 - Routage préfixé automatique avec détection de la langue et redirection fluide.
 
 ---
@@ -84,12 +84,15 @@ Transmission-Circulaire/
 │   ├── layouts/            # Layouts globaux (HTML, méta-tags SEO, en-têtes)
 │   ├── lib/                # Clients Supabase (côté serveur et côté client)
 │   ├── pages/              # Routes Astro & API endpoints
-│   │   ├── [lang]/         # Routes localisées (/en, /es, /de)
-│   │   ├── api/            # Webhooks (HelloAsso, etc.)
+│   │   ├── [lang]/         # Routes localisées (/en)
+│   │   ├── api/            # Webhooks (HelloAsso) & endpoints API (DeepL)
 │   │   ├── dashboard/      # Tableau de bord d'administration
 │   │   └── routes/         # Pages publiques des Routes Circulaires
 │   └── styles/             # Feuilles de styles globales (Tailwind, palettes couleurs)
-├── supabase_*.sql          # Scripts SQL de migration et patches (schémas, RLS, rôles)
+├── supabase/               # Gestion de la base de données Supabase
+│   ├── schema_full.sql     # Schéma consolidé complet (tables, fonctions RPC, RLS)
+│   ├── migrations/         # Historique ordonné des migrations SQL (001 à 015)
+│   └── README.md           # Guide explicatif de chaque script de migration
 └── astro.config.mjs        # Configuration Astro & intégrations (Cloudflare, i18n, Tailwind)
 ```
 
@@ -125,11 +128,9 @@ PUBLIC_SUPABASE_ANON_KEY=your-anon-key-here
 ```
 
 ### 5. Initialiser la base de données (Supabase)
-Exécutez les scripts SQL situés à la racine dans l'éditeur SQL de votre tableau de bord Supabase :
-- Schéma des routes et étapes : `supabase_routes.sql`, `supabase_route_points_colors.sql`
-- Gestion des rôles et permissions : `supabase_role_guide.sql`, `supabase_profiles_admin_patch.sql`
-- Politiques de sécurité (RLS) : `supabase_routes_rls_patch.sql`
-- Stockage d'images (Buckets) : `supabase_routes_storage_patch.sql`
+Pour initialiser ou mettre à niveau votre base de données, consultez le dossier `supabase/` :
+- **Déploiement initial complet :** Exécutez [`supabase/schema_full.sql`](supabase/schema_full.sql) dans l'éditeur SQL de votre tableau de bord Supabase.
+- **Historique / patches spécifiques :** Retrouvez tous les scripts détaillés dans [`supabase/migrations/`](supabase/migrations/) et consultez [`supabase/README.md`](supabase/README.md).
 
 ### 6. Lancer le serveur de développement
 ```bash
