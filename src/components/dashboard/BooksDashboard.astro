@@ -507,9 +507,9 @@ function initBooksDashboard() {
 
   if (btnTranslate) {
     btnTranslate.addEventListener('click', async () => {
-      const title = (document.getElementById('book-title') as HTMLInputElement)?.value.trim() || '';
-      const shortDesc = (document.getElementById('book-short-desc') as HTMLTextAreaElement)?.value.trim() || '';
-      const longDesc = (document.getElementById('book-long-desc') as HTMLTextAreaElement)?.value.trim() || '';
+      const title = document.getElementById('book-title')?.value?.trim() || '';
+      const shortDesc = document.getElementById('book-short-desc')?.value?.trim() || '';
+      const longDesc = document.getElementById('book-long-desc')?.value?.trim() || '';
 
       if (!title && !shortDesc && !longDesc) {
         alert("Veuillez d'abord remplir au moins un champ en français (titre ou description).");
@@ -537,15 +537,15 @@ function initBooksDashboard() {
         }
 
         if (data.translations) {
-          const titleEn = document.getElementById('book-title-en') as HTMLInputElement;
-          const shortDescEn = document.getElementById('book-short-desc-en') as HTMLTextAreaElement;
-          const longDescEn = document.getElementById('book-long-desc-en') as HTMLTextAreaElement;
+          const titleEn = document.getElementById('book-title-en');
+          const shortDescEn = document.getElementById('book-short-desc-en');
+          const longDescEn = document.getElementById('book-long-desc-en');
 
           if (titleEn && data.translations[0]) titleEn.value = data.translations[0];
           if (shortDescEn && data.translations[1]) shortDescEn.value = data.translations[1];
           if (longDescEn && data.translations[2]) longDescEn.value = data.translations[2];
         }
-      } catch (err: any) {
+      } catch (err) {
         alert(err.message);
       } finally {
         btnTranslate.removeAttribute('disabled');
