@@ -413,10 +413,12 @@ window.addOtherCollab = function() {
   container.appendChild(input);
 };
 
-document.addEventListener('DOMContentLoaded', () => {
+function initBooksDashboard() {
   const searchInput = document.getElementById('userSearchInput');
   const searchResults = document.getElementById('userSearchResults');
   const selectedList = document.getElementById('selectedUsersList');
+
+  if (!searchInput || !searchResults || !selectedList) return;
 
   let selectedUserIds = new Set();
   
@@ -424,38 +426,44 @@ document.addEventListener('DOMContentLoaded', () => {
   const existingInputs = document.querySelectorAll('input[name="main_collab_user_id[]"]');
   existingInputs.forEach(input => selectedUserIds.add(input.value));
 
-  if (!searchInput) return;
-
-  searchInput.addEventListener('input', (e) => {
-    const query = e.target.value.toLowerCase().trim();
+  function renderResults(query = '') {
     searchResults.innerHTML = '';
-    if (!query) {
-      searchResults.classList.add('hidden');
-      return;
-    }
+    const cleanQuery = query.toLowerCase().trim();
 
     const matches = (users || []).filter(u => {
-      const name = (u.full_name || u.id).toLowerCase();
-      return name.includes(query) && !selectedUserIds.has(u.id);
+      const name = (u.full_name || u.id).trim().toLowerCase();
+      const matchesQuery = !cleanQuery || name.includes(cleanQuery);
+      return matchesQuery && !selectedUserIds.has(u.id);
     });
 
     if (matches.length > 0) {
       searchResults.classList.remove('hidden');
       matches.forEach(u => {
         const div = document.createElement('div');
-        div.className = 'px-4 py-2 hover:bg-[var(--color-tc-cream)] cursor-pointer text-sm text-[var(--color-tc-blue)] border-b border-[var(--color-tc-blue)]/5 last:border-0';
-        div.textContent = u.full_name || u.id;
-        div.onclick = () => selectUser(u);
+        div.className = 'px-4 py-2.5 hover:bg-[var(--color-tc-cream)] cursor-pointer text-sm text-[var(--color-tc-blue)] border-b border-[var(--color-tc-blue)]/5 last:border-0 font-medium flex items-center justify-between transition-colors';
+        div.innerHTML = `<span>${(u.full_name || u.id).trim()}</span> <span class="text-xs text-[var(--color-tc-mustard)] font-bold">+ Ajouter</span>`;
+        div.onmousedown = (e) => {
+          e.preventDefault();
+          selectUser(u);
+        };
         searchResults.appendChild(div);
       });
     } else {
-      searchResults.classList.add('hidden');
-      const div = document.createElement('div');
-      div.className = 'px-4 py-2 text-sm text-[var(--color-tc-blue)]/50 italic';
-      div.textContent = 'Aucun membre trouvé.';
-      searchResults.appendChild(div);
       searchResults.classList.remove('hidden');
+      const div = document.createElement('div');
+      div.className = 'px-4 py-2.5 text-sm text-[var(--color-tc-blue)]/50 italic';
+      div.textContent = cleanQuery ? 'Aucun membre trouvé.' : 'Tous les membres sont déjà ajoutés.';
+      searchResults.appendChild(div);
     }
+  }
+
+  // Ouvrir la liste dès qu'on clique ou focus dans le champ
+  searchInput.addEventListener('focus', () => {
+    renderResults(searchInput.value);
+  });
+
+  searchInput.addEventListener('input', (e) => {
+    renderResults(e.target.value);
   });
 
   document.addEventListener('click', (e) => {
@@ -469,6 +477,8 @@ document.addEventListener('DOMContentLoaded', () => {
     searchInput.value = '';
     searchResults.classList.add('hidden');
 
+    const displayName = (user.full_name || user.id).trim();
+
     const item = document.createElement('div');
     item.className = 'flex flex-col sm:flex-row gap-3 items-start sm:items-center bg-[var(--color-tc-cream)]/50 p-3 rounded-xl border border-[var(--color-tc-blue)]/10';
     item.id = `selected-user-${user.id}`;
@@ -476,10 +486,10 @@ document.addEventListener('DOMContentLoaded', () => {
     item.innerHTML = `
       <div class="flex items-center justify-between sm:justify-start gap-2 w-full sm:w-auto sm:min-w-[200px]">
         <input type="hidden" name="main_collab_user_id[]" value="${user.id}" />
-        <span class="text-sm font-bold text-[var(--color-tc-blue)] flex-1 truncate">${user.full_name || user.id}</span>
-        <button type="button" class="text-red-400 hover:text-red-600 px-2 font-bold" onclick="removeUser('${user.id}')">✕</button>
+        <span class="text-sm font-bold text-[var(--color-tc-blue)] flex-1 truncate">${displayName}</span>
+        <button type="button" class="text-red-400 hover:text-red-600 px-2 font-bold cursor-pointer" onclick="removeUser('${user.id}')">✕</button>
       </div>
-      <input type="text" name="main_collab_contrib[]" placeholder="Rôle / contribution..." class="flex-1 rounded-xl border-0 py-2 px-3 bg-white ring-1 ring-[var(--color-tc-blue)]/20 focus:ring-2 focus:ring-[var(--color-tc-mustard)] text-[var(--color-tc-blue)] text-sm w-full" />
+      <input type="text" name="main_collab_contrib[]" placeholder="Rôle ou contribution..." class="flex-1 rounded-xl border-0 py-2 px-3 bg-white ring-1 ring-[var(--color-tc-blue)]/20 focus:ring-2 focus:ring-[var(--color-tc-mustard)] text-[var(--color-tc-blue)] text-sm w-full" />
     `;
     
     selectedList.appendChild(item);
@@ -543,5 +553,12 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
-});
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initBooksDashboard);
+} else {
+  initBooksDashboard();
+}
+document.addEventListener('astro:page-load', initBooksDashboard);
 </script>
