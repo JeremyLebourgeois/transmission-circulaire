@@ -17,21 +17,26 @@ export const POST: APIRoute = async ({ request, cookies }) => {
       });
     }
 
-    // 2. Récupération de la clé API DeepL
+    // 2. Récupération de la clé API DeepL (Cloudflare Workers, process.env, import.meta.env, globalThis)
     let apiKey = '';
     try {
-      if (typeof env !== 'undefined' && env?.DEEPL_API_KEY) {
-        apiKey = env.DEEPL_API_KEY;
+      if (typeof env !== 'undefined' && env) {
+        apiKey = env.DEEPL_API_KEY || (env as any).deepl_api_key || '';
       }
     } catch (e) {}
 
     if (!apiKey) {
-      apiKey = import.meta.env.DEEPL_API_KEY || process.env.DEEPL_API_KEY || '';
+      apiKey = 
+        (globalThis as any)?.DEEPL_API_KEY || 
+        (globalThis as any)?.env?.DEEPL_API_KEY ||
+        import.meta.env.DEEPL_API_KEY || 
+        process.env.DEEPL_API_KEY || 
+        '';
     }
 
     if (!apiKey || !apiKey.trim()) {
       return new Response(JSON.stringify({ 
-        error: "Clé DeepL manquante : veuillez ajouter DEEPL_API_KEY dans votre fichier .env (et dans vos variables Cloudflare en production)." 
+        error: "Clé DeepL manquante : veuillez ajouter la variable DEEPL_API_KEY dans vos paramètres Cloudflare (Settings > Variables and Secrets), puis redéployer le projet." 
       }), {
         status: 400,
         headers: { 'Content-Type': 'application/json' }
