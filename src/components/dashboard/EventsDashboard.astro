@@ -221,7 +221,7 @@ if (fetchError && fetchError.code === '42P01') { // table does not exist
             <!-- Titre -->
             <div>
               <label class="block text-sm font-medium text-[var(--color-tc-blue)] mb-2">Nom de l'événement *</label>
-              <input type="text" id="event-title" name="title" required value={eventToEdit?.title || ''} placeholder="Ex: Vernissage exposition" class="w-full rounded-xl border-0 py-3 px-4 bg-[var(--color-tc-cream)] ring-1 ring-[var(--color-tc-blue)]/20 focus:ring-2 focus:ring-[var(--color-tc-mustard)] text-[var(--color-tc-blue)] text-sm" />
+              <input type="text" id="event-title" name="title" required value={eventToEdit?.title || ''} placeholder="Titre..." class="w-full rounded-xl border-0 py-3 px-4 bg-[var(--color-tc-cream)] ring-1 ring-[var(--color-tc-blue)]/20 focus:ring-2 focus:ring-[var(--color-tc-mustard)] text-[var(--color-tc-blue)] text-sm" />
             </div>
 
             <!-- Dates -->
@@ -240,7 +240,7 @@ if (fetchError && fetchError.code === '42P01') { // table does not exist
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div>
                 <label class="block text-sm font-medium text-[var(--color-tc-blue)] mb-2">Lieu *</label>
-                <input type="text" name="location" required value={eventToEdit?.location || ''} placeholder="Ex: Paris, France" class="w-full rounded-xl border-0 py-3 px-4 bg-[var(--color-tc-cream)] ring-1 ring-[var(--color-tc-blue)]/20 focus:ring-2 focus:ring-[var(--color-tc-mustard)] text-[var(--color-tc-blue)] text-sm" />
+                <input type="text" name="location" required value={eventToEdit?.location || ''} placeholder="Lieu..." class="w-full rounded-xl border-0 py-3 px-4 bg-[var(--color-tc-cream)] ring-1 ring-[var(--color-tc-blue)]/20 focus:ring-2 focus:ring-[var(--color-tc-mustard)] text-[var(--color-tc-blue)] text-sm" />
               </div>
               <div>
                 <label class="block text-sm font-medium text-[var(--color-tc-blue)] mb-2">Image d'illustration (optionnel)</label>
@@ -252,7 +252,7 @@ if (fetchError && fetchError.code === '42P01') { // table does not exist
             <!-- Description -->
             <div>
               <label class="block text-sm font-medium text-[var(--color-tc-blue)] mb-2">Description / Informations additionnelles</label>
-              <textarea id="event-description" name="description" rows="4" placeholder="Détails de l'événement, lien de réservation..." class="w-full rounded-xl border-0 py-3 px-4 bg-[var(--color-tc-cream)] ring-1 ring-[var(--color-tc-blue)]/20 focus:ring-2 focus:ring-[var(--color-tc-mustard)] text-[var(--color-tc-blue)] text-sm">{eventToEdit?.description || ''}</textarea>
+              <textarea id="event-description" name="description" rows="4" placeholder="Description..." class="w-full rounded-xl border-0 py-3 px-4 bg-[var(--color-tc-cream)] ring-1 ring-[var(--color-tc-blue)]/20 focus:ring-2 focus:ring-[var(--color-tc-mustard)] text-[var(--color-tc-blue)] text-sm">{eventToEdit?.description || ''}</textarea>
             </div>
 
             <!-- Section Traduction Anglaise (Optionnelle avec DeepL) -->
@@ -281,11 +281,11 @@ if (fetchError && fetchError.code === '42P01') { // table does not exist
               <div class="space-y-4">
                 <div>
                   <label class="block text-xs font-semibold text-[var(--color-tc-blue)] mb-1">Nom de l'événement en anglais</label>
-                  <input type="text" id="event-title-en" name="title_en" value={eventToEdit?.title_en || ''} placeholder="Event name in English..." class="w-full rounded-xl border-0 py-2.5 px-3 bg-white ring-1 ring-[var(--color-tc-blue)]/20 focus:ring-2 focus:ring-[var(--color-tc-mustard)] text-[var(--color-tc-blue)] text-sm" />
+                  <input type="text" id="event-title-en" name="title_en" value={eventToEdit?.title_en || ''} placeholder="Titre en anglais..." class="w-full rounded-xl border-0 py-2.5 px-3 bg-white ring-1 ring-[var(--color-tc-blue)]/20 focus:ring-2 focus:ring-[var(--color-tc-mustard)] text-[var(--color-tc-blue)] text-sm" />
                 </div>
                 <div>
                   <label class="block text-xs font-semibold text-[var(--color-tc-blue)] mb-1">Description en anglais</label>
-                  <textarea id="event-description-en" name="description_en" rows="3" placeholder="Description in English..." class="w-full rounded-xl border-0 py-2.5 px-3 bg-white ring-1 ring-[var(--color-tc-blue)]/20 focus:ring-2 focus:ring-[var(--color-tc-mustard)] text-[var(--color-tc-blue)] text-sm">{eventToEdit?.description_en || ''}</textarea>
+                  <textarea id="event-description-en" name="description_en" rows="3" placeholder="Description en anglais..." class="w-full rounded-xl border-0 py-2.5 px-3 bg-white ring-1 ring-[var(--color-tc-blue)]/20 focus:ring-2 focus:ring-[var(--color-tc-mustard)] text-[var(--color-tc-blue)] text-sm">{eventToEdit?.description_en || ''}</textarea>
                 </div>
               </div>
             </div>
@@ -316,7 +316,7 @@ if (fetchError && fetchError.code === '42P01') { // table does not exist
                 <div>
                   <label class="block text-sm font-medium text-[var(--color-tc-blue)] mb-2">Lien de billetterie HelloAsso <span class="text-[var(--color-tc-blue)]/50 font-normal">(optionnel)</span></label>
                   <div class="flex gap-2">
-                    <input type="url" name="ticket_url" value={eventToEdit?.ticket_url || ''} placeholder="https://www.helloasso.com/..." class="flex-1 rounded-xl border-0 py-3 px-4 bg-[var(--color-tc-cream)] ring-1 ring-[var(--color-tc-blue)]/20 focus:ring-2 focus:ring-[var(--color-tc-mustard)] text-[var(--color-tc-blue)] text-sm" />
+                    <input type="url" name="ticket_url" value={eventToEdit?.ticket_url || ''} placeholder="Lien de billetterie (URL)..." class="flex-1 rounded-xl border-0 py-3 px-4 bg-[var(--color-tc-cream)] ring-1 ring-[var(--color-tc-blue)]/20 focus:ring-2 focus:ring-[var(--color-tc-mustard)] text-[var(--color-tc-blue)] text-sm" />
                     <a href="https://admin.helloasso.com/transmission-circulaire/evenements/creation" target="_blank" rel="noopener noreferrer" class="flex-shrink-0 inline-flex items-center gap-1.5 px-3 py-2 bg-[var(--color-tc-mustard)] text-[var(--color-tc-blue)] rounded-xl text-xs font-bold hover:bg-opacity-90 transition-all" title="Créer la billetterie sur HelloAsso">
                       <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" /></svg>
                       Créer la billetterie
