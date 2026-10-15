@@ -52,71 +52,72 @@ if (Astro.request.method === 'POST' && user) {
   if (action === 'register') {
     if (!canUserRegisterToThis) {
       isError = true;
-      message = "Votre adhésion sera expirée au moment de cet événement. Veuillez la renouveler pour vous inscrire.";
+      message = lang === 'en' 
+        ? "Your membership will have expired by the date of this event. Please renew to register."
+        : "Votre adhésion sera expirée au moment de cet événement. Veuillez la renouveler pour vous inscrire.";
     } else {
       const isPaidEvent = evt.price && parseFloat(evt.price) > 0;
       const initialPaymentStatus = isPaidEvent ? 'en_attente' : 'non_requis';
       const { error } = await supabase.from('event_registrations').insert({ event_id: id, user_id: user.id, payment_status: initialPaymentStatus });
       if (error) {
         isError = true;
-        message = "Erreur lors de l'inscription : " + error.message;
-        console.error(error);
+        message = (lang === 'en' ? "Registration error: " : "Erreur lors de l'inscription : ") + error.message;
       } else {
-        message = isPaidEvent ? "Inscription enregistrée ! Veuillez finaliser votre paiement ci-dessous." : "Inscription confirmée !";
+        message = lang === 'en' ? "Registration successful!" : "Inscription réussie !";
       }
     }
   } else if (action === 'unregister') {
     const { error } = await supabase.from('event_registrations').delete().match({ event_id: id, user_id: user.id });
     if (error) {
       isError = true;
-      message = "Erreur lors de la désinscription.";
+      message = (lang === 'en' ? "Cancellation error: " : "Erreur lors de l'annulation : ") + error.message;
     } else {
-      message = "Inscription annulée.";
+      message = lang === 'en' ? "Registration cancelled." : "Inscription annulée.";
     }
   } else if (action === 'force_unregister' && isAdmin) {
-    const registrationId = formData.get('registration_id');
-    const { error } = await supabase.from('event_registrations').delete().eq('id', registrationId);
+    const regId = formData.get('registration_id');
+    const { error } = await supabase.from('event_registrations').delete().eq('id', regId);
     if (error) {
       isError = true;
-      message = "Erreur lors de la désinscription : " + error.message;
+      message = (lang === 'en' ? "Error removing attendee: " : "Erreur désinscription forcée : ") + error.message;
     } else {
-      message = "Membre désinscrit avec succès.";
+      message = lang === 'en' ? "Attendee removed successfully." : "Participant désinscrit avec succès.";
     }
   }
 }
 
-let registeredUsers = [];
-if (isAdmin) {
-  const { data: regs } = await supabase
-    .from('event_registrations')
-    .select('id, user_id, payment_status')
-    .eq('event_id', id);
-    
-  if (regs && regs.length > 0) {
-    const userIds = regs.map(r => r.user_id);
-    const { data: profiles } = await supabase
-      .from('profiles')
-      .select('*')
-      .in('id', userIds);
-      
-    registeredUsers = regs.map(reg => {
-      const p = (profiles || []).find(p => p.id === reg.user_id);
-      return {
-        id: reg.id,
-        user_id: reg.user_id,
-        first_name: p ? (p.first_name || p.full_name || 'Inconnu') : 'Inconnu',
-        last_name: p ? (p.last_name || '') : '',
-        email: p ? (p.email || 'N/A') : 'N/A',
-        payment_status: reg.payment_status
-      };
-    });
-  }
-}
-
+// Fetch total count of registrations
 const { count: registrationsCount } = await supabase
   .from('event_registrations')
   .select('*', { count: 'exact', head: true })
   .eq('event_id', id);
+
+// Fetch admin registrations list
+let registeredUsers: any[] = [];
+if (isAdmin) {
+  const { data: regData } = await supabase
+    .from('event_registrations')
+    .select('id, user_id, payment_status, created_at')
+    .eq('event_id', id);
+
+  if (regData && regData.length > 0) {
+    const userIds = regData.map(r => r.user_id);
+    const { data: profilesData } = await supabase
+      .from('profiles')
+      .select('id, full_name')
+      .in('id', userIds);
+
+    registeredUsers = regData.map(r => {
+      const p = profilesData?.find(prof => prof.id === r.user_id);
+      return {
+        id: r.id,
+        first_name: p?.full_name || (lang === 'en' ? 'User' : 'Utilisateur'),
+        last_name: '',
+        payment_status: r.payment_status,
+      };
+    });
+  }
+}
 
 const { data: userReg } = user ? await supabase
   .from('event_registrations')
@@ -140,7 +141,7 @@ const displayTitle = (lang === 'en' && evt.title_en) ? evt.title_en : evt.title;
 const displayDesc = (lang === 'en' && evt.description_en) ? evt.description_en : evt.description;
 ---
 
-<Layout title={`${displayTitle} | Événements`}>
+<Layout title={`${displayTitle} | ${lang === 'en' ? 'Events' : 'Événements'}`}>
   <main class="min-h-screen bg-[var(--color-tc-cream)]">
     <!-- Hero Section -->
     <div class="bg-[var(--color-tc-blue)] text-white py-16 sm:py-24 px-4">
@@ -149,7 +150,7 @@ const displayDesc = (lang === 'en' && evt.description_en) ? evt.description_en :
           <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
           </svg>
-          Retour aux événements
+          {lang === 'en' ? 'Back to events' : 'Retour aux événements'}
         </a>
         <h1 class="text-4xl sm:text-5xl font-display font-bold leading-tight">{displayTitle}</h1>
         <div class="flex flex-col sm:flex-row items-center justify-center sm:justify-start gap-4 sm:gap-6 text-white/80 mt-4 bg-white/5 rounded-2xl p-4 border border-white/10 w-fit mx-auto sm:mx-0">
@@ -159,12 +160,19 @@ const displayDesc = (lang === 'en' && evt.description_en) ? evt.description_en :
             </svg>
             <time datetime={evt.date} class="font-medium text-lg flex flex-col gap-0.5 text-left">
               {evt.end_date ? (
-                <>
-                  <span>Du {new Date(evt.date).toLocaleDateString(lang === 'fr' ? 'fr-FR' : 'en-US', { day: 'numeric', month: 'long', hour: '2-digit', minute:'2-digit' })}</span>
-                  <span>Au {new Date(evt.end_date).toLocaleDateString(lang === 'fr' ? 'fr-FR' : 'en-US', { day: 'numeric', month: 'long', hour: '2-digit', minute:'2-digit' })}</span>
-                </>
+                lang === 'en' ? (
+                  <>
+                    <span>From {new Date(evt.date).toLocaleDateString('en-US', { day: 'numeric', month: 'long', hour: '2-digit', minute:'2-digit' })}</span>
+                    <span>To {new Date(evt.end_date).toLocaleDateString('en-US', { day: 'numeric', month: 'long', hour: '2-digit', minute:'2-digit' })}</span>
+                  </>
+                ) : (
+                  <>
+                    <span>Du {new Date(evt.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', hour: '2-digit', minute:'2-digit' })}</span>
+                    <span>Au {new Date(evt.end_date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', hour: '2-digit', minute:'2-digit' })}</span>
+                  </>
+                )
               ) : (
-                <span>{new Date(evt.date).toLocaleDateString(lang === 'fr' ? 'fr-FR' : 'en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute:'2-digit' })}</span>
+                <span>{new Date(evt.date).toLocaleDateString(lang === 'en' ? 'en-US' : 'fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute:'2-digit' })}</span>
               )}
             </time>
           </div>
@@ -181,28 +189,28 @@ const displayDesc = (lang === 'en' && evt.description_en) ? evt.description_en :
         <div class="flex flex-col sm:flex-row items-center justify-center sm:justify-start gap-4 mt-6">
           {evt.max_spots !== null && spotsRemaining !== null && (
             <div class="bg-white/10 rounded-full px-4 py-2 border border-white/20 text-sm font-medium">
-              🎟️ {spotsRemaining} places restantes sur {evt.max_spots}
+              🎟️ {spotsRemaining} {lang === 'en' ? 'spots remaining out of' : 'places restantes sur'} {evt.max_spots}
             </div>
           )}
           {evt.audience === 'collaborator_only' && (
             <div class="bg-purple-500/20 text-purple-200 rounded-full px-4 py-2 border border-purple-500/30 text-sm font-medium flex items-center gap-2">
               <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
-              Réservé aux adhérents
+              {lang === 'en' ? 'Members only' : 'Réservé aux adhérents'}
             </div>
           )}
           <!-- Badge prix -->
           {(evt.price === null || evt.price === undefined || parseFloat(evt.price) === 0) ? (
             <div class="bg-green-500/20 text-green-300 rounded-full px-4 py-2 border border-green-500/30 text-sm font-bold">
-              Gratuit
+              {lang === 'en' ? 'Free' : 'Gratuit'}
             </div>
           ) : (
             <div class="flex items-center gap-2">
               <div class="bg-[var(--color-tc-mustard)]/20 text-[var(--color-tc-mustard)] rounded-full px-4 py-2 border border-[var(--color-tc-mustard)]/30 text-sm font-bold">
-                {parseFloat(evt.price).toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' })}
+                {parseFloat(evt.price).toLocaleString(lang === 'en' ? 'en-US' : 'fr-FR', { style: 'currency', currency: 'EUR' })}
               </div>
               {!evt.ticket_url && (
                 <div class="bg-white/10 text-white/70 rounded-full px-4 py-2 border border-white/20 text-sm font-medium">
-                  Règlement sur place
+                  {lang === 'en' ? 'Payment on site' : 'Règlement sur place'}
                 </div>
               )}
             </div>
@@ -220,52 +228,52 @@ const displayDesc = (lang === 'en' && evt.description_en) ? evt.description_en :
           <div class="mt-6 p-4 rounded-2xl bg-[var(--color-tc-mustard)]/20 border border-[var(--color-tc-mustard)]/40">
             <div class="flex items-center gap-2 mb-3">
               <svg class="w-5 h-5 text-[var(--color-tc-mustard)]" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" /></svg>
-              <p class="text-[var(--color-tc-mustard)] font-bold text-sm">Paiement en attente</p>
+              <p class="text-[var(--color-tc-mustard)] font-bold text-sm">{lang === 'en' ? 'Payment pending' : 'Paiement en attente'}</p>
             </div>
             {evt.ticket_url ? (
               <a href={evt.ticket_url} target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 bg-[var(--color-tc-mustard)] text-[var(--color-tc-blue)] px-6 py-2.5 rounded-full font-bold text-sm hover:scale-105 transition-all shadow-lg">
                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" /></svg>
-                Finaliser mon paiement sur HelloAsso
+                {lang === 'en' ? 'Complete payment on HelloAsso' : 'Finaliser mon paiement sur HelloAsso'}
               </a>
             ) : (
-              <p class="text-white/80 text-sm">Règlement à effectuer sur place.</p>
+              <p class="text-white/80 text-sm">{lang === 'en' ? 'Payment to be made on site.' : 'Règlement à effectuer sur place.'}</p>
             )}
           </div>
         )}
         {isRegistered && isPaidEvent && paymentStatus === 'effectue' && (
           <div class="mt-6 p-3 rounded-2xl bg-green-500/20 border border-green-500/40 flex items-center gap-2 w-fit">
             <svg class="w-5 h-5 text-green-400" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-            <p class="text-green-300 font-bold text-sm">Paiement effectué ✓</p>
+            <p class="text-green-300 font-bold text-sm">{lang === 'en' ? 'Payment completed ✓' : 'Paiement effectué ✓'}</p>
           </div>
         )}
 
         <div class="mt-8 flex justify-center sm:justify-start">
           {!user ? (
             <a href={translatePath('/login')} class="inline-flex items-center gap-2 bg-white text-[var(--color-tc-blue)] px-6 py-3 rounded-full font-bold hover:bg-gray-100 transition-colors">
-              Se connecter pour s'inscrire
+              {lang === 'en' ? 'Log in to register' : 'Se connecter pour s\'inscrire'}
             </a>
           ) : isRegistered ? (
             <form method="POST" class="inline-block">
               <input type="hidden" name="action" value="unregister" />
               <button type="submit" class="inline-flex items-center gap-2 bg-red-500/20 border border-red-500/50 text-red-100 px-6 py-3 rounded-full font-bold hover:bg-red-500/30 transition-colors">
-                Annuler mon inscription
+                {lang === 'en' ? 'Cancel my registration' : 'Annuler mon inscription'}
               </button>
             </form>
           ) : isPast ? (
             <div class="inline-flex items-center gap-2 bg-white/10 text-white/50 px-6 py-3 rounded-full font-bold cursor-not-allowed border border-white/10">
-              Événement passé
+              {lang === 'en' ? 'Past event' : 'Événement passé'}
             </div>
           ) : isFull ? (
             <div class="inline-flex items-center gap-2 bg-white/10 text-white/50 px-6 py-3 rounded-full font-bold cursor-not-allowed border border-white/10">
-              Complet
+              {lang === 'en' ? 'Full' : 'Complet'}
             </div>
           ) : !canRegister ? (
             <div class="relative group inline-block">
               <div class="inline-flex items-center gap-2 bg-white/10 text-white/50 px-8 py-3 rounded-full font-bold cursor-not-allowed border border-white/10">
-                S'inscrire à l'événement
+                {lang === 'en' ? 'Register for event' : 'S\'inscrire à l\'événement'}
               </div>
               <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-max px-3 py-1.5 bg-gray-900/90 backdrop-blur-sm text-white text-xs font-medium rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all shadow-lg pointer-events-none z-50">
-                {isAdherentExpiredForEvent ? "Votre adhésion aura expiré à cette date" : "Réservé aux adhérents"}
+                {isAdherentExpiredForEvent ? (lang === 'en' ? "Your membership will have expired by this date" : "Votre adhésion aura expiré à cette date") : (lang === 'en' ? "Members only" : "Réservé aux adhérents")}
                 <div class="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-gray-900/90 rotate-45"></div>
               </div>
             </div>
@@ -273,7 +281,7 @@ const displayDesc = (lang === 'en' && evt.description_en) ? evt.description_en :
             <form method="POST" class="inline-block">
               <input type="hidden" name="action" value="register" />
               <button type="submit" class="inline-flex items-center gap-2 bg-[var(--color-tc-mustard)] text-[var(--color-tc-blue)] px-8 py-3 rounded-full font-bold shadow-lg hover:shadow-xl hover:scale-105 transition-all">
-                S'inscrire à l'événement
+                {lang === 'en' ? 'Register for event' : 'S\'inscrire à l\'événement'}
               </button>
             </form>
           )}
@@ -283,7 +291,6 @@ const displayDesc = (lang === 'en' && evt.description_en) ? evt.description_en :
 
     <!-- Content -->
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 space-y-16">
-
 
       {evt.image_url && (
         <div class="rounded-3xl overflow-hidden shadow-2xl border border-[var(--color-tc-blue)]/10 bg-[var(--color-tc-cream)]">
@@ -295,9 +302,9 @@ const displayDesc = (lang === 'en' && evt.description_en) ? evt.description_en :
         <section class="bg-white rounded-3xl p-8 sm:p-12 shadow-sm border border-[var(--color-tc-blue)]/5">
           <h2 class="text-2xl font-display font-bold text-[var(--color-tc-blue)] mb-6 flex items-center gap-3">
             <svg class="w-6 h-6 text-[var(--color-tc-olive)]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
+              <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            À propos de cet événement
+            {lang === 'en' ? 'About this event' : 'À propos de cet événement'}
           </h2>
           <div class="prose prose-lg max-w-none text-[var(--color-tc-blue)]/80 leading-relaxed whitespace-pre-wrap">{displayDesc}</div>
         </section>

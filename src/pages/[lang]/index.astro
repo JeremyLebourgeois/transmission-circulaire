@@ -1,17 +1,16 @@
 ---
-export const prerender = true;
+export const prerender = false;
+
 import Layout from '../../layouts/Layout.astro';
 import Hero from '../../components/Hero.astro';
-import { languages } from '../../i18n/ui';
+import HomeContent from '../../components/HomeContent.astro';
+import { getLangFromUrl, useTranslations } from '../../i18n/utils';
 
-export function getStaticPaths() {
- const paths = Object.keys(languages)
- .filter((lang) => lang !== 'fr') // 'fr' is the default and handled by /src/pages/index.astro
- .map((lang) => ({ params: { lang } }));
- return paths;
-}
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
 ---
 
-<Layout title="Home">
+<Layout title={t('nav.home')}>
 	<Hero />
+	<HomeContent />
 </Layout>

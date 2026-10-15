@@ -8,37 +8,43 @@ const t = useTranslations(lang);
 const team = [
   {
     name: 'Eloïne Ramon-Burgada',
-    role: 'Co-Présidente & Fondatrice',
+    role: lang === 'en' ? 'Co-President & Founder' : 'Co-Présidente & Fondatrice',
     image: '/images/team/eloine.png'
   },
   {
     name: 'Meltem Etcheberry',
-    role: 'Co-Présidente & Fondatrice',
+    role: lang === 'en' ? 'Co-President & Founder' : 'Co-Présidente & Fondatrice',
     image: '/images/team/meltem.jpg'
   },
   {
     name: 'Thomas Lesomptier',
-    role: 'Trésorier',
+    role: lang === 'en' ? 'Treasurer' : 'Trésorier',
     image: '/images/team/thomas.jpg'
   },
   {
     name: 'Charlotte de Montgolfier',
-    role: 'Secrétaire',
+    role: lang === 'en' ? 'Secretary' : 'Secrétaire',
     image: '/images/team/charlotte.jpg'
   },
   {
     name: 'Jean-Emre Etcheberry',
-    role: 'Secrétaire Adjoint',
+    role: lang === 'en' ? 'Deputy Secretary' : 'Secrétaire Adjoint',
     image: '/images/team/jean-emre.jpg'
   },
   {
     name: 'Jérémy Lebourgeois',
-    role: 'Responsable Numérique',
+    role: lang === 'en' ? 'Digital Lead' : 'Responsable Numérique',
     image: '/images/team/jerem.jpg'
   }
 ];
 
-const routes = [
+const routes = lang === 'en' ? [
+  { name: 'Perfume Route', sense: 'Smell', desc: 'Raw materials, olfactory memory, and perfumery craft.', color: 'bg-[var(--color-tc-olive)]' },
+  { name: 'Raffia Route', sense: 'Touch', desc: 'Materials, artisanal craft, and lands of transmission.', color: 'bg-[var(--color-tc-mustard)]' },
+  { name: 'Wine & Gastronomy Route', sense: 'Taste', desc: 'Terroirs, culinary traditions, and taste culture.', color: 'bg-[var(--color-tc-red)]' },
+  { name: 'Jewelry Route', sense: 'Sight', desc: 'Materials, design, and jewelry craftsmanship.', color: 'bg-[var(--color-tc-blue)]' },
+  { name: 'Music & Folklore Route', sense: 'Hearing', desc: 'Musical traditions, rhythm, and oral heritage.', color: 'bg-indigo-900' },
+] : [
   { name: 'Route du Parfum', sense: "L'Odorat", desc: 'Matières premières, mémoire olfactive et gestes de la parfumerie.', color: 'bg-[var(--color-tc-olive)]' },
   { name: 'Route du Raphia', sense: 'Le Toucher', desc: 'Matière, geste artisanal et territoires de transmission.', color: 'bg-[var(--color-tc-mustard)]' },
   { name: 'Route du Vin & Gastronomie', sense: 'Le Goût', desc: 'Terroirs, traditions culinaires et rapport au goût.', color: 'bg-[var(--color-tc-red)]' },
@@ -47,7 +53,7 @@ const routes = [
 ];
 ---
 
-<Layout title="L'Association | Transmission Circulaire">
+<Layout title={lang === 'en' ? "About the Association | Circular Transmission" : "L'Association | Transmission Circulaire"}>
   <main class="bg-[var(--color-tc-cream)] selection:bg-[var(--color-tc-mustard)] selection:text-[var(--color-tc-blue)]">
     
     <!-- Hero Section -->
@@ -58,13 +64,21 @@ const routes = [
       </div>
       <div class="max-w-4xl mx-auto px-6 lg:px-8 text-center">
         <h1 class="text-4xl font-display font-bold tracking-tight text-[var(--color-tc-blue)] sm:text-6xl mb-6">
-          Laisser une sublime trace <span class="text-[var(--color-tc-mustard)]">intergénérationnelle</span>
+          {lang === 'en' ? (
+            <>Leaving a sublime <span class="text-[var(--color-tc-mustard)]">intergenerational</span> mark</>
+          ) : (
+            <>Laisser une sublime trace <span class="text-[var(--color-tc-mustard)]">intergénérationnelle</span></>
+          )}
         </h1>
         <p class="text-xl leading-8 text-[var(--color-tc-blue)]/80 mb-8 max-w-2xl mx-auto">
-          Transmettre les savoir-faire. Relier les générations et les cultures. Construire la Paix par l’Artisanat.
+          {lang === 'en' 
+            ? 'Passing on craftsmanship. Connecting generations and cultures. Building Peace through Craft.'
+            : 'Transmettre les savoir-faire. Relier les générations et les cultures. Construire la Paix par l’Artisanat.'}
         </p>
         <blockquote class="italic text-lg text-[var(--color-tc-olive)] border-l-4 border-[var(--color-tc-olive)] pl-4 py-2 w-fit mx-auto bg-white/50 pr-6 rounded-r-lg shadow-sm">
-          « L’homme jeune marche plus vite que l’ancien, mais l’ancien connaît la route. »
+          {lang === 'en'
+            ? '“The young man walks faster than the elder, but the elder knows the road.”'
+            : '« L’homme jeune marche plus vite que l’ancien, mais l’ancien connaît la route. »'}
         </blockquote>
       </div>
     </section>
@@ -73,48 +87,86 @@ const routes = [
     <section class="py-16 sm:py-24 max-w-7xl mx-auto px-6 lg:px-8">
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
         <div>
-          <h2 class="text-3xl font-display font-bold text-[var(--color-tc-blue)] mb-6">Qui sommes-nous ?</h2>
+          <h2 class="text-3xl font-display font-bold text-[var(--color-tc-blue)] mb-6">
+            {lang === 'en' ? 'Who Are We?' : 'Qui sommes-nous ?'}
+          </h2>
           <div class="space-y-6 text-lg text-[var(--color-tc-blue)]/80 leading-relaxed">
-            <p>
-              <strong>TRANSMISSION CIRCULAIRE ©</strong> est une association internationale dédiée à la transmission intergénérationnelle des savoir-faire, à la préservation des patrimoines culturels vivants et au dialogue entre les générations, les cultures et les territoires.
-            </p>
-            <p>
-              Notre conviction est simple : <strong>ce qui se transmet continue de vivre</strong>. Nous croyons que les savoirs du passé constituent des ressources essentielles pour construire les solutions de demain.
-            </p>
-            <p>
-              La transmission n’est pas un mouvement à sens unique. Les générations expérimentées partagent leurs gestes et leur mémoire, tandis que les nouvelles générations apportent leur créativité et leur vision du futur. 
-            </p>
+            {lang === 'en' ? (
+              <>
+                <p>
+                  <strong>CIRCULAR TRANSMISSION ©</strong> is an international non-profit association dedicated to the intergenerational transmission of craftsmanship, the preservation of living cultural heritage, and dialogue between generations, cultures, and regions.
+                </p>
+                <p>
+                  Our conviction is simple: <strong>what is passed on lives on</strong>. We believe the wisdom and skills of the past are essential resources for building tomorrow’s solutions.
+                </p>
+                <p>
+                  Transmission is never a one-way street. Experienced generations share their gestures and memory, while newer generations bring their creativity and vision of the future.
+                </p>
+              </>
+            ) : (
+              <>
+                <p>
+                  <strong>TRANSMISSION CIRCULAIRE ©</strong> est une association internationale dédiée à la transmission intergénérationnelle des savoir-faire, à la préservation des patrimoines culturels vivants et au dialogue entre les générations, les cultures et les territoires.
+                </p>
+                <p>
+                  Notre conviction est simple : <strong>ce qui se transmet continue de vivre</strong>. Nous croyons que les savoirs du passé constituent des ressources essentielles pour construire les solutions de demain.
+                </p>
+                <p>
+                  La transmission n’est pas un mouvement à sens unique. Les générations expérimentées partagent leurs gestes et leur mémoire, tandis que les nouvelles générations apportent leur créativité et leur vision du futur. 
+                </p>
+              </>
+            )}
           </div>
         </div>
         <div class="bg-white rounded-3xl p-8 sm:p-10 shadow-xl border border-[var(--color-tc-blue)]/5 relative">
           <div class="absolute -top-4 -right-4 w-24 h-24 bg-[var(--color-tc-red)]/10 rounded-full blur-2xl"></div>
-          <h3 class="text-2xl font-bold text-[var(--color-tc-blue)] mb-8">Nos 3 piliers fondateurs</h3>
+          <h3 class="text-2xl font-bold text-[var(--color-tc-blue)] mb-8">
+            {lang === 'en' ? 'Our 3 Founding Pillars' : 'Nos 3 piliers fondateurs'}
+          </h3>
           <ul class="space-y-8">
             <li class="flex gap-4">
-              <div class="flex-shrink-0 w-12 h-12 rounded-full bg-[var(--color-tc-olive)]/20 flex items-center justify-center text-[var(--color-tc-olive)]">
+              <div class="flex-shrink-0 w-12 h-12 rounded-full bg-[var(--color-tc-olive)]/20 flex items-center justify-center text-[var(--color-tc-olive)] font-bold">
                 1
               </div>
               <div>
-                <h4 class="font-bold text-[var(--color-tc-blue)] text-lg">Transmission Intergénérationnelle</h4>
-                <p class="text-[var(--color-tc-blue)]/70 text-sm mt-1">Créer des passerelles entre les générations pour apprendre mutuellement et transmettre les patrimoines culturels.</p>
+                <h4 class="font-bold text-[var(--color-tc-blue)] text-lg">
+                  {lang === 'en' ? 'Intergenerational Transmission' : 'Transmission Intergénérationnelle'}
+                </h4>
+                <p class="text-[var(--color-tc-blue)]/70 text-sm mt-1">
+                  {lang === 'en'
+                    ? 'Building bridges between generations to learn from one another and pass down living cultural heritage.'
+                    : 'Créer des passerelles entre les générations pour apprendre mutuellement et transmettre les patrimoines culturels.'}
+                </p>
               </div>
             </li>
             <li class="flex gap-4">
-              <div class="flex-shrink-0 w-12 h-12 rounded-full bg-[var(--color-tc-mustard)]/20 flex items-center justify-center text-[var(--color-tc-mustard)]">
+              <div class="flex-shrink-0 w-12 h-12 rounded-full bg-[var(--color-tc-mustard)]/20 flex items-center justify-center text-[var(--color-tc-mustard)] font-bold">
                 2
               </div>
               <div>
-                <h4 class="font-bold text-[var(--color-tc-blue)] text-lg">Intelligence Artisanale & Innovéthique</h4>
-                <p class="text-[var(--color-tc-blue)]/70 text-sm mt-1">Associer innovation et éthique pour permettre aux traditions d'évoluer de manière responsable sans perdre leur identité.</p>
+                <h4 class="font-bold text-[var(--color-tc-blue)] text-lg">
+                  {lang === 'en' ? 'Craft Intelligence & Innovethics' : 'Intelligence Artisanale & Innovéthique'}
+                </h4>
+                <p class="text-[var(--color-tc-blue)]/70 text-sm mt-1">
+                  {lang === 'en'
+                    ? 'Combining innovation with ethics to help traditions evolve responsibly without losing their identity.'
+                    : 'Associer innovation et éthique pour permettre aux traditions d\'évoluer de manière responsable sans perdre leur identité.'}
+                </p>
               </div>
             </li>
             <li class="flex gap-4">
-              <div class="flex-shrink-0 w-12 h-12 rounded-full bg-[var(--color-tc-red)]/20 flex items-center justify-center text-[var(--color-tc-red)]">
+              <div class="flex-shrink-0 w-12 h-12 rounded-full bg-[var(--color-tc-red)]/20 flex items-center justify-center text-[var(--color-tc-red)] font-bold">
                 3
               </div>
               <div>
-                <h4 class="font-bold text-[var(--color-tc-blue)] text-lg">Paix par la Culture</h4>
-                <p class="text-[var(--color-tc-blue)]/70 text-sm mt-1">Considérer l'artisanat comme un langage commun capable de créer de la coopération et de la compréhension entre les peuples.</p>
+                <h4 class="font-bold text-[var(--color-tc-blue)] text-lg">
+                  {lang === 'en' ? 'Peace through Culture' : 'Paix par la Culture'}
+                </h4>
+                <p class="text-[var(--color-tc-blue)]/70 text-sm mt-1">
+                  {lang === 'en'
+                    ? 'Embracing craftsmanship as a universal language fostering cooperation and mutual understanding between peoples.'
+                    : 'Considérer l\'artisanat comme un langage commun capable de créer de la coopération et de la compréhension entre les peuples.'}
+                </p>
               </div>
             </li>
           </ul>
@@ -126,9 +178,13 @@ const routes = [
     <section class="py-16 sm:py-24 bg-[var(--color-tc-blue)] text-white relative overflow-hidden">
       <div class="max-w-7xl mx-auto px-6 lg:px-8">
         <div class="text-center max-w-3xl mx-auto mb-16">
-          <h2 class="text-3xl font-display font-bold sm:text-4xl mb-6 text-white">Notre Modèle : Les Routes Circulaires</h2>
+          <h2 class="text-3xl font-display font-bold sm:text-4xl mb-6 text-white">
+            {lang === 'en' ? 'Our Model: The Circular Routes' : 'Notre Modèle : Les Routes Circulaires'}
+          </h2>
           <p class="text-lg text-white/80">
-            Inspirées des grandes routes historiques d’échanges, les Routes Circulaires constituent le cœur opérationnel de l'association. Elles réunissent artisans, chercheurs, institutions et jeunes autour de thématiques liées aux 5 sens.
+            {lang === 'en'
+              ? 'Inspired by historic trade routes, the Circular Routes form the operational heart of the association. They bring together artisans, researchers, institutions, and youth around themes inspired by the 5 senses.'
+              : 'Inspirées des grandes routes historiques d’échanges, les Routes Circulaires constituent le cœur opérationnel de l\'association. Elles réunissent artisans, chercheurs, institutions et jeunes autour de thématiques liées aux 5 sens.'}
           </p>
         </div>
         
@@ -147,14 +203,18 @@ const routes = [
     <!-- L'Équipe / Le Bureau -->
     <section class="py-16 sm:py-24 max-w-7xl mx-auto px-6 lg:px-8">
       <div class="text-center max-w-2xl mx-auto mb-16">
-        <h2 class="text-3xl font-display font-bold text-[var(--color-tc-blue)] mb-4">Notre Équipe Fondatrice</h2>
+        <h2 class="text-3xl font-display font-bold text-[var(--color-tc-blue)] mb-4">
+          {lang === 'en' ? 'Our Founding Team' : 'Notre Équipe Fondatrice'}
+        </h2>
         <p class="text-lg text-[var(--color-tc-blue)]/70">
-          Transmission Circulaire adopte un mode de gouvernance inspiré de la sociocratie (intelligence collective, responsabilité partagée, consentement et transparence).
+          {lang === 'en'
+            ? 'Circular Transmission adopts a governance model inspired by sociocracy (collective intelligence, shared responsibility, consent, and transparency).'
+            : 'Transmission Circulaire adopte un mode de gouvernance inspiré de la sociocratie (intelligence collective, responsabilité partagée, consentement et transparence).'}
         </p>
       </div>
       
       <div class="flex flex-wrap justify-center gap-8">
-        {team.map((member, index) => (
+        {team.map((member) => (
           <div class="w-full sm:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1.5rem)] max-w-sm bg-white rounded-3xl p-8 text-center shadow-md border border-[var(--color-tc-blue)]/5 hover:shadow-xl transition-shadow">
             <img src={member.image} alt={member.name} class="w-32 h-32 mx-auto rounded-full object-cover mb-6 ring-4 ring-[var(--color-tc-cream)] shadow-sm" />
             <h3 class="text-xl font-bold text-[var(--color-tc-blue)]">{member.name}</h3>
@@ -167,13 +227,23 @@ const routes = [
     <!-- L'Origine -->
     <section class="py-16 sm:py-24 bg-white border-t border-[var(--color-tc-blue)]/10">
       <div class="max-w-4xl mx-auto px-6 lg:px-8 text-center">
-        <h2 class="text-3xl font-display font-bold text-[var(--color-tc-blue)] mb-6">Une aventure née d'un livre</h2>
+        <h2 class="text-3xl font-display font-bold text-[var(--color-tc-blue)] mb-6">
+          {lang === 'en' ? 'An Adventure Born from a Book' : 'Une aventure née d\'un livre'}
+        </h2>
         <p class="text-lg leading-8 text-[var(--color-tc-blue)]/80 mb-8">
-          Le projet trouve son origine dans l’ouvrage éponyme publié aux Éditions Maïa en 2026. À travers trois tomes, le projet développe une réflexion autour d’une idée centrale : <strong>nous sommes tous à la fois héritiers et transmetteurs</strong>.
+          {lang === 'en' ? (
+            <>The project originated in the eponymous book trilogy published by Éditions Maïa in 2026. Across three volumes, it explores a central idea: <strong>we are all both heirs and transmitters</strong>.</>
+          ) : (
+            <>Le projet trouve son origine dans l’ouvrage éponyme publié aux Éditions Maïa en 2026. À travers trois tomes, le projet développe une réflexion autour d’une idée centrale : <strong>nous sommes tous à la fois héritiers et transmetteurs</strong>.</>
+          )}
         </p>
         <div class="inline-flex items-center justify-center p-6 bg-[var(--color-tc-cream)] rounded-2xl border border-[var(--color-tc-mustard)]/30">
           <p class="text-[var(--color-tc-blue)] font-serif italic text-lg">
-            "Le livre a donné naissance à une philosophie.<br/>L’association lui donne vie à travers l’action."
+            {lang === 'en' ? (
+              <>“The book gave birth to a philosophy.<br/>The association brings it to life through action.”</>
+            ) : (
+              <>« Le livre a donné naissance à une philosophie.<br/>L’association lui donne vie à travers l’action. »</>
+            )}
           </p>
         </div>
       </div>

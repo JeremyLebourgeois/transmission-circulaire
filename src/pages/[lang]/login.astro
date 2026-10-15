@@ -2,13 +2,12 @@
 export const prerender = false;
 
 import Layout from '../../layouts/Layout.astro';
-import Navbar from '../../components/Navbar.astro';
-import Footer from '../../components/Footer.astro';
-import { getLangFromUrl, useTranslatedPath } from '../../i18n/utils';
+import { getLangFromUrl, useTranslatedPath, useTranslations } from '../../i18n/utils';
 import { getSupabaseServerClient } from '../../lib/supabase-server';
 
 const lang = getLangFromUrl(Astro.url);
 const translatePath = useTranslatedPath(lang);
+const t = useTranslations(lang);
 
 let error = '';
 
@@ -26,7 +25,7 @@ if (Astro.request.method === 'POST') {
  const password = formData.get('password')?.toString();
 
  if (!email || !password) {
- error = 'Veuillez remplir tous les champs.';
+ error = lang === 'en' ? 'Please fill in all fields.' : 'Veuillez remplir tous les champs.';
  } else {
  const { error: signInError } = await supabase.auth.signInWithPassword({
  email,
@@ -34,7 +33,7 @@ if (Astro.request.method === 'POST') {
  });
 
  if (signInError) {
- error = "Email ou mot de passe incorrect.";
+ error = lang === 'en' ? 'Incorrect email or password.' : 'Email ou mot de passe incorrect.';
  } else {
  return Astro.redirect(translatePath('/dashboard'));
  }
@@ -42,17 +41,16 @@ if (Astro.request.method === 'POST') {
 }
 ---
 
-<Layout title="Connexion | Transmission Circulaire">
+<Layout title={lang === 'en' ? 'Login | Circular Transmission' : 'Connexion | Transmission Circulaire'}>
 
- 
  <main class="min-h-screen flex items-center justify-center bg-[var(--color-tc-cream)] py-12 px-4 sm:px-6 lg:px-8">
- <div class="max-w-md w-full space-y-8 bg-[var(--color-tc-card)] p-6 sm:p-10 rounded-3xl mx-4 sm:mx-0 shadow-2xl border border-[var(--color-tc-blue)]/10 ">
+ <div class="max-w-md w-full space-y-8 bg-[var(--color-tc-card)] p-6 sm:p-10 rounded-3xl mx-4 sm:mx-0 shadow-2xl border border-[var(--color-tc-blue)]/10">
  <div>
- <h2 class="mt-6 text-center text-3xl font-display font-bold tracking-tight text-[var(--color-tc-blue)] ">
- Bon retour
+ <h2 class="mt-6 text-center text-3xl font-display font-bold tracking-tight text-[var(--color-tc-blue)]">
+ {lang === 'en' ? 'Welcome back' : 'Bon retour'}
  </h2>
- <p class="mt-2 text-center text-sm text-[var(--color-tc-blue)]/80 ">
- Connectez-vous pour accéder à votre espace
+ <p class="mt-2 text-center text-sm text-[var(--color-tc-blue)]/80">
+ {lang === 'en' ? 'Log in to access your space' : 'Connectez-vous pour accéder à votre espace'}
  </p>
  </div>
  
@@ -65,38 +63,37 @@ if (Astro.request.method === 'POST') {
  
  <div class="space-y-4 rounded-md shadow-sm">
  <div>
- <label for="email" class="sr-only">Adresse email</label>
- <input id="email" name="email" type="email" autocomplete="email" required class="relative block w-full rounded-t-lg border-0 py-3 px-4 text-[var(--color-tc-blue)] ring-1 ring-inset ring-[var(--color-tc-blue)]/20 placeholder:text-[var(--color-tc-blue)]/60 focus:z-10 focus:ring-2 focus:ring-inset focus:ring-[var(--color-tc-blue)] sm:text-sm sm:leading-6 " placeholder="Adresse email">
+ <label for="email" class="sr-only">{t('auth.email')}</label>
+ <input id="email" name="email" type="email" autocomplete="email" required class="relative block w-full rounded-t-lg border-0 py-3 px-4 text-[var(--color-tc-blue)] ring-1 ring-inset ring-[var(--color-tc-blue)]/20 placeholder:text-[var(--color-tc-blue)]/60 focus:z-10 focus:ring-2 focus:ring-inset focus:ring-[var(--color-tc-blue)] sm:text-sm sm:leading-6" placeholder={t('auth.email')}>
  </div>
  <div>
- <label for="password" class="sr-only">Mot de passe</label>
- <input id="password" name="password" type="password" autocomplete="current-password" required class="relative block w-full rounded-b-lg border-0 py-3 px-4 text-[var(--color-tc-blue)] ring-1 ring-inset ring-[var(--color-tc-blue)]/20 placeholder:text-[var(--color-tc-blue)]/60 focus:z-10 focus:ring-2 focus:ring-inset focus:ring-[var(--color-tc-blue)] sm:text-sm sm:leading-6 " placeholder="Mot de passe">
+ <label for="password" class="sr-only">{lang === 'en' ? 'Password' : 'Mot de passe'}</label>
+ <input id="password" name="password" type="password" autocomplete="current-password" required class="relative block w-full rounded-b-lg border-0 py-3 px-4 text-[var(--color-tc-blue)] ring-1 ring-inset ring-[var(--color-tc-blue)]/20 placeholder:text-[var(--color-tc-blue)]/60 focus:z-10 focus:ring-2 focus:ring-inset focus:ring-[var(--color-tc-blue)] sm:text-sm sm:leading-6" placeholder={lang === 'en' ? 'Password' : 'Mot de passe'}>
  </div>
  </div>
 
  <div class="flex items-center justify-between">
  <div class="text-sm leading-6">
- <a href={translatePath('/forgot-password')} class="font-semibold text-[var(--color-tc-blue)] hover:text-[var(--color-tc-mustard)] ">
- Mot de passe oublié ?
+ <a href={translatePath('/forgot-password')} class="font-semibold text-[var(--color-tc-blue)] hover:text-[var(--color-tc-mustard)]">
+ {lang === 'en' ? 'Forgot your password?' : 'Mot de passe oublié ?'}
  </a>
  </div>
  </div>
 
  <div>
  <button type="submit" class="flex w-full justify-center rounded-lg bg-[var(--color-tc-olive)] px-3 py-3 text-sm font-semibold leading-6 text-white shadow-md hover:bg-opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 transition-transform transform hover:-translate-y-0.5">
- Se connecter
+ {t('auth.login.link')}
  </button>
  </div>
  </form>
  
  <p class="mt-10 text-center text-sm text-[var(--color-tc-blue)]/70">
- Pas encore membre ?
+ {lang === 'en' ? 'Not a member yet?' : 'Pas encore membre ?'}
  <a href={translatePath('/register')} class="font-semibold leading-6 text-[var(--color-tc-olive)] hover:text-opacity-80 ml-1">
- Créer un compte
+ {lang === 'en' ? 'Create an account' : 'Créer un compte'}
  </a>
  </p>
  </div>
  </main>
- 
 
 </Layout>

@@ -3,9 +3,13 @@ export const prerender = false;
 import Layout from '../layouts/Layout.astro';
 import Hero from '../components/Hero.astro';
 import HomeContent from '../components/HomeContent.astro';
+import { getLangFromUrl, useTranslations } from '../i18n/utils';
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
 ---
 
-<Layout title="Accueil">
+<Layout title={t('nav.home')}>
 	<Hero />
 	<HomeContent />
 </Layout>

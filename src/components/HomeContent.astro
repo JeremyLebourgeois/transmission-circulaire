@@ -11,13 +11,13 @@ const supabase = getSupabaseServerClient(Astro.cookies);
 
 const { data: books } = await supabase
   .from('books')
-  .select('id, title, short_description, main_image_url')
+  .select('id, title, title_en, short_description, short_description_en, main_image_url')
   .order('created_at', { ascending: false })
   .limit(3);
 
 const { data: events } = await supabase
   .from('events')
-  .select('id, title, date, end_date, location, image_url')
+  .select('id, title, title_en, date, end_date, location, image_url')
   .order('date', { ascending: false })
   .limit(3);
 
@@ -28,7 +28,26 @@ const { data: guestbookData } = await supabase
 
 const guestbookMessages = guestbookData || [];
 
-const fallbackMessages = [
+const fallbackMessages = lang === 'en' ? [
+  {
+    id: 'f1',
+    message: "An inspiring initiative that gives true meaning to sharing skills and connecting generations.",
+    author: "A passionate member",
+    date: "Guestbook"
+  },
+  {
+    id: 'f2',
+    message: "Looking forward to following the next steps of the Circular Routes and discovering the wealth of living heritage!",
+    author: "A curious traveler",
+    date: "Guestbook"
+  },
+  {
+    id: 'f3',
+    message: "To transmit is not only to remember, it is to create a more united and creative future together.",
+    author: "A partner artisan",
+    date: "Guestbook"
+  }
+] : [
   {
     id: 'f1',
     message: "Une initiative inspirante qui donne tout son sens au partage des savoir-faire et à la rencontre entre générations.",
@@ -53,8 +72,8 @@ const displayMessages = guestbookMessages.length > 0
   ? guestbookMessages.map(m => ({
       id: m.id,
       message: m.message,
-      author: m.profiles?.full_name || 'Un visiteur',
-      date: new Date(m.created_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }),
+      author: m.profiles?.full_name || (lang === 'en' ? 'A visitor' : 'Un visiteur'),
+      date: new Date(m.created_at).toLocaleDateString(lang === 'en' ? 'en-US' : 'fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }),
       is_featured: m.is_featured
     }))
   : fallbackMessages;
@@ -77,9 +96,13 @@ const firstMessage = displayMessages[Math.floor(Math.random() * displayMessages.
             <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
           </svg>
         </div>
-        <h3 class="text-lg font-bold text-[var(--color-tc-blue)]">Notre Vision</h3>
-        <p class="text-base font-semibold text-[var(--color-tc-mustard)]">Relier les générations et les cultures.</p>
-        <p class="text-sm leading-6 text-[var(--color-tc-blue)]/70">Nous croyons que chaque culture porte en elle des savoirs précieux qui méritent d'être transmis, partagés et célébrés.</p>
+        <h3 class="text-lg font-bold text-[var(--color-tc-blue)]">{lang === 'en' ? 'Our Vision' : 'Notre Vision'}</h3>
+        <p class="text-base font-semibold text-[var(--color-tc-mustard)]">{lang === 'en' ? 'Connecting generations and cultures.' : 'Relier les générations et les cultures.'}</p>
+        <p class="text-sm leading-6 text-[var(--color-tc-blue)]/70">
+          {lang === 'en' 
+            ? 'We believe that every culture holds precious knowledge worth passing on, sharing, and celebrating.'
+            : 'Nous croyons que chaque culture porte en elle des savoirs précieux qui méritent d\'être transmis, partagés et célébrés.'}
+        </p>
       </div>
 
       <!-- Pilier 2 : Notre Engagement -->
@@ -89,9 +112,13 @@ const firstMessage = displayMessages[Math.floor(Math.random() * displayMessages.
             <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
           </svg>
         </div>
-        <h3 class="text-lg font-bold text-[var(--color-tc-blue)]">Notre Engagement</h3>
-        <p class="text-base font-semibold text-[var(--color-tc-mustard)]">Faire vivre ce qui nous relie.</p>
-        <p class="text-sm leading-6 text-[var(--color-tc-blue)]/70">Par nos projets éditoriaux, artistiques et humains, nous construisons des connexions durables entre les individus, les territoires et les époques.</p>
+        <h3 class="text-lg font-bold text-[var(--color-tc-blue)]">{lang === 'en' ? 'Our Commitment' : 'Notre Engagement'}</h3>
+        <p class="text-base font-semibold text-[var(--color-tc-mustard)]">{lang === 'en' ? 'Bringing alive what connects us.' : 'Faire vivre ce qui nous relie.'}</p>
+        <p class="text-sm leading-6 text-[var(--color-tc-blue)]/70">
+          {lang === 'en'
+            ? 'Through our editorial, artistic, and human initiatives, we build lasting connections between people, territories, and eras.'
+            : 'Par nos projets éditoriaux, artistiques et humains, nous construisons des connexions durables entre les individus, les territoires et les époques.'}
+        </p>
       </div>
 
       <!-- Pilier 3 : Nos Routes -->
@@ -101,9 +128,13 @@ const firstMessage = displayMessages[Math.floor(Math.random() * displayMessages.
             <path stroke-linecap="round" stroke-linejoin="round" d="M9 6.75V15m6-6v8.25m.503 3.498l4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 00-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0z" />
           </svg>
         </div>
-        <h3 class="text-lg font-bold text-[var(--color-tc-blue)]">Nos Routes Circulaires</h3>
-        <p class="text-base font-semibold text-[var(--color-tc-mustard)]">Transmettre pour créer ensemble.</p>
-        <p class="text-sm leading-6 text-[var(--color-tc-blue)]/70">Des routes de rencontres entre créateurs du monde entier, tissant des liens inédits autour des savoir-faire, des patrimoines et des cultures.</p>
+        <h3 class="text-lg font-bold text-[var(--color-tc-blue)]">{lang === 'en' ? 'Our Circular Routes' : 'Nos Routes Circulaires'}</h3>
+        <p class="text-base font-semibold text-[var(--color-tc-mustard)]">{lang === 'en' ? 'Transmitting to create together.' : 'Transmettre pour créer ensemble.'}</p>
+        <p class="text-sm leading-6 text-[var(--color-tc-blue)]/70">
+          {lang === 'en'
+            ? 'Meeting journeys between creators from around the world, weaving new bonds around craftsmanship, heritage, and cultures.'
+            : 'Des routes de rencontres entre créateurs du monde entier, tissant des liens inédits autour des savoir-faire, des patrimoines et des cultures.'}
+        </p>
       </div>
 
     </div>
@@ -125,17 +156,19 @@ const firstMessage = displayMessages[Math.floor(Math.random() * displayMessages.
       <!-- Texte à droite -->
       <div class="text-center lg:text-left">
         <h2 class="text-3xl font-display font-bold tracking-tight text-[var(--color-tc-blue)] sm:text-4xl">
-          Faire de la transmission une force pour demain.
+          {lang === 'en' ? 'Making transmission a force for tomorrow.' : 'Faire de la transmission une force pour demain.'}
         </h2>
         <p class="mt-4 text-lg leading-8 text-[var(--color-tc-blue)]/70">
-          Transmission Circulaire crée des passerelles entre générations, cultures, territoires et savoir-faire. Nous croyons que transmettre, c'est aussi partager, faire évoluer et créer ensemble.
+          {lang === 'en'
+            ? 'Circular Transmission builds bridges between generations, cultures, regions, and crafts. We believe that transmitting also means sharing, evolving, and creating together.'
+            : 'Transmission Circulaire crée des passerelles entre générations, cultures, territoires et savoir-faire. Nous croyons que transmettre, c\'est aussi partager, faire évoluer et créer ensemble.'}
         </p>
         <div class="mt-8 flex justify-center lg:justify-start">
           <a
             href={translatePath('/about')}
             class="rounded-full bg-[var(--color-tc-blue)] px-8 py-3 text-sm font-semibold text-white shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5"
           >
-            Découvrir l'association →
+            {lang === 'en' ? 'Discover the association →' : 'Découvrir l\'association →'}
           </a>
         </div>
       </div>
@@ -154,17 +187,19 @@ const firstMessage = displayMessages[Math.floor(Math.random() * displayMessages.
       <!-- Texte à gauche (sur desktop) -->
       <div class="text-center lg:text-left">
         <h2 class="text-3xl font-display font-bold tracking-tight text-[var(--color-tc-blue)] sm:text-4xl">
-          Les Routes Circulaires
+          {lang === 'en' ? 'The Circular Routes' : 'Les Routes Circulaires'}
         </h2>
         <p class="mt-4 text-lg leading-8 text-[var(--color-tc-blue)]/70">
-          Les Routes Circulaires sont des parcours de rencontres où des créateurs, artisans et intellectuels de différents pays se retrouvent autour de savoir-faire, de cultures et de patrimoines pour imaginer et créer ensemble. Un programme unique qui fait circuler les idées, les gestes et les humanités.
+          {lang === 'en'
+            ? 'The Circular Routes are exploratory journeys where creators, artisans, and intellectuals from different countries come together around craftsmanship, culture, and heritage to imagine and create together. A unique initiative circulating ideas, gestures, and human connection.'
+            : 'Les Routes Circulaires sont des parcours de rencontres où des créateurs, artisans et intellectuels de différents pays se retrouvent autour de savoir-faire, de cultures et de patrimoines pour imaginer et créer ensemble. Un programme unique qui fait circuler les idées, les gestes et les humanités.'}
         </p>
         <div class="mt-8 flex justify-center lg:justify-start">
           <a
             href={translatePath('/routes')}
             class="rounded-full bg-[var(--color-tc-olive)] px-8 py-3 text-sm font-semibold text-white shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5"
           >
-            Découvrir nos routes →
+            {lang === 'en' ? 'Discover our routes →' : 'Découvrir nos routes →'}
           </a>
         </div>
       </div>
@@ -185,41 +220,45 @@ const firstMessage = displayMessages[Math.floor(Math.random() * displayMessages.
   <div class="mx-auto max-w-7xl px-6 lg:px-8">
     <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between mb-8 gap-4">
       <h2 class="text-3xl font-display font-bold tracking-tight text-[var(--color-tc-blue)] sm:text-4xl">
-        Nos Livres
+        {lang === 'en' ? 'Our Books' : 'Nos Livres'}
       </h2>
       <a
         href={translatePath('/books')}
         class="text-sm font-semibold text-[var(--color-tc-blue)] hover:underline flex items-center gap-1 group whitespace-nowrap"
       >
-        Découvrir nos livres
+        {lang === 'en' ? 'Discover our books' : 'Découvrir nos livres'}
         <span class="group-hover:translate-x-1 transition-transform" aria-hidden="true">→</span>
       </a>
     </div>
 
     {books && books.length > 0 ? (
       <div class="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
-        {books.map(book => (
-          <a href={translatePath(`/books/${book.id}`)} class="group flex flex-col gap-4 rounded-3xl overflow-hidden bg-[var(--color-tc-cream-dark)] border-2 border-[var(--color-tc-blue)] shadow-sm hover:shadow-md transition-shadow">
-            {book.main_image_url ? (
-              <img src={book.main_image_url} alt={book.title} class="w-full h-52 object-cover" />
-            ) : (
-              <div class="w-full h-52 bg-[var(--color-tc-blue)]/10 flex items-center justify-center">
-                <svg class="w-10 h-10 text-[var(--color-tc-blue)]/30" fill="none" viewBox="0 0 24 24" stroke-width="1" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
-                </svg>
-              </div>
-            )}
-            <div class="p-5 flex flex-col gap-2">
-              <h3 class="font-bold text-[var(--color-tc-blue)] group-hover:text-[var(--color-tc-mustard)] transition-colors">{book.title}</h3>
-              {book.short_description && (
-                <p class="text-sm text-[var(--color-tc-blue)]/60 line-clamp-2">{book.short_description}</p>
+        {books.map(book => {
+          const displayTitle = (lang === 'en' && book.title_en) ? book.title_en : book.title;
+          const displayDesc = (lang === 'en' && book.short_description_en) ? book.short_description_en : book.short_description;
+          return (
+            <a href={translatePath(`/books/${book.id}`)} class="group flex flex-col gap-4 rounded-3xl overflow-hidden bg-[var(--color-tc-cream-dark)] border-2 border-[var(--color-tc-blue)] shadow-sm hover:shadow-md transition-shadow">
+              {book.main_image_url ? (
+                <img src={book.main_image_url} alt={displayTitle} class="w-full h-52 object-cover" />
+              ) : (
+                <div class="w-full h-52 bg-[var(--color-tc-blue)]/10 flex items-center justify-center">
+                  <svg class="w-10 h-10 text-[var(--color-tc-blue)]/30" fill="none" viewBox="0 0 24 24" stroke-width="1" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
+                  </svg>
+                </div>
               )}
-            </div>
-          </a>
-        ))}
+              <div class="p-5 flex flex-col gap-2">
+                <h3 class="font-bold text-[var(--color-tc-blue)] group-hover:text-[var(--color-tc-mustard)] transition-colors">{displayTitle}</h3>
+                {displayDesc && (
+                  <p class="text-sm text-[var(--color-tc-blue)]/60 line-clamp-2">{displayDesc}</p>
+                )}
+              </div>
+            </a>
+          );
+        })}
       </div>
     ) : (
-      <p class="text-[var(--color-tc-blue)]/50 italic text-sm">Aucun livre disponible pour l'instant.</p>
+      <p class="text-[var(--color-tc-blue)]/50 italic text-sm">{lang === 'en' ? 'No books available at the moment.' : 'Aucun livre disponible pour l\'instant.'}</p>
     )}
   </div>
 </section>
@@ -231,13 +270,13 @@ const firstMessage = displayMessages[Math.floor(Math.random() * displayMessages.
   <div class="mx-auto max-w-7xl px-6 lg:px-8">
     <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between mb-8 gap-4">
       <h2 class="text-3xl font-display font-bold tracking-tight text-[var(--color-tc-olive)] sm:text-4xl">
-        Événements
+        {lang === 'en' ? 'Events' : 'Événements'}
       </h2>
       <a
         href={translatePath('/events')}
         class="text-sm font-semibold text-[var(--color-tc-olive)] hover:underline flex items-center gap-1 group whitespace-nowrap"
       >
-        Voir les événements
+        {lang === 'en' ? 'View events' : 'Voir les événements'}
         <span class="group-hover:translate-x-1 transition-transform" aria-hidden="true">→</span>
       </a>
     </div>
@@ -245,8 +284,8 @@ const firstMessage = displayMessages[Math.floor(Math.random() * displayMessages.
     {events && events.length > 0 ? (
       <div class="flex flex-col gap-4">
         {events.map(event => {
+          const displayTitle = (lang === 'en' && event.title_en) ? event.title_en : event.title;
           const eventDate = event.end_date ? new Date(event.end_date) : new Date(event.date);
-          // Compare with beginning of today to not make today's events "past"
           const today = new Date();
           today.setHours(0, 0, 0, 0);
           const isPast = eventDate < today;
@@ -257,7 +296,7 @@ const firstMessage = displayMessages[Math.floor(Math.random() * displayMessages.
           <Wrapper {...wrapperProps} class={`flex items-center gap-6 p-5 rounded-2xl bg-[var(--color-tc-cream)] border-2 border-[var(--color-tc-olive)] shadow-sm transition-all group ${!isPast ? 'hover:shadow-md hover:-translate-y-0.5 hover:border-[var(--color-tc-mustard)]/70 cursor-pointer block w-full' : 'opacity-80'}`}>
             <div class={`flex-shrink-0 h-16 w-16 overflow-hidden flex items-center justify-center rounded-xl ${!isPast ? 'bg-[var(--color-tc-red)]/10' : 'bg-gray-200'}`}>
               {event.image_url ? (
-                <img src={event.image_url} alt={event.title} class={`w-full h-full object-cover ${isPast ? 'grayscale opacity-70' : ''}`} />
+                <img src={event.image_url} alt={displayTitle} class={`w-full h-full object-cover ${isPast ? 'grayscale opacity-70' : ''}`} />
               ) : (
                 <svg class={`h-6 w-6 ${!isPast ? 'text-[var(--color-tc-red)]' : 'text-gray-500'}`} fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
@@ -265,15 +304,22 @@ const firstMessage = displayMessages[Math.floor(Math.random() * displayMessages.
               )}
             </div>
             <div class="flex-1 min-w-0">
-              <p class="font-bold text-[var(--color-tc-olive)] truncate">{event.title}</p>
+              <p class="font-bold text-[var(--color-tc-olive)] truncate">{displayTitle}</p>
               <div class="text-xs text-[var(--color-tc-blue)]/50 mt-1 flex flex-col gap-0.5">
                 {event.end_date ? (
-                  <>
-                    <span>Du {new Date(event.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
-                    <span>Au {new Date(event.end_date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
-                  </>
+                  lang === 'en' ? (
+                    <>
+                      <span>From {new Date(event.date).toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
+                      <span>To {new Date(event.end_date).toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>Du {new Date(event.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
+                      <span>Au {new Date(event.end_date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
+                    </>
+                  )
                 ) : (
-                  <span>{event.date ? new Date(event.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }) : ''}</span>
+                  <span>{event.date ? new Date(event.date).toLocaleDateString(lang === 'en' ? 'en-US' : 'fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }) : ''}</span>
                 )}
                 {event.location && <span class="mt-0.5 text-[var(--color-tc-blue)]/40 flex items-center gap-1">
                   <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -296,7 +342,7 @@ const firstMessage = displayMessages[Math.floor(Math.random() * displayMessages.
         })}
       </div>
     ) : (
-      <p class="text-[var(--color-tc-blue)]/50 italic text-sm">Aucun événement à venir pour l'instant. Revenez bientôt !</p>
+      <p class="text-[var(--color-tc-blue)]/50 italic text-sm">{lang === 'en' ? 'No upcoming events at the moment. Check back soon!' : 'Aucun événement à venir pour l\'instant. Revenez bientôt !'}</p>
     )}
   </div>
 </section>
@@ -305,18 +351,19 @@ const firstMessage = displayMessages[Math.floor(Math.random() * displayMessages.
   6. CTA FINAL
 ───────────────────────────────────────────── -->
 <section class="bg-[var(--color-tc-blue)] py-12 sm:py-20 relative overflow-hidden">
-  <!-- Halo décoratif subtil en arrière-plan -->
   <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[36rem] h-[36rem] bg-[var(--color-tc-mustard)]/5 rounded-full blur-3xl pointer-events-none"></div>
 
   <div class="mx-auto max-w-3xl px-6 lg:px-8 text-center relative z-10">
     <h2 class="text-3xl font-display font-bold tracking-tight text-white sm:text-4xl">
-      Vous avez quelque chose à transmettre ?
+      {lang === 'en' ? 'Do you have something to pass on?' : 'Vous avez quelque chose à transmettre ?'}
     </h2>
     <p class="mt-4 text-lg leading-8 text-white/70">
-      Rejoignez une communauté qui fait circuler les savoirs, les cultures et les générations.
+      {lang === 'en'
+        ? 'Join a community that brings knowledge, cultures, and generations into circulation.'
+        : 'Rejoignez une communauté qui fait circuler les savoirs, les cultures et les générations.'}
     </p>
 
-    <!-- Box Épinglée du Livre d'or (apparaît et disparaît de manière aléatoire) -->
+    <!-- Box Épinglée du Livre d'or -->
     <div class="my-8 max-w-xl mx-auto text-left min-h-[175px] sm:min-h-[155px] flex items-center justify-center">
       <div 
         id="pinned-guestbook-card" 
@@ -328,14 +375,14 @@ const firstMessage = displayMessages[Math.floor(Math.random() * displayMessages.
             <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
               <path d="M16 12V4H17V2H7V4H8V12L6 14V16H11V22H13V16H18V14L16 12Z"/>
             </svg>
-            Livre d'or
+            {lang === 'en' ? 'Guestbook' : 'Livre d\'or'}
           </span>
           <a 
             href={translatePath('/donate') + "#guestbook"} 
             class="text-xs text-white/60 hover:text-[var(--color-tc-mustard)] transition-colors inline-flex items-center gap-1"
-            title="Consulter le livre d'or"
+            title={lang === 'en' ? 'View guestbook' : 'Consulter le livre d\'or'}
           >
-            Voir le livre <span class="group-hover:translate-x-0.5 transition-transform">→</span>
+            {lang === 'en' ? 'View guestbook' : 'Voir le livre'} <span class="group-hover:translate-x-0.5 transition-transform">→</span>
           </a>
         </div>
 
@@ -368,19 +415,19 @@ const firstMessage = displayMessages[Math.floor(Math.random() * displayMessages.
         href={translatePath('/register')}
         class="rounded-full bg-[var(--color-tc-olive)] px-8 py-3 text-sm font-semibold text-white shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5"
       >
-        Rejoindre l'association
+        {lang === 'en' ? 'Join the association' : 'Rejoindre l\'association'}
       </a>
       <a
         href={translatePath('/donate')}
         class="rounded-full bg-[var(--color-tc-mustard)] px-8 py-3 text-sm font-semibold text-white shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5"
       >
-        Soutenir l'association
+        {lang === 'en' ? 'Support the association' : 'Soutenir l\'association'}
       </a>
       <a
         href={translatePath('/donate') + "#guestbook"}
         class="rounded-full bg-gradient-to-r from-[#F5AF19] via-[#F8C847] to-[#EE9F08] hover:from-[#F8B825] hover:via-[#FBD25E] hover:to-[#F1A814] px-8 py-3 text-sm font-bold text-[var(--color-tc-blue)] shadow-md hover:shadow-xl hover:scale-105 transition-all"
       >
-        Laissez un mot
+        {lang === 'en' ? 'Leave a note' : 'Laissez un mot'}
       </a>
     </div>
   </div>
@@ -430,11 +477,9 @@ const firstMessage = displayMessages[Math.floor(Math.random() * displayMessages.
     function switchMessage() {
       if (isPaused) return;
 
-      // Disparition en fondu et léger zoom arrière
       cardEl.classList.add('opacity-0', 'scale-95', 'pointer-events-none');
 
       setTimeout(() => {
-        // Sélection aléatoire parmi tous les messages
         currentIndex = pickRandomIndex();
         const msg = messages[currentIndex];
 
@@ -443,7 +488,6 @@ const firstMessage = displayMessages[Math.floor(Math.random() * displayMessages.
         dateEl.textContent = msg.date;
         avatarEl.textContent = (msg.author || 'A').charAt(0).toUpperCase();
 
-        // Moment d'absence où la box a disparu, puis réapparition
         setTimeout(() => {
           if (!isPaused) {
             cardEl.classList.remove('opacity-0', 'scale-95', 'pointer-events-none');
@@ -453,7 +497,6 @@ const firstMessage = displayMessages[Math.floor(Math.random() * displayMessages.
     }
 
     function scheduleNext() {
-      // Apparaît et reste affiché entre 5 et 7 secondes
       const delay = Math.floor(Math.random() * 2000) + 5500;
       timer = setTimeout(() => {
         switchMessage();

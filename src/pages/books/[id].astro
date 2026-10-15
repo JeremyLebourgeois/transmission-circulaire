@@ -42,7 +42,7 @@ const displayShortDesc = (lang === 'en' && book.short_description_en) ? book.sho
 const displayLongDesc = (lang === 'en' && book.long_description_en) ? book.long_description_en : book.long_description;
 ---
 
-<Layout title={`${displayTitle} | Livres`} description={displayShortDesc} image={book.main_image_url}>
+<Layout title={`${displayTitle} | ${lang === 'en' ? 'Books' : 'Livres'}`} description={displayShortDesc} image={book.main_image_url}>
   <main class="min-h-screen bg-[var(--color-tc-cream)]">
 
     <!-- Hero Section -->
@@ -58,14 +58,14 @@ const displayLongDesc = (lang === 'en' && book.long_description_en) ? book.long_
             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
             </svg>
-            Retour aux livres
+            {lang === 'en' ? 'Back to books' : 'Retour aux livres'}
           </a>
           <h1 class="text-4xl sm:text-5xl font-display font-bold leading-tight">{displayTitle}</h1>
           {mainCollabs.length > 0 && (
             <p class="mt-4 text-white/70 text-lg">
-              Par {mainCollabs.map((c: any) => {
+              {lang === 'en' ? 'By ' : 'Par '} {mainCollabs.map((c: any) => {
                 const profile = c.user_id ? profileMap[c.user_id] : null;
-                return profile?.full_name || c.name || 'Inconnu';
+                return profile?.full_name || c.name || (lang === 'en' ? 'Unknown' : 'Inconnu');
               }).join(', ')}
             </p>
           )}
@@ -77,7 +77,7 @@ const displayLongDesc = (lang === 'en' && book.long_description_en) ? book.long_
                 <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
                 </svg>
-                Acheter le livre
+                {lang === 'en' ? 'Buy the book' : 'Acheter le livre'}
               </a>
             </div>
           )}
@@ -91,7 +91,9 @@ const displayLongDesc = (lang === 'en' && book.long_description_en) ? book.long_
       <!-- Long description -->
       {displayLongDesc && (
         <section>
-          <h2 class="text-2xl font-display font-bold text-[var(--color-tc-blue)] mb-6">À propos de ce livre</h2>
+          <h2 class="text-2xl font-display font-bold text-[var(--color-tc-blue)] mb-6">
+            {lang === 'en' ? 'About this book' : 'À propos de ce livre'}
+          </h2>
           <div class="prose prose-lg max-w-none text-[var(--color-tc-blue)]/80 leading-relaxed whitespace-pre-wrap">{displayLongDesc}</div>
         </section>
       )}
@@ -99,11 +101,13 @@ const displayLongDesc = (lang === 'en' && book.long_description_en) ? book.long_
       <!-- Main Collaborators -->
       {mainCollabs.length > 0 && (
         <section>
-          <h2 class="text-2xl font-display font-bold text-[var(--color-tc-blue)] mb-8">Collaborateurs principaux</h2>
+          <h2 class="text-2xl font-display font-bold text-[var(--color-tc-blue)] mb-8">
+            {lang === 'en' ? 'Main collaborators' : 'Collaborateurs principaux'}
+          </h2>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
             {mainCollabs.map((c: any) => {
               const profile = c.user_id ? profileMap[c.user_id] : null;
-              const name = profile?.full_name || c.name || 'Inconnu';
+              const name = profile?.full_name || c.name || (lang === 'en' ? 'Unknown' : 'Inconnu');
               const avatar = profile?.avatar_url;
               return (
                 <div class="bg-[var(--color-tc-card)] rounded-2xl p-6 border border-[var(--color-tc-blue)]/10 shadow-md flex gap-4 items-start relative group hover:shadow-lg transition-all cursor-default">
@@ -136,7 +140,9 @@ const displayLongDesc = (lang === 'en' && book.long_description_en) ? book.long_
       <!-- Other Collaborators -->
       {otherCollabs.length > 0 && (
         <section>
-          <h2 class="text-2xl font-display font-bold text-[var(--color-tc-blue)] mb-6">Autres contributeurs</h2>
+          <h2 class="text-2xl font-display font-bold text-[var(--color-tc-blue)] mb-6">
+            {lang === 'en' ? 'Other contributors' : 'Autres contributeurs'}
+          </h2>
           <ul class="flex flex-wrap gap-3">
             {otherCollabs.map((c: any) => {
               const profile = c.user_id ? profileMap[c.user_id] : null;
@@ -159,7 +165,9 @@ const displayLongDesc = (lang === 'en' && book.long_description_en) ? book.long_
       <!-- Extra Images -->
       {book.extra_images?.length > 0 && (
         <section>
-          <h2 class="text-2xl font-display font-bold text-[var(--color-tc-blue)] mb-6">Galerie</h2>
+          <h2 class="text-2xl font-display font-bold text-[var(--color-tc-blue)] mb-6">
+            {lang === 'en' ? 'Gallery' : 'Galerie'}
+          </h2>
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {book.extra_images.map((img: string) => (
               <img src={img} alt="Image du livre" class="w-full rounded-2xl shadow-md object-cover aspect-video" />
