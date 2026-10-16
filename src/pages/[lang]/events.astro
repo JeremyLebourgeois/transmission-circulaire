@@ -48,9 +48,9 @@ const { data: events, error } = await supabase
  <div class="mx-auto mt-16 grid max-w-2xl grid-cols-1 gap-x-8 gap-y-12 sm:mt-20 lg:mx-0 lg:max-w-none lg:grid-cols-2 xl:grid-cols-3">
  
  {error && error.code === '42P01' ? (
-   <p class="text-center w-full text-red-500 italic">{lang === 'en' ? 'The events table has not been created yet.' : "La table des événements n'a pas encore été créée dans la base de données."}</p>
+   <p class="col-span-full text-center w-full text-red-500 italic py-12">{lang === 'en' ? 'The events table has not been created yet.' : "La table des événements n'a pas encore été créée dans la base de données."}</p>
  ) : events?.length === 0 ? (
-   <p class="text-center w-full text-[var(--color-tc-blue)]/60 italic">{lang === 'en' ? 'No events are scheduled at this time.' : "Aucun événement n'est programmé pour le moment."}</p>
+   <p class="col-span-full text-center w-full text-[var(--color-tc-blue)]/60 italic py-12 text-base sm:text-lg">{lang === 'en' ? 'No events are scheduled at this time.' : "Aucun événement n'est programmé pour le moment."}</p>
  ) : (
    events?.map(evt => {
      const targetDate = (evt.end_date && evt.end_date.trim() !== '') ? evt.end_date : evt.date;
