@@ -34,6 +34,9 @@ if (Astro.request.method === 'POST') {
  const { error: signUpError } = await supabase.auth.signUp({
  email,
  password,
+ options: {
+   emailRedirectTo: `${new URL(Astro.request.url).origin}${translatePath('/login')}`,
+ },
  });
 
  if (signUpError) {

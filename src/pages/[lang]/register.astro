@@ -29,11 +29,14 @@ if (Astro.request.method === 'POST') {
  const consent = formData.get('consent');
 
  if (!email || !password || !consent) {
- error = 'Veuillez remplir tous les champs et accepter la politique de confidentialité.';
+ error = lang === 'en' ? 'Please fill in all fields and accept the privacy policy.' : 'Veuillez remplir tous les champs et accepter la politique de confidentialité.';
  } else {
  const { error: signUpError } = await supabase.auth.signUp({
  email,
  password,
+ options: {
+   emailRedirectTo: `${new URL(Astro.request.url).origin}${translatePath('/login')}`,
+ },
  });
 
  if (signUpError) {
@@ -64,9 +67,9 @@ if (Astro.request.method === 'POST') {
  <svg class="mx-auto h-12 w-12 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
  </svg>
- <h3 class="text-lg font-medium">Inscription réussie !</h3>
- <p class="text-sm">Un email de confirmation vous a été envoyé. Veuillez cliquer sur le lien qu'il contient pour activer votre compte.</p>
- <a href={translatePath('/login')} class="inline-block mt-4 text-[var(--color-tc-olive)] font-bold hover:underline">Aller à la connexion</a>
+ <h3 class="text-lg font-medium">{lang === 'en' ? 'Registration successful!' : 'Inscription réussie !'}</h3>
+ <p class="text-sm">{lang === 'en' ? 'A confirmation email has been sent to you. Please click the link inside to activate your account.' : "Un email de confirmation vous a été envoyé. Veuillez cliquer sur le lien qu'il contient pour activer votre compte."}</p>
+ <a href={translatePath('/login')} class="inline-block mt-4 text-[var(--color-tc-olive)] font-bold hover:underline">{lang === 'en' ? 'Go to login' : 'Aller à la connexion'}</a>
  </div>
  ) : (
  <form class="mt-8 space-y-6" method="POST">
